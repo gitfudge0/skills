@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report style gallery — pick a visual style</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================= PAGE SHELL */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --page-bg:#ECECEC; --page-ink:#1c1c1c; --page-sub:#6a6a6a; --page-card:#ffffff;
+  --page-line:#dcdcdc;
+}
+:root[data-theme="dark"]{
+  --page-bg:#0c0c0d; --page-ink:#f0f0f0; --page-sub:#8c8c8c; --page-card:#161617;
+  --page-line:#262627;
+}
+body{background:var(--page-bg);color:var(--page-ink);font-family:'Inter',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;line-height:1.5;transition:background .3s,color .3s}
+
+.mockbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;padding:14px clamp(16px,4vw,48px);background:color-mix(in srgb,var(--page-bg) 86%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--page-line)}
+.mockbar h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.mockbar .sub{font-size:13px;color:var(--page-sub);font-weight:400}
+.mockbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.mockbar nav a{font-size:12px;color:var(--page-sub);text-decoration:none;padding:5px 10px;border:1px solid var(--page-line);
+  border-radius:999px;transition:.15s}
+.mockbar nav a:hover{color:var(--page-ink);border-color:var(--page-ink)}
+.theme-btn{font:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--page-card);
+  color:var(--page-ink);border:1px solid var(--page-line);border-radius:999px;padding:7px 14px;display:inline-flex;
+  align-items:center;gap:7px}
+.theme-btn:focus-visible{outline:2px solid #4C84FF;outline-offset:2px}
+
+main{max-width:1500px;margin:0 auto;padding:clamp(24px,5vw,64px) clamp(16px,4vw,48px) 120px}
+
+.variation{padding-block:clamp(40px,6vw,80px);border-top:1px solid var(--page-line)}
+.variation:first-of-type{border-top:0}
+.v-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 18px;margin-bottom:28px}
+.v-head .num{font-family:'Space Mono',monospace;font-size:13px;color:var(--page-sub)}
+.v-head h2{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em}
+.v-head .tag{font-size:12px;color:var(--page-sub);font-weight:500;border:1px solid var(--page-line);
+  padding:3px 10px;border-radius:999px}
+.v-desc{max-width:62ch;color:var(--page-sub);font-size:14.5px;margin:-14px 0 18px}
+.swatches{display:flex;gap:7px;margin-bottom:26px}
+.swatches i{width:26px;height:26px;border-radius:7px;border:1px solid rgba(128,128,128,.25)}
+
+.slides{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,1.6vw,22px)}
+@media(max-width:1080px){.slides{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.slides{grid-template-columns:1fr}}
+
+/* ============================================================= FRAME BASE */
+.frame{position:relative;container-type:inline-size;aspect-ratio:16/9;overflow:hidden;
+  background:var(--bg);color:var(--ink);font-family:var(--f-body);border-radius:12px;
+  box-shadow:0 1px 0 rgba(0,0,0,.04),0 18px 40px -28px rgba(0,0,0,.5)}
+.pad{position:absolute;inset:0;padding:7cqw;display:flex;flex-direction:column}
+.frame h1,.frame h2{font-family:var(--f-display);letter-spacing:-.02em;line-height:1.02}
+.eyebrow{display:flex;gap:1.4cqw;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+.lead{color:var(--muted);font-size:2.6cqw;line-height:1.4;max-width:52cqw}
+.meta{font-size:2.2cqw;color:var(--muted)}
+.badge{font-size:2cqw;font-weight:600;padding:.7cqw 1.6cqw;border-radius:999px;white-space:nowrap}
+
+/* metrics + list (dash) */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:2cqw;margin:2.4cqw 0}
+.m-val{font-family:var(--f-display);font-size:5.4cqw;font-weight:700;line-height:1;letter-spacing:-.03em}
+.m-label{font-size:1.9cqw;font-weight:600;margin-top:.6cqw}
+.m-sub{font-size:1.55cqw;color:var(--muted);margin-top:.2cqw}
+.rows{display:flex;flex-direction:column;gap:1.8cqw}
+.row{display:grid;grid-template-columns:auto 1fr;gap:2.2cqw;align-items:start}
+.row-mark{font-size:2.6cqw;color:var(--accent);font-weight:700;line-height:1.3}
+.row-title{font-size:2.5cqw;font-weight:600}
+.row-desc{font-size:2.2cqw;color:var(--muted);line-height:1.35}
+
+/* findings */
+.h2row{display:flex;align-items:baseline;justify-content:space-between;gap:2cqw}
+.finds{display:flex;flex-direction:column;gap:2.4cqw;margin-top:3cqw}
+.find{display:grid;grid-template-columns:auto 1fr auto;gap:2.6cqw;align-items:start}
+.f-num{font-family:var(--f-display);font-size:4cqw;font-weight:700;color:var(--accent);line-height:1}
+.f-title{font-size:2.8cqw;font-weight:600}
+.f-text{font-size:2.2cqw;color:var(--muted);margin-top:.5cqw;line-height:1.35}
+
+h2.slide-h{font-size:5.4cqw;font-weight:700;margin-bottom:1cqw}
+.rule{height:1px;background:var(--line);margin:1.6cqw 0 0}
+
+/* ====================================================================== */
+/* 1 · MARGINALIA — annotated minimal, ink + one marker                    */
+/* ====================================================================== */
+[data-variant="marginalia"]{--bg:#FBFAF7;--ink:#16140F;--muted:#6B6660;--line:#E7E3DC;
+  --accent:#E1452B;--f-display:'Space Grotesk';--f-body:'Inter'}
+:root[data-theme="dark"] [data-variant="marginalia"]{--bg:#15130F;--ink:#F2ECE2;--muted:#9C948A;
+  --line:#2A261F;--accent:#FF6A4D}
+[data-variant="marginalia"] .badge{background:transparent;border:1.5px solid var(--ink);color:var(--ink);font-weight:600}
+[data-variant="marginalia"] .frame-cover h1{font-size:6.8cqw;font-weight:700;margin:1.4cqw 0 2.4cqw}
+[data-variant="marginalia"] .ink-mark{position:relative;display:inline-block;white-space:nowrap}
+[data-variant="marginalia"] .ink-mark svg{position:absolute;left:-4%;top:-16%;width:108%;height:150%;
+  stroke:var(--accent);fill:none;stroke-width:2.4;overflow:visible;pointer-events:none}
+[data-variant="marginalia"] .arrow{position:absolute;right:7cqw;bottom:7cqw;width:14cqw;stroke:var(--accent);fill:none;stroke-width:2}
+[data-variant="marginalia"] .m-val{color:var(--ink)}
+[data-variant="marginalia"] .row-mark{font-family:var(--f-display)}
+[data-variant="marginalia"] .find{border:0}
+[data-variant="marginalia"] .f-badge{background:transparent;border:1.5px solid var(--accent);color:var(--accent)}
+
+/* ====================================================================== */
+/* 2 · VERDANT — friendly product deck, green, rounded cards               */
+/* ====================================================================== */
+[data-variant="verdant"]{--bg:#F4F6F2;--ink:#13251A;--muted:#5E6B62;--line:#E2E8E0;
+  --accent:#2FB457;--card:#FFFFFF;--soft:#E4F4E8;--f-display:'Plus Jakarta Sans';--f-body:'Inter'}
+:root[data-theme="dark"] [data-variant="verdant"]{--bg:#0E1611;--ink:#EAF2EC;--muted:#90A096;
+  --line:#21302A;--accent:#46D472;--card:#16211A;--soft:#1B2C22}
+[data-variant="verdant"] .frame-cover h1{font-size:6.4cqw;font-weight:800;margin:1.4cqw 0 2.2cqw;font-feature-settings:"ss01"}
+[data-variant="verdant"] .badge{background:var(--soft);color:var(--accent);font-weight:700}
+[data-variant="verdant"] .pill-dot::before{content:"";display:inline-block;width:1.6cqw;height:1.6cqw;border-radius:50%;
+  background:var(--accent);margin-right:1cqw;vertical-align:middle}
+[data-variant="verdant"] .metrics{gap:2.2cqw}
+[data-variant="verdant"] .metric{background:var(--card);border:1px solid var(--line);border-radius:2.4cqw;padding:1.8cqw}
+[data-variant="verdant"] .frame-cover h1{max-width:58cqw}
+[data-variant="verdant"] .m-val{color:var(--accent)}
+[data-variant="verdant"] .idx{font-family:var(--f-display);font-weight:800;font-size:2.2cqw;color:var(--accent);opacity:.55}
+[data-variant="verdant"] .row{background:var(--card);border:1px solid var(--line);border-radius:2.4cqw;padding:2cqw 2.4cqw}
+[data-variant="verdant"] .row-mark{display:flex;width:5cqw;height:5cqw;border-radius:50%;background:var(--soft);
+  color:var(--accent);align-items:center;justify-content:center;font-size:2.4cqw}
+[data-variant="verdant"] .tile{position:absolute;right:6cqw;top:6cqw;width:15cqw;height:15cqw;border-radius:2.6cqw;
+  background:radial-gradient(var(--accent) 18%,transparent 19%) 0 0/2.4cqw 2.4cqw,var(--soft);opacity:.9}
+[data-variant="verdant"] .f-num{background:var(--soft);border-radius:2cqw;padding:1cqw 2cqw}
+[data-variant="verdant"] .f-badge{background:var(--soft);color:var(--accent)}
+
+/* ====================================================================== */
+/* 3 · BLUEPRINT — technical schematic, graph paper + dimension lines       */
+/* ====================================================================== */
+[data-variant="blueprint"]{--bg:#EEF4FB;--ink:#102A47;--muted:#5E7693;--line:#CFE0F0;--accent:#1F6FE0;
+  --grid:rgba(31,111,224,.10);--f-display:'Space Grotesk';--f-body:'Inter';--f-data:'Space Mono'}
+:root[data-theme="dark"] [data-variant="blueprint"]{--bg:#0B2A52;--ink:#DCEBFF;--muted:#8FB0D8;
+  --line:#1C4A82;--accent:#85B6FF;--grid:rgba(133,182,255,.16)}
+[data-variant="blueprint"] .frame{background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:4cqw 4cqw}
+[data-variant="blueprint"] .badge{font-family:var(--f-data);background:transparent;border:1px solid var(--accent);
+  color:var(--accent);font-size:1.7cqw;letter-spacing:.06em;text-transform:uppercase;border-radius:0;font-weight:400}
+[data-variant="blueprint"] .frame-cover h1{font-weight:600;font-size:6.6cqw;margin:1.4cqw 0 1.8cqw}
+[data-variant="blueprint"] .dimline{height:0;border-top:1px solid var(--accent);position:relative;width:42cqw;margin-bottom:2.4cqw}
+[data-variant="blueprint"] .dimline::before,[data-variant="blueprint"] .dimline::after{content:"";position:absolute;top:-1cqw;width:1px;height:2cqw;background:var(--accent)}
+[data-variant="blueprint"] .dimline::before{left:0}[data-variant="blueprint"] .dimline::after{right:0}
+[data-variant="blueprint"] .slide-h{font-weight:600}
+[data-variant="blueprint"] .m-label{font-family:var(--f-data);text-transform:uppercase;letter-spacing:.05em}
+[data-variant="blueprint"] .m-sub{font-family:var(--f-data)}
+[data-variant="blueprint"] .m-val{color:var(--accent)}
+[data-variant="blueprint"] .row-mark,[data-variant="blueprint"] .f-num{font-family:var(--f-data);color:var(--accent)}
+[data-variant="blueprint"] .f-badge{font-family:var(--f-data);background:transparent;border:1px solid var(--accent);
+  color:var(--accent);border-radius:0;font-size:1.6cqw;text-transform:uppercase;font-weight:400}
+
+/* ====================================================================== */
+/* 4 · EDITORIAL — magazine, italic display serif + hot accent + drop cap    */
+/* ====================================================================== */
+[data-variant="editorial"]{--bg:#FBF8F4;--ink:#1A1714;--muted:#736B62;--line:#E6DFD6;--accent:#E0218A;
+  --f-display:'Instrument Serif';--f-body:'Inter'}
+:root[data-theme="dark"] [data-variant="editorial"]{--bg:#161310;--ink:#F2ECE3;--muted:#9C9286;--line:#2C2620;--accent:#FF4FA3}
+[data-variant="editorial"] .badge{background:transparent;border:0;border-left:2px solid var(--accent);border-radius:0;
+  color:var(--ink);font-weight:600;font-size:1.8cqw;padding:.2cqw 0 .2cqw 1.4cqw;text-transform:uppercase;letter-spacing:.12em}
+[data-variant="editorial"] .frame-cover h1{font-family:'Instrument Serif';font-weight:400;font-size:10cqw;line-height:.98;
+  letter-spacing:0;margin:1cqw 0 1.8cqw}
+[data-variant="editorial"] .frame-cover h1 em{font-style:italic;color:var(--accent)}
+[data-variant="editorial"] .slide-h{font-family:'Instrument Serif';font-weight:400;font-size:6.6cqw;letter-spacing:0}
+[data-variant="editorial"] .lead::first-letter{font-family:'Instrument Serif';font-size:7cqw;float:left;line-height:.66;
+  padding:.6cqw .8cqw 0 0;color:var(--accent)}
+[data-variant="editorial"] .metrics{border-top:1px solid var(--ink);padding-top:2cqw}
+[data-variant="editorial"] .m-val{font-family:'Instrument Serif';font-weight:400;color:var(--ink);font-size:6.4cqw}
+[data-variant="editorial"] .m-label{text-transform:uppercase;letter-spacing:.07em;font-size:1.7cqw}
+[data-variant="editorial"] .row-mark{color:var(--accent)}
+[data-variant="editorial"] .f-num{font-family:'Instrument Serif';font-weight:400;color:var(--accent);font-size:5cqw}
+[data-variant="editorial"] .f-badge{background:transparent;color:var(--accent);border:0;font-weight:700;
+  text-transform:uppercase;letter-spacing:.07em;font-size:1.8cqw}
+
+/* ====================================================================== */
+/* 5 · TERMINAL — monospace console, window chrome, prompt + caret           */
+/* ====================================================================== */
+[data-variant="terminal"]{--bg:#F7F4EC;--ink:#1C2B22;--muted:#6F7A6F;--line:#D6D2C4;--accent:#0A7D3C;
+  --f-display:'Space Mono';--f-body:'Space Mono';--f-data:'Space Mono'}
+:root[data-theme="dark"] [data-variant="terminal"]{--bg:#0B0F0D;--ink:#CDE9CF;--muted:#6F8A72;--line:#1C2A20;--accent:#3BE07A}
+[data-variant="terminal"] .frame{border:1px solid var(--line)}
+[data-variant="terminal"] .frame::before{content:"\25CF \25CF \25CF   ~/audit-report";position:absolute;top:0;left:0;right:0;
+  height:7cqw;display:flex;align-items:center;padding:0 4cqw;font-size:1.8cqw;color:var(--muted);
+  border-bottom:1px solid var(--line);letter-spacing:.12em}
+[data-variant="terminal"] .pad{padding-top:10cqw}
+[data-variant="terminal"] .finds{gap:1.9cqw;margin-top:2.2cqw}
+[data-variant="terminal"] .f-text{font-size:2cqw}
+[data-variant="terminal"] .frame-cover h1{font-weight:700;font-size:5.4cqw;letter-spacing:-.01em}
+[data-variant="terminal"] .frame-cover h1::before{content:"$ ";color:var(--accent)}
+[data-variant="terminal"] .caret{display:inline-block;width:1.1cqw;height:4.4cqw;background:var(--accent);
+  vertical-align:-0.7cqw;margin-left:.6cqw;animation:tcaret 1.05s steps(1) infinite}
+@keyframes tcaret{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){[data-variant="terminal"] .caret{animation:none}}
+[data-variant="terminal"] .badge{background:transparent;border:0;color:var(--accent);border-radius:0;font-weight:700;font-size:1.8cqw}
+[data-variant="terminal"] .badge::before{content:"["}[data-variant="terminal"] .badge::after{content:"]"}
+[data-variant="terminal"] .slide-h::before{content:"> ";color:var(--accent)}
+[data-variant="terminal"] .m-val{color:var(--accent)}
+[data-variant="terminal"] .f-num{color:var(--accent)}
+[data-variant="terminal"] .f-badge{color:var(--accent)}
+
+/* ====================================================================== */
+/* 6 · BRUTALIST — thick borders, hard offset shadows, clashing primaries    */
+/* ====================================================================== */
+[data-variant="brutalist"]{--bg:#FAF7EE;--ink:#0B0B0B;--muted:#4a4a4a;--line:#0B0B0B;--accent:#2D5BFF;
+  --accent2:#FFD23F;--shadow:#0B0B0B;--f-display:'Space Grotesk';--f-body:'Inter'}
+:root[data-theme="dark"] [data-variant="brutalist"]{--bg:#15140F;--ink:#F7F4EA;--muted:#B9B3A5;--line:#F7F4EA;
+  --accent:#7E97FF;--accent2:#FFDD55;--shadow:#000}
+[data-variant="brutalist"] .frame{border:2.5px solid var(--line)}
+[data-variant="brutalist"] .frame-cover h1{font-weight:700;text-transform:uppercase;font-size:6.8cqw;line-height:1.0;margin:1.4cqw 0 2cqw}
+[data-variant="brutalist"] .hl{background:var(--accent2);color:#0B0B0B;padding:.1cqw 1cqw;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+[data-variant="brutalist"] .badge{background:var(--accent2);color:#0B0B0B;border:2px solid #0B0B0B;border-radius:0;
+  font-weight:700;text-transform:uppercase;font-size:1.7cqw}
+[data-variant="brutalist"] .slide-h{text-transform:uppercase;font-weight:700}
+[data-variant="brutalist"] .metric{border:2.5px solid var(--line);padding:1.8cqw;box-shadow:.8cqw .8cqw 0 var(--shadow);background:var(--bg)}
+[data-variant="brutalist"] .m-val{color:var(--accent)}
+[data-variant="brutalist"] .row{border:2.5px solid var(--line);padding:1.6cqw 2cqw;box-shadow:.8cqw .8cqw 0 var(--shadow)}
+[data-variant="brutalist"] .row-mark{color:var(--accent)}
+[data-variant="brutalist"] .finds{gap:1.4cqw;margin-top:2.2cqw}
+[data-variant="brutalist"] .find{border:2.5px solid var(--line);padding:1.2cqw 1.8cqw;box-shadow:.7cqw .7cqw 0 var(--shadow)}
+[data-variant="brutalist"] .f-text{font-size:2cqw}
+[data-variant="brutalist"] .f-num{color:var(--accent)}
+[data-variant="brutalist"] .f-badge{background:var(--accent);color:#fff;border:2px solid var(--line);border-radius:0;
+  font-weight:700;text-transform:uppercase;font-size:1.6cqw}
+
+/* ====================================================================== */
+/* 7 · AURORA GLASS — frosted glass cards over a gradient mesh               */
+/* ====================================================================== */
+[data-variant="glass"]{--ink:#1A1430;--muted:#5B5470;--line:rgba(255,255,255,.6);--accent:#7C3AED;
+  --glass:rgba(255,255,255,.55);--f-display:'Sora';--f-body:'Inter'}
+:root[data-theme="dark"] [data-variant="glass"]{--ink:#EDEAFD;--muted:#A9A2C8;--line:rgba(255,255,255,.16);
+  --accent:#A78BFA;--glass:rgba(255,255,255,.07)}
+[data-variant="glass"] .frame{background:
+  radial-gradient(60cqw 42cqw at 12% 6%, rgba(196,181,253,.55), transparent 60%),
+  radial-gradient(52cqw 40cqw at 96% 18%, rgba(125,211,252,.5), transparent 56%),
+  radial-gradient(60cqw 52cqw at 80% 112%, rgba(240,171,252,.5), transparent 56%), #F3F0FB}
+:root[data-theme="dark"] [data-variant="glass"] .frame{background:
+  radial-gradient(60cqw 42cqw at 10% 4%, rgba(109,40,217,.5), transparent 60%),
+  radial-gradient(55cqw 40cqw at 98% 16%, rgba(14,165,233,.42), transparent 56%),
+  radial-gradient(60cqw 56cqw at 80% 116%, rgba(219,39,119,.4), transparent 56%), #0E0B1C}
+[data-variant="glass"] .badge{background:var(--glass);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid var(--line);color:var(--ink);font-weight:600}
+[data-variant="glass"] .frame-cover h1{font-weight:700;font-size:6.6cqw;margin:1.4cqw 0 2cqw}
+[data-variant="glass"] .grad{background:linear-gradient(90deg,var(--accent),#22D3EE);-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+[data-variant="glass"] .slide-h{font-weight:700}
+[data-variant="glass"] .metric{background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border:1px solid var(--line);border-radius:2.4cqw;padding:1.8cqw;box-shadow:0 6cqw 16cqw -12cqw rgba(40,20,80,.45)}
+[data-variant="glass"] .m-val{color:var(--ink)}
+[data-variant="glass"] .row{background:var(--glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:2cqw;padding:1.6cqw 2cqw}
+[data-variant="glass"] .row-mark{color:var(--accent)}
+[data-variant="glass"] .finds{gap:1.7cqw;margin-top:2.4cqw}
+[data-variant="glass"] .find{background:var(--glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:2cqw;padding:1.5cqw 2.2cqw}
+[data-variant="glass"] .f-num{color:var(--accent)}
+[data-variant="glass"] .f-badge{background:rgba(124,58,237,.18);color:var(--accent);border:0}
+
+/* shared badge status colors (used where a variant doesn't override) */
+.badge-crit{background:#f6dcd6;color:#a3301a}
+.badge-ok{background:#d9efe0;color:#1f7a44}
+.badge-info{background:#e2e8f5;color:#33507f}
+</style>
+</head>
+<body>
+
+<header class="mockbar">
+  <div>
+    <h1>Report style gallery</h1>
+    <div class="sub">7 visual styles × 3 slides · pick one to skin your report</div>
+  </div>
+  <nav>
+    <a href="#v1">Marginalia</a><a href="#v2">Verdant</a><a href="#v6">Blueprint</a><a href="#v7">Editorial</a><a href="#v8">Terminal</a><a href="#v9">Brutalist</a><a href="#v10">Glass</a>
+  </nav>
+  <button class="theme-btn" id="themeBtn" aria-label="Toggle light and dark">◑ <span id="themeLabel">Dark</span></button>
+</header>
+
+<main>
+
+<!-- ===================== 1 · MARGINALIA ===================== -->
+<section class="variation" id="v1" data-variant="marginalia">
+  <div class="v-head"><span class="num">01</span><h2>Marginalia</h2><span class="tag">human · annotated minimal</span></div>
+  <p class="v-desc">Ink on warm paper, one oversized grotesk, and a single marker color that only ever appears as a hand-drawn mark — a circled word, an underline, an arrow. Everything else stays quiet. The annotation layer is the personality; the page reads like a thoughtful person marked up a clean document.</p>
+  <div class="swatches"><i style="background:#FBFAF7"></i><i style="background:#16140F"></i><i style="background:#E1452B"></i><i style="background:#6B6660"></i><i style="background:#E7E3DC"></i></div>
+  <div class="slides">
+    <!-- cover -->
+    <div class="frame frame-cover"><div class="pad">
+      <div class="eyebrow"><span class="badge">Implementation report</span><span class="badge">Built &amp; tested</span></div>
+      <div class="spacer"></div>
+      <h1>Audit trail —<br>implementation <span class="ink-mark">report
+        <svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M12,30 C12,8 188,6 192,28 C196,52 30,58 8,38 C-2,29 20,16 60,14"/></svg>
+      </span></h1>
+      <p class="lead">Two services, one shared vocabulary — deliberate events, a slim middleware, an enforced CI guard.</p>
+      <div class="spacer"></div>
+      <div class="meta">23 Jun 2026</div>
+    </div></div>
+    <!-- dash -->
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">What shipped</h2>
+      <div class="metrics">
+        <div class="metric"><div class="m-val">146</div><div class="m-label">Audit tests</div><div class="m-sub">all green, both services</div></div>
+        <div class="metric"><div class="m-val">6</div><div class="m-label">Choke points</div><div class="m-sub">deliberately instrumented</div></div>
+        <div class="metric"><div class="m-val">0</div><div class="m-label">New regressions</div><div class="m-sub">vs. clean main</div></div>
+        <div class="metric"><div class="m-val">3</div><div class="m-label">Review fixes</div><div class="m-sub">across 3 passes</div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="row-mark">→</span><div><div class="row-title">Shared vocabulary</div><div class="row-desc">One versioned spec; two services aligned by contract test.</div></div></div>
+      </div>
+    </div></div>
+    <!-- find -->
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">Code review — found &amp; fixed</h2>
+      <div class="finds">
+        <div class="find"><span class="f-num">1</span><div><div class="f-title">Archive downgrade could fail</div><div class="f-text">Guarded table access with TO_REGCLASS before the row check.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">2</span><div><div class="f-title">Fragile failure-path access</div><div class="f-text">Replaced locals() lookup with explicit init + getattr.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">3</span><div><div class="f-title">Guard hardened to a regex</div><div class="f-text">Match ignores def&nbsp;audit / audit_setup().</div></div><span class="badge f-badge">Fixed</span></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ===================== 2 · VERDANT ===================== -->
+<section class="variation" id="v2" data-variant="verdant">
+  <div class="v-head"><span class="num">02</span><h2>Verdant</h2><span class="tag">friendly product deck</span></div>
+  <p class="v-desc">A fresh, optimistic product look: soft rounded cards on a tinted ground, a confident green that signals "go/healthy", tabular metric numerals, and a dotted-tile motif. Structure is shown with pills and circular marks. Reads modern and approachable without losing rigor.</p>
+  <div class="swatches"><i style="background:#F4F6F2"></i><i style="background:#2FB457"></i><i style="background:#13251A"></i><i style="background:#E4F4E8"></i><i style="background:#5E6B62"></i></div>
+  <div class="slides">
+    <div class="frame frame-cover"><div class="pad">
+      <div class="tile"></div>
+      <div class="eyebrow"><span class="badge pill-dot">Implementation report</span><span class="badge">Built &amp; tested</span></div>
+      <div class="spacer"></div>
+      <h1>Audit trail —<br>implementation report</h1>
+      <p class="lead">Two services, one shared vocabulary — deliberate events, a slim middleware, an enforced CI guard.</p>
+      <div class="spacer"></div>
+      <div class="meta">23 Jun 2026</div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">What shipped</h2>
+      <div class="metrics">
+        <div class="metric"><span class="idx">01</span><div class="m-val">146</div><div class="m-label">Audit tests</div><div class="m-sub">all green</div></div>
+        <div class="metric"><span class="idx">02</span><div class="m-val">6</div><div class="m-label">Choke points</div><div class="m-sub">instrumented</div></div>
+        <div class="metric"><span class="idx">03</span><div class="m-val">0</div><div class="m-label">Regressions</div><div class="m-sub">vs. main</div></div>
+        <div class="metric"><span class="idx">04</span><div class="m-val">3</div><div class="m-label">Review fixes</div><div class="m-sub">3 passes</div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="row-mark">✓</span><div><div class="row-title">Shared vocabulary</div><div class="row-desc">One versioned spec; two services aligned by contract test.</div></div></div>
+      </div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">Code review — found &amp; fixed</h2>
+      <div class="finds">
+        <div class="find"><span class="f-num">1</span><div><div class="f-title">Archive downgrade could fail</div><div class="f-text">Guarded table access with TO_REGCLASS before the row check.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">2</span><div><div class="f-title">Fragile failure-path access</div><div class="f-text">Replaced locals() lookup with explicit init + getattr.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">3</span><div><div class="f-title">Guard hardened to a regex</div><div class="f-text">Match ignores def&nbsp;audit / audit_setup().</div></div><span class="badge f-badge">Fixed</span></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ===================== 3 · BLUEPRINT ===================== -->
+<section class="variation" id="v6" data-variant="blueprint">
+  <div class="v-head"><span class="num">03</span><h2>Blueprint</h2><span class="tag">technical schematic</span></div>
+  <p class="v-desc">A draughtsman's drawing: faint graph-paper grid, a cool engineering blue, monospaced annotations, and dimension lines that "measure" the headline. The structure literally looks like a spec sheet — apt for a system that is itself about tracing and measurement. Dark mode is a true blueprint (light ink on deep blue).</p>
+  <div class="swatches"><i style="background:#EEF4FB"></i><i style="background:#1F6FE0"></i><i style="background:#102A47"></i><i style="background:#5E7693"></i><i style="background:#CFE0F0"></i></div>
+  <div class="slides">
+    <div class="frame frame-cover"><div class="pad">
+      <div class="eyebrow"><span class="badge">Implementation report</span><span class="badge">Built &amp; tested</span></div>
+      <div class="spacer"></div>
+      <h1>Audit trail —<br>implementation report</h1>
+      <div class="dimline"></div>
+      <p class="lead">Two services, one shared vocabulary — deliberate events, a slim middleware, an enforced CI guard.</p>
+      <div class="spacer"></div>
+      <div class="meta">REV 1.0 · 23 JUN 2026</div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">What shipped</h2>
+      <div class="metrics">
+        <div class="metric"><div class="m-val">146</div><div class="m-label">Audit tests</div><div class="m-sub">all green</div></div>
+        <div class="metric"><div class="m-val">6</div><div class="m-label">Choke points</div><div class="m-sub">instrumented</div></div>
+        <div class="metric"><div class="m-val">0</div><div class="m-label">Regressions</div><div class="m-sub">vs. main</div></div>
+        <div class="metric"><div class="m-val">3</div><div class="m-label">Review fixes</div><div class="m-sub">3 passes</div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="row-mark">#</span><div><div class="row-title">Shared vocabulary</div><div class="row-desc">One versioned spec; two services aligned by contract test.</div></div></div>
+      </div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">Code review — found &amp; fixed</h2>
+      <div class="finds">
+        <div class="find"><span class="f-num">1</span><div><div class="f-title">Archive downgrade could fail</div><div class="f-text">Guarded table access with TO_REGCLASS before the row check.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">2</span><div><div class="f-title">Fragile failure-path access</div><div class="f-text">Replaced locals() lookup with explicit init + getattr.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">3</span><div><div class="f-title">Guard hardened to a regex</div><div class="f-text">Match ignores def&nbsp;audit / audit_setup().</div></div><span class="badge f-badge">Fixed</span></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ===================== 4 · EDITORIAL ===================== -->
+<section class="variation" id="v7" data-variant="editorial">
+  <div class="v-head"><span class="num">04</span><h2>Editorial</h2><span class="tag">magazine</span></div>
+  <p class="v-desc">A magazine feature, not a memo: a large italic display serif, a single hot accent, a drop cap, and hairline column rules. The voice is confident and considered. Distinct from the others — expressive italic serif with a vivid magenta.</p>
+  <div class="swatches"><i style="background:#FBF8F4"></i><i style="background:#E0218A"></i><i style="background:#1A1714"></i><i style="background:#736B62"></i><i style="background:#E6DFD6"></i></div>
+  <div class="slides">
+    <div class="frame frame-cover"><div class="pad">
+      <div class="eyebrow"><span class="badge">Implementation report</span></div>
+      <div class="spacer"></div>
+      <h1>Audit trail —<br>implementation <em>report</em></h1>
+      <p class="lead">Two services, one shared vocabulary — deliberate events, a slim middleware, and an enforced CI guard that gates the cutover.</p>
+      <div class="spacer"></div>
+      <div class="meta">23 June 2026</div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">What shipped</h2>
+      <div class="metrics">
+        <div class="metric"><div class="m-val">146</div><div class="m-label">Audit tests</div><div class="m-sub">all green</div></div>
+        <div class="metric"><div class="m-val">6</div><div class="m-label">Choke points</div><div class="m-sub">instrumented</div></div>
+        <div class="metric"><div class="m-val">0</div><div class="m-label">Regressions</div><div class="m-sub">vs. main</div></div>
+        <div class="metric"><div class="m-val">3</div><div class="m-label">Review fixes</div><div class="m-sub">3 passes</div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="row-mark">&rarr;</span><div><div class="row-title">Shared vocabulary</div><div class="row-desc">One versioned spec; two services aligned by contract test.</div></div></div>
+      </div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">Code review — found &amp; fixed</h2>
+      <div class="finds">
+        <div class="find"><span class="f-num">1</span><div><div class="f-title">Archive downgrade could fail</div><div class="f-text">Guarded table access with TO_REGCLASS before the row check.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">2</span><div><div class="f-title">Fragile failure-path access</div><div class="f-text">Replaced locals() lookup with explicit init + getattr.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">3</span><div><div class="f-title">Guard hardened to a regex</div><div class="f-text">Match ignores def&nbsp;audit / audit_setup().</div></div><span class="badge f-badge">Fixed</span></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ===================== 5 · TERMINAL ===================== -->
+<section class="variation" id="v8" data-variant="terminal">
+  <div class="v-head"><span class="num">05</span><h2>Terminal</h2><span class="tag">console</span></div>
+  <p class="v-desc">The report dressed as the thing it documents: a monospaced console with window chrome, a command prompt, a blinking caret, and bracketed <code>[status]</code> tags. Phosphor-green on black in dark mode, an ink-on-paper terminal in light. On-theme for a backend audit log; respects reduced-motion.</p>
+  <div class="swatches"><i style="background:#0B0F0D"></i><i style="background:#3BE07A"></i><i style="background:#CDE9CF"></i><i style="background:#6F8A72"></i><i style="background:#1C2A20"></i></div>
+  <div class="slides">
+    <div class="frame frame-cover"><div class="pad">
+      <div class="eyebrow"><span class="badge">implementation report</span><span class="badge">built &amp; tested</span></div>
+      <div class="spacer"></div>
+      <h1>audit-trail rewrite — shipped<span class="caret"></span></h1>
+      <p class="lead">two services, one shared vocabulary — deliberate events, a slim middleware, an enforced CI guard.</p>
+      <div class="spacer"></div>
+      <div class="meta">2026-06-23 · exit 0</div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">What shipped</h2>
+      <div class="metrics">
+        <div class="metric"><div class="m-val">146</div><div class="m-label">Audit tests</div><div class="m-sub">all green</div></div>
+        <div class="metric"><div class="m-val">6</div><div class="m-label">Choke points</div><div class="m-sub">instrumented</div></div>
+        <div class="metric"><div class="m-val">0</div><div class="m-label">Regressions</div><div class="m-sub">vs. main</div></div>
+        <div class="metric"><div class="m-val">3</div><div class="m-label">Review fixes</div><div class="m-sub">3 passes</div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="row-mark">&rarr;</span><div><div class="row-title">Shared vocabulary</div><div class="row-desc">One versioned spec; two services aligned by contract test.</div></div></div>
+      </div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">Code review — found &amp; fixed</h2>
+      <div class="finds">
+        <div class="find"><span class="f-num">1</span><div><div class="f-title">Archive downgrade could fail</div><div class="f-text">Guarded table access with TO_REGCLASS before the row check.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">2</span><div><div class="f-title">Fragile failure-path access</div><div class="f-text">Replaced locals() lookup with explicit init + getattr.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">3</span><div><div class="f-title">Guard hardened to a regex</div><div class="f-text">Match ignores def&nbsp;audit / audit_setup().</div></div><span class="badge f-badge">Fixed</span></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ===================== 6 · BRUTALIST ===================== -->
+<section class="variation" id="v9" data-variant="brutalist">
+  <div class="v-head"><span class="num">06</span><h2>Brutalist</h2><span class="tag">hard offset shadows</span></div>
+  <p class="v-desc">Loud and structural: thick black borders, hard offset shadows with zero blur, clashing primaries (electric blue + highlighter yellow), and sticker-style badges. Every block feels physical and stacked. Best when the report should feel energetic and unmistakably not a default template.</p>
+  <div class="swatches"><i style="background:#FAF7EE"></i><i style="background:#2D5BFF"></i><i style="background:#FFD23F"></i><i style="background:#0B0B0B"></i><i style="background:#B9B3A5"></i></div>
+  <div class="slides">
+    <div class="frame frame-cover"><div class="pad">
+      <div class="eyebrow"><span class="badge">Implementation report</span><span class="badge">Built &amp; tested</span></div>
+      <div class="spacer"></div>
+      <h1>Audit trail —<br>implementation <span class="hl">report</span></h1>
+      <p class="lead">Two services, one shared vocabulary — deliberate events, a slim middleware, an enforced CI guard.</p>
+      <div class="spacer"></div>
+      <div class="meta">23 Jun 2026</div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">What shipped</h2>
+      <div class="metrics">
+        <div class="metric"><div class="m-val">146</div><div class="m-label">Audit tests</div><div class="m-sub">all green</div></div>
+        <div class="metric"><div class="m-val">6</div><div class="m-label">Choke points</div><div class="m-sub">instrumented</div></div>
+        <div class="metric"><div class="m-val">0</div><div class="m-label">Regressions</div><div class="m-sub">vs. main</div></div>
+        <div class="metric"><div class="m-val">3</div><div class="m-label">Review fixes</div><div class="m-sub">3 passes</div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="row-mark">&rarr;</span><div><div class="row-title">Shared vocabulary</div><div class="row-desc">One versioned spec; two services aligned by contract test.</div></div></div>
+      </div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">Code review — found &amp; fixed</h2>
+      <div class="finds">
+        <div class="find"><span class="f-num">1</span><div><div class="f-title">Archive downgrade could fail</div><div class="f-text">Guarded table access with TO_REGCLASS before the row check.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">2</span><div><div class="f-title">Fragile failure-path access</div><div class="f-text">Replaced locals() lookup with explicit init + getattr.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">3</span><div><div class="f-title">Guard hardened to a regex</div><div class="f-text">Match ignores def&nbsp;audit / audit_setup().</div></div><span class="badge f-badge">Fixed</span></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ===================== 7 · AURORA GLASS ===================== -->
+<section class="variation" id="v10" data-variant="glass">
+  <div class="v-head"><span class="num">07</span><h2>Aurora Glass</h2><span class="tag">frosted glass · gradient mesh</span></div>
+  <p class="v-desc">Atmospheric and modern: frosted translucent cards float over a soft aurora gradient mesh, with a violet-to-cyan accent that also tints the headline. Light mode is bright and airy; dark mode glows. The surfaces are see-through and the background is alive with color.</p>
+  <div class="swatches"><i style="background:#C4B5FD"></i><i style="background:#7DD3FC"></i><i style="background:#7C3AED"></i><i style="background:#F0ABFC"></i><i style="background:#0E0B1C"></i></div>
+  <div class="slides">
+    <div class="frame frame-cover"><div class="pad">
+      <div class="eyebrow"><span class="badge">Implementation report</span><span class="badge">Built &amp; tested</span></div>
+      <div class="spacer"></div>
+      <h1>Audit trail —<br>implementation <span class="grad">report</span></h1>
+      <p class="lead">Two services, one shared vocabulary — deliberate events, a slim middleware, an enforced CI guard.</p>
+      <div class="spacer"></div>
+      <div class="meta">23 Jun 2026</div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">What shipped</h2>
+      <div class="metrics">
+        <div class="metric"><div class="m-val">146</div><div class="m-label">Audit tests</div><div class="m-sub">all green</div></div>
+        <div class="metric"><div class="m-val">6</div><div class="m-label">Choke points</div><div class="m-sub">instrumented</div></div>
+        <div class="metric"><div class="m-val">0</div><div class="m-label">Regressions</div><div class="m-sub">vs. main</div></div>
+        <div class="metric"><div class="m-val">3</div><div class="m-label">Review fixes</div><div class="m-sub">3 passes</div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="row-mark">&rarr;</span><div><div class="row-title">Shared vocabulary</div><div class="row-desc">One versioned spec; two services aligned by contract test.</div></div></div>
+      </div>
+    </div></div>
+    <div class="frame"><div class="pad">
+      <h2 class="slide-h">Code review — found &amp; fixed</h2>
+      <div class="finds">
+        <div class="find"><span class="f-num">1</span><div><div class="f-title">Archive downgrade could fail</div><div class="f-text">Guarded table access with TO_REGCLASS before the row check.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">2</span><div><div class="f-title">Fragile failure-path access</div><div class="f-text">Replaced locals() lookup with explicit init + getattr.</div></div><span class="badge f-badge">Fixed</span></div>
+        <div class="find"><span class="f-num">3</span><div><div class="f-title">Guard hardened to a regex</div><div class="f-text">Match ignores def&nbsp;audit / audit_setup().</div></div><span class="badge f-badge">Fixed</span></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+const root=document.documentElement,btn=document.getElementById('themeBtn'),lbl=document.getElementById('themeLabel');
+function setTheme(t){root.setAttribute('data-theme',t);lbl.textContent=(t==='dark'?'Light':'Dark');try{localStorage.setItem('mockTheme',t)}catch(e){}}
+setTheme(localStorage.getItem('mockTheme')||'light');
+btn.addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+</script>
+</body>
+</html>

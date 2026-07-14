@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<!-- LAYOUT GALLERY — single page. Every thumbnail is a REAL slide rendered from
+     report.css, scaled into a 16:9 frame, with its explanation beneath. The style
+     chips and ◐ toggle set data-style / data-theme on <html>, so they restyle every
+     thumbnail at once (all frames share the same :root tokens). Each composition
+     uses the named classes documented in SKILL.md / report.css. -->
+<html lang="en" data-style="editorial" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide layout gallery — what slides are possible</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="report.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    /* ─── Page shell (independent of report.css tokens so the chrome is stable) ─── */
+    :root { --page-bg:#ECECEC; --page-ink:#1c1c1c; --page-sub:#6a6a6a; --page-card:#fff; --page-line:#dcdcdc; --scale:0.375; }
+    html[data-theme="dark"] { --page-bg:#0c0c0d; --page-ink:#f0f0f0; --page-sub:#8c8c8c; --page-card:#161617; --page-line:#262627; }
+
+    /* report.css sets body{overflow:hidden}; this page scrolls. */
+    body { overflow:auto !important; background:var(--page-bg); color:var(--page-ink);
+      font-family:'Inter',system-ui,sans-serif; line-height:1.5; transition:background .3s,color .3s; }
+
+    .g-bar { position:sticky; top:0; z-index:50; display:flex; flex-wrap:wrap; align-items:center; gap:12px 18px;
+      padding:14px clamp(16px,4vw,48px); background:color-mix(in srgb,var(--page-bg) 88%,transparent);
+      backdrop-filter:blur(10px); border-bottom:1px solid var(--page-line); }
+    .g-bar .g-title { font-size:15px; font-weight:600; letter-spacing:-.01em; }
+    .g-bar .g-sub { font-size:13px; color:var(--page-sub); }
+    .g-spacer { flex:1 1 auto; }
+    .g-chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .g-chip { font:inherit; font-size:12px; cursor:pointer; background:var(--page-card); color:var(--page-sub);
+      border:1px solid var(--page-line); border-radius:999px; padding:5px 11px; transition:.15s; }
+    .g-chip:hover { color:var(--page-ink); border-color:var(--page-ink); }
+    .g-chip[aria-pressed="true"] { color:var(--page-ink); border-color:var(--page-ink); font-weight:600; }
+    .g-theme { font:inherit; font-size:13px; font-weight:500; cursor:pointer; background:var(--page-card);
+      color:var(--page-ink); border:1px solid var(--page-line); border-radius:999px; padding:7px 13px;
+      display:inline-flex; align-items:center; gap:7px; }
+
+    .g-intro { max-width:760px; margin:clamp(28px,5vw,52px) auto 8px; padding:0 clamp(16px,4vw,48px); }
+    .g-intro h1 { font-family:'Inter',sans-serif; font-size:clamp(24px,4vw,34px); font-weight:700; letter-spacing:-.02em; line-height:1.1; }
+    .g-intro p { color:var(--page-sub); font-size:15px; margin-top:10px; }
+
+    main { max-width:1500px; margin:0 auto; padding:clamp(24px,4vw,48px) clamp(16px,4vw,48px) 120px;
+      display:grid; grid-template-columns:repeat(auto-fill,480px); gap:clamp(24px,3vw,44px); justify-content:center; }
+    @media (max-width:560px){ main{ grid-template-columns:1fr; } }
+
+    .card { display:flex; flex-direction:column; }
+    .thumb { width:480px; max-width:100%; aspect-ratio:16/9; position:relative; overflow:hidden;
+      border-radius:12px; border:1px solid var(--page-line);
+      box-shadow:0 1px 0 rgba(0,0,0,.04),0 18px 40px -28px rgba(0,0,0,.55); background:var(--color-bg); }
+    /* The real slide, full 1280×720, scaled down into the frame. */
+    .stage { position:absolute; top:0; left:0; width:1280px; height:720px;
+      transform:scale(var(--scale)); transform-origin:top left; }
+    .stage .slide { position:static; inset:auto; visibility:visible; opacity:1; pointer-events:auto;
+      width:1280px; height:720px; }
+
+    .cap { margin-top:16px; }
+    .cap-head { display:flex; align-items:baseline; gap:10px; }
+    .cap-num { font-family:'Space Mono',monospace; font-size:12px; color:var(--page-sub); }
+    .cap-name { font-family:'Inter',sans-serif; font-size:16px; font-weight:600; letter-spacing:-.01em; color:var(--page-ink); }
+    .cap-desc { color:var(--page-sub); font-size:14px; margin-top:6px; max-width:46ch; }
+  </style>
+</head>
+<body>
+
+<header class="g-bar">
+  <span class="g-title">Slide layouts</span>
+  <span class="g-sub">28 composition archetypes · html-report-skill</span>
+  <span class="g-spacer"></span>
+  <div class="g-chips" id="chips">
+    <button class="g-chip" data-style="marginalia">marginalia</button>
+    <button class="g-chip" data-style="verdant">verdant</button>
+    <button class="g-chip" data-style="blueprint">blueprint</button>
+    <button class="g-chip" data-style="editorial">editorial</button>
+    <button class="g-chip" data-style="terminal">terminal</button>
+    <button class="g-chip" data-style="brutalist">brutalist</button>
+    <button class="g-chip" data-style="glass">glass</button>
+  </div>
+  <button class="g-theme" id="themeBtn"><span id="themeIcon">◐</span> theme</button>
+</header>
+
+<section class="g-intro">
+  <h1>What slides are possible</h1>
+  <p>Each thumbnail below is a real slide rendered from the shipped component library — not a redrawn mockup. Every composition uses the named classes documented in the skill. Tap a style chip to restyle every layout at once, and ◐ to flip light / dark.</p>
+</section>
+
+<main>
+
+  <!-- 1 · COVER -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide slide-cover"><div class="slide-inner">
+        <div class="report-header-meta">
+          <span class="badge badge-accent">Layout gallery</span>
+          <span class="badge badge-success">28 archetypes</span>
+          <span class="report-header-date">html-report-skill</span>
+        </div>
+        <h1>Slide layouts you can build</h1>
+        <p class="lead">Every layout that follows is a different composition pattern, assembled from the shipped components.</p>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">01</span><span class="cap-name">Cover</span></div>
+      <p class="cap-desc">Always slide 1. Meta badges, a big title, and a lead sentence — the deck's front door.</p></div>
+  </article>
+
+  <!-- 2 · SECTION DIVIDER -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner slide-divider">
+        <div class="divider-num">02</div>
+        <h2 class="slide-title">Findings &amp; evidence</h2>
+        <p>Where the data lives and what it tells us.</p>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">02</span><span class="cap-name">Section divider</span></div>
+      <p class="cap-desc">A chapter break between parts of a long deck — a big numeral, a title, one orienting line.</p></div>
+  </article>
+
+  <!-- 3 · AGENDA / CONTENTS (item-list) -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Agenda</h2>
+        <div class="item-list">
+          <div class="item-row"><span class="item-row-icon">1</span><div><div class="item-row-title">Numbers that matter</div><div class="item-row-desc">Metric grids and a headline KPI.</div></div><span class="badge badge-info">Metrics</span></div>
+          <div class="item-row"><span class="item-row-icon">2</span><div><div class="item-row-title">Findings &amp; evidence</div><div class="item-row-desc">Findings, comparisons, tables, code.</div></div><span class="badge badge-info">Body</span></div>
+          <div class="item-row"><span class="item-row-icon">3</span><div><div class="item-row-title">Structure &amp; visuals</div><div class="item-row-desc">Trees, mocks, diagrams, timelines.</div></div><span class="badge badge-info">Visuals</span></div>
+          <div class="item-row"><span class="item-row-icon">4</span><div><div class="item-row-title">What happens next</div><div class="item-row-desc">Recommendations and a close.</div></div><span class="badge badge-info">Close</span></div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">03</span><span class="cap-name">Agenda / contents</span></div>
+      <p class="cap-desc">An <code>item-list</code> whose numbered icons double as a slide index. Also the canonical layout for risks, checklists, and open questions.</p></div>
+  </article>
+
+  <!-- 4 · KEY METRICS -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Headline numbers</h2>
+        <div class="metric-grid">
+          <div class="metric-card"><div class="metric-label">Coverage</div><div class="metric-value">92%</div><div class="metric-sub">+8 pts</div></div>
+          <div class="metric-card"><div class="metric-label">Open findings</div><div class="metric-value">7</div><div class="metric-sub">2 critical</div></div>
+          <div class="metric-card"><div class="metric-label">Median latency</div><div class="metric-value">214<span style="font-size:16px">ms</span></div><div class="metric-sub">p95 480ms</div></div>
+          <div class="metric-card"><div class="metric-label">Services</div><div class="metric-value">14</div><div class="metric-sub">3 added</div></div>
+        </div>
+        <p class="text-muted">2–6 figures only, when the numbers are meaningful.</p>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">04</span><span class="cap-name">Metric grid</span></div>
+      <p class="cap-desc">2–6 headline numbers in an auto-fitting grid. Only when the figures are meaningful — never filler.</p></div>
+  </article>
+
+  <!-- 5 · KPI HERO -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Net impact</h2>
+        <div class="kpi-hero">
+          <div class="kpi-figure">−38%</div>
+          <div class="kpi-cap">p95 latency after the outbox cutover</div>
+          <div style="margin-top:18px"><span class="badge badge-success">Improved</span></div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">05</span><span class="cap-name">KPI hero</span></div>
+      <p class="cap-desc">One number, set huge and centered, when a single figure is the whole story.</p></div>
+  </article>
+
+  <!-- 6 · FINDINGS -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Findings — numbered + status</h2>
+        <div class="finding"><div class="finding-header"><span class="finding-num">1</span><div class="finding-body">
+          <div class="finding-title-row"><span class="finding-title">Unbounded export query</span><span class="badge badge-critical">Blocker</span></div>
+          <p>Loads the full result set into memory before streaming; large tenants OOM the worker.</p></div></div></div>
+        <div class="finding"><div class="finding-header"><span class="finding-num">2</span><div class="finding-body">
+          <div class="finding-title-row"><span class="finding-title">Retry storm on webhook 5xx</span><span class="badge badge-warning">Modified</span></div>
+          <p>No jitter on the backoff means failures synchronize. Add full-jitter.</p></div></div></div>
+        <div class="finding"><div class="finding-header"><span class="finding-num">3</span><div class="finding-body">
+          <div class="finding-title-row"><span class="finding-title">Idempotency key added</span><span class="badge badge-success">Resolved</span></div>
+          <p>Duplicate deliveries are now collapsed at ingest.</p></div></div></div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">06</span><span class="cap-name">Findings</span></div>
+      <p class="cap-desc">Numbered findings, each with a status badge — the workhorse layout for audits and reviews.</p></div>
+  </article>
+
+  <!-- 7 · TWO-COLUMN COMPARISON -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Current vs proposed</h2>
+        <div class="split">
+          <div>
+            <div class="section-label">Current</div>
+            <div style="display:flex;flex-direction:column;gap:12px;font-size:14px">
+              <div style="display:flex;gap:10px"><span class="text-critical">✗</span><span style="color:var(--color-text-secondary)">Synchronous writes add tail latency</span></div>
+              <div style="display:flex;gap:10px"><span class="text-critical">✗</span><span style="color:var(--color-text-secondary)">No retry on a failed audit write</span></div>
+              <div style="display:flex;gap:10px"><span class="text-critical">✗</span><span style="color:var(--color-text-secondary)">Coupled to the request lifecycle</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="section-label">Proposed</div>
+            <div style="display:flex;flex-direction:column;gap:12px;font-size:14px">
+              <div style="display:flex;gap:10px"><span class="text-success">✓</span><span style="color:var(--color-text-secondary)">Outbox decouples durability from the request</span></div>
+              <div style="display:flex;gap:10px"><span class="text-success">✓</span><span style="color:var(--color-text-secondary)">At-least-once delivery with dedupe</span></div>
+              <div style="display:flex;gap:10px"><span class="text-success">✓</span><span style="color:var(--color-text-secondary)">Backpressure handled by the worker</span></div>
+            </div>
+          </div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">07</span><span class="cap-name">Two-column comparison</span></div>
+      <p class="cap-desc">A <code>split</code> grid for before / after, option A / B, or pros / cons.</p></div>
+  </article>
+
+  <!-- 8 · DATA TABLE -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Data table</h2>
+        <div class="data-table-wrap"><table class="data-table">
+          <thead><tr><th>Endpoint</th><th>p50</th><th>p95</th><th>Errors</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><code>POST /webhooks</code></td><td>42ms</td><td>120ms</td><td>0.02%</td><td><span class="badge badge-success">Healthy</span></td></tr>
+            <tr><td><code>GET /calls/export</code></td><td>880ms</td><td>4.2s</td><td>1.40%</td><td><span class="badge badge-critical">Degraded</span></td></tr>
+            <tr><td><code>POST /agents/lookup</code></td><td>61ms</td><td>210ms</td><td>0.30%</td><td><span class="badge badge-warning">Watch</span></td></tr>
+            <tr><td><code>GET /health</code></td><td>3ms</td><td>9ms</td><td>0.00%</td><td><span class="badge badge-success">Healthy</span></td></tr>
+          </tbody>
+        </table></div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">08</span><span class="cap-name">Data table</span></div>
+      <p class="cap-desc">Genuinely tabular data. The wrapper adds horizontal scroll on narrow viewports.</p></div>
+  </article>
+
+  <!-- 9 · DETAIL / SPEC (kv-block) -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Specification detail</h2>
+        <div class="section"><div class="section-label">Job configuration</div>
+          <div class="kv-block">
+            <div class="kv-row"><span class="kv-label">Trigger</span><span class="kv-value">Daily 02:00 UTC (RedBeat)</span></div>
+            <div class="kv-row"><span class="kv-label">Isolation</span><span class="kv-value">Schema-per-tenant</span></div>
+            <div class="kv-row"><span class="kv-label">Idempotency</span><span class="kv-value">Per-invoice deterministic key</span></div>
+            <div class="kv-row"><span class="kv-label">Retry policy</span><span class="kv-value">5× exponential, full jitter</span></div>
+            <div class="kv-row"><span class="kv-label">Owner</span><span class="kv-value">Billing platform</span></div>
+          </div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">09</span><span class="cap-name">Detail / spec</span></div>
+      <p class="cap-desc">A <code>kv-block</code> of label–value pairs for specs, configuration, and metadata.</p></div>
+  </article>
+
+  <!-- 10 · CALLOUTS -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Callouts — three weights</h2>
+        <div class="callout"><strong>Note.</strong> Neutral context, no status colour — the default weight.</div>
+        <div class="callout callout-warning"><strong>Warning.</strong> Reversible but disruptive; proceed with care.</div>
+        <div class="callout callout-danger"><strong>Danger.</strong> Irreversible — needs sign-off before running.</div>
+        <p class="text-muted" style="margin-top:8px">Use 1–2 per deck; they lose force in bulk.</p>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">10</span><span class="cap-name">Callouts</span></div>
+      <p class="cap-desc">Note / warning / danger — a left-rule aside for a single point that needs emphasis.</p></div>
+  </article>
+
+  <!-- 11 · CODE BLOCK -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Code sample</h2>
+        <p>Inline <code>identifiers</code> stay in prose; multi-line goes in a fenced block.</p>
+        <pre class="code-block"><span class="code-comment"># enqueue to the outbox instead of writing inline</span>
+def record_audit(event):
+    outbox.enqueue(event, key=event.idempotency_key)
+    return Ack(status=<span class="code-string">"queued"</span>)</pre>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">11</span><span class="cap-name">Code block</span></div>
+      <p class="cap-desc">A monospace <code>code-block</code> for snippets, configs, and commands. Prefer fenced over inline for multi-line.</p></div>
+  </article>
+
+  <!-- 12 · FILE TREE -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">File tree — change map</h2>
+        <div class="file-tree">
+<span class="dir">core-api/app/</span><br>
+&nbsp;&nbsp;├─ <span class="dir">core/</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;├─ <span class="new">audit_policy.py</span>&nbsp;&nbsp;<span class="note"># new — coverage contract</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;├─ <span class="mod">audit_service.py</span>&nbsp;&nbsp;<span class="note"># hardened</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;└─ <span class="mod">audit_middleware.py</span><br>
+&nbsp;&nbsp;├─ <span class="dir">services/email/</span><br>
+&nbsp;&nbsp;│&nbsp;&nbsp;└─ <span class="mod">outbox_service.py</span><br>
+&nbsp;&nbsp;└─ <span class="del">legacy_audit.py</span>&nbsp;&nbsp;<span class="note"># removed</span>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">12</span><span class="cap-name">File tree</span></div>
+      <p class="cap-desc">Structure annotated with added / modified / deleted spans, so a diff reads at a glance.</p></div>
+  </article>
+
+  <!-- 13 · UI MOCK -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">UI mock</h2>
+        <div class="mock-frame">
+          <div class="mock-bar">
+            <span class="mock-dot" style="background:#ff5f57"></span><span class="mock-dot" style="background:#febc2e"></span><span class="mock-dot" style="background:#28c840"></span>
+            <span class="mock-url">app.careconvoy.ai/reports</span>
+          </div>
+          <div class="mock-body"><div style="display:flex;gap:20px">
+            <div style="flex:0 0 140px;border-right:1px solid var(--color-border);padding-right:16px">
+              <div style="font-weight:600;margin-bottom:10px">Reports</div>
+              <div style="color:var(--color-text-secondary);font-size:13px;line-height:2.1">Overview<br>Call logs<br><span style="color:var(--color-accent);font-weight:600">Invoicing</span><br>Settings</div>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:18px;font-weight:600;margin-bottom:12px">June invoices</div>
+              <div style="display:flex;gap:10px"><span class="badge badge-success">14 generated</span><span class="badge badge-warning">2 pending</span></div>
+              <div style="margin-top:16px;height:8px;background:var(--color-surface);border-radius:4px;overflow:hidden"><div style="width:85%;height:100%;background:var(--color-accent)"></div></div>
+            </div>
+          </div></div>
+        </div>
+        <p class="mock-caption">Ground mocks in real chrome — sidebar, labels, and context.</p>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">13</span><span class="cap-name">UI mock</span></div>
+      <p class="cap-desc">A framed mockup built from bare HTML, grounded in real chrome rather than floating.</p></div>
+  </article>
+
+  <!-- 14 · DIAGRAM -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Diagram</h2>
+        <div class="diagram-wrap"><div class="mermaid">
+flowchart LR
+  A[Webhook] --> B[FastAPI]
+  B --> C[Celery task]
+  C --> D{Workflow engine}
+  D --> E[Plugin]
+  D --> F[Audit trail]
+  E --> G[(Database)]
+        </div></div>
+        <p class="mock-caption">Flow, sequence, state, and ER diagrams via Mermaid.</p>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">14</span><span class="cap-name">Diagram</span></div>
+      <p class="cap-desc">Mermaid flow, sequence, state, or ER diagrams in a tinted container. Needs the Mermaid script.</p></div>
+  </article>
+
+  <!-- 15 · TIMELINE / ROADMAP -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Rollout roadmap</h2>
+        <div class="timeline">
+          <div class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div class="timeline-title">Week 1 · Shadow write</div>
+            <div class="timeline-desc">Slim middleware behind a flag; compare against the legacy path.</div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div class="timeline-title">Week 2 · Backfill</div>
+            <div class="timeline-desc">Run the audit index migration in a maintenance window.</div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-dot is-pending"></span>
+            <div class="timeline-title">Week 3 · Cut over</div>
+            <div class="timeline-desc">Retire the synchronous path once shadow parity holds.</div>
+          </div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">15</span><span class="cap-name">Timeline / roadmap</span></div>
+      <p class="cap-desc">Phased work on a vertical rail — dates, milestones, and what's done vs pending.</p></div>
+  </article>
+
+  <!-- 16 · NEXT STEPS -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Next steps</h2>
+        <div class="next-steps"><div class="section-label">Recommended sequence</div>
+          <ol>
+            <li><span>Ship the slim middleware behind a flag and shadow-write for one week.</span></li>
+            <li><span>Backfill the audit index migration during the next maintenance window.</span></li>
+            <li><span>Enable the coverage guard test in CI to block un-audited endpoints.</span></li>
+            <li><span>Cut over outbox delivery and retire the legacy synchronous path.</span></li>
+          </ol>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">16</span><span class="cap-name">Next steps</span></div>
+      <p class="cap-desc">Ordered, numbered recommendations — the closing call to action. Keep to ~5 steps per slide.</p></div>
+  </article>
+
+  <!-- 17 · BIG TAKEAWAY / QUOTE -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <div class="section-label">The takeaway</div>
+        <blockquote class="quote">“Audit writes belong in an outbox, not the request path — durability shouldn't cost the user latency.”</blockquote>
+        <div class="quote-attr">— Architecture review · June 2026</div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">17</span><span class="cap-name">Big takeaway / quote</span></div>
+      <p class="cap-desc">One large statement, no chrome — for the single line you want the reader to leave with.</p></div>
+  </article>
+
+  <!-- 18 · SPLIT HERO -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <div class="split">
+          <div>
+            <div class="section-label">Feature</div>
+            <h2 class="slide-title" style="border:none;padding:0;font-size:36px;margin-bottom:14px">Outbox-backed audit</h2>
+            <p style="color:var(--color-text-secondary)">Durability without latency — events queue to an outbox and flush off the request path.</p>
+            <div style="margin-top:16px"><span class="badge badge-success">Shipped</span></div>
+          </div>
+          <div class="panel">
+            <div style="font:700 56px/1 var(--font-display);color:var(--color-accent)">−38%</div>
+            <div style="color:var(--color-text-secondary);margin-top:10px;font-size:14px">p95 request latency</div>
+            <div class="panel-rule"></div>
+            <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--color-text-tertiary)">Throughput</span><span style="color:var(--color-text)">3.2M / day</span></div>
+          </div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">18</span><span class="cap-name">Split hero</span></div>
+      <p class="cap-desc">Asymmetric text / visual split — a claim on one side, the supporting figure or <code>panel</code> on the other.</p></div>
+  </article>
+
+  <!-- 19 · STAT BAND -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">By the numbers</h2>
+        <div class="stat-band">
+          <div class="stat"><div class="stat-figure">3.2M</div><div class="stat-label">events / day</div></div>
+          <div class="stat-divider"></div>
+          <div class="stat"><div class="stat-figure is-accent">99.98%</div><div class="stat-label">uptime</div></div>
+          <div class="stat-divider"></div>
+          <div class="stat"><div class="stat-figure">214ms</div><div class="stat-label">median latency</div></div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">19</span><span class="cap-name">Stat band</span></div>
+      <p class="cap-desc">A horizontal strip of oversized figures split by hairlines — louder and flatter than the bordered metric grid.</p></div>
+  </article>
+
+  <!-- 20 · HORIZONTAL PROCESS STEPS -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Request lifecycle</h2>
+        <div class="process">
+          <div class="process-step">
+            <div class="process-disc">1</div>
+            <div class="process-step-title">Ingest</div>
+            <div class="process-step-desc">Webhook hits FastAPI</div>
+          </div>
+          <div class="process-arrow">→</div>
+          <div class="process-step">
+            <div class="process-disc">2</div>
+            <div class="process-step-title">Queue</div>
+            <div class="process-step-desc">Celery enqueues the task</div>
+          </div>
+          <div class="process-arrow">→</div>
+          <div class="process-step">
+            <div class="process-disc">3</div>
+            <div class="process-step-title">Process</div>
+            <div class="process-step-desc">Workflow engine runs plugins</div>
+          </div>
+          <div class="process-arrow">→</div>
+          <div class="process-step">
+            <div class="process-disc">4</div>
+            <div class="process-step-title">Persist</div>
+            <div class="process-step-desc">Results written to the DB</div>
+          </div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">20</span><span class="cap-name">Process steps</span></div>
+      <p class="cap-desc">A left-to-right numbered flow with connectors — for a linear pipeline or sequence of stages.</p></div>
+  </article>
+
+  <!-- 21 · 2×2 QUADRANT MATRIX -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Effort vs impact</h2>
+        <div style="display:flex;gap:14px">
+          <div class="axis-y">Impact →</div>
+          <div style="flex:1">
+            <div class="quadrant">
+              <div class="quadrant-cell is-priority">
+                <div class="quadrant-label">Quick wins</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px"><span class="badge badge-info">Outbox</span><span class="badge badge-info">Add index</span></div>
+              </div>
+              <div class="quadrant-cell">
+                <div class="quadrant-label">Big bets</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px"><span class="badge badge-info">Event bus</span></div>
+              </div>
+              <div class="quadrant-cell">
+                <div class="quadrant-label">Fill-ins</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px"><span class="badge badge-info">Lint rule</span></div>
+              </div>
+              <div class="quadrant-cell">
+                <div class="quadrant-label">Avoid</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px"><span class="badge badge-info">Full rewrite</span></div>
+              </div>
+            </div>
+            <div class="axis-x">Effort →</div>
+          </div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">21</span><span class="cap-name">2×2 quadrant</span></div>
+      <p class="cap-desc">A priority / positioning matrix with labelled axes — items dropped into the cell that fits.</p></div>
+  </article>
+
+  <!-- 22 · BAR CHART (pure CSS) -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Error rate by service</h2>
+        <div class="bar-chart">
+          <div class="bar-row"><div class="bar-name">Export API</div><div class="bar-track"><div class="bar-fill is-critical" style="width:82%"></div></div><div class="bar-value">1.40%</div></div>
+          <div class="bar-row"><div class="bar-name">Lookup API</div><div class="bar-track"><div class="bar-fill" style="width:30%"></div></div><div class="bar-value">0.30%</div></div>
+          <div class="bar-row"><div class="bar-name">Webhooks</div><div class="bar-track"><div class="bar-fill" style="width:6%"></div></div><div class="bar-value">0.02%</div></div>
+          <div class="bar-row"><div class="bar-name">Health</div><div class="bar-track"><div class="bar-fill" style="width:1%"></div></div><div class="bar-value">0.00%</div></div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">22</span><span class="cap-name">Bar chart</span></div>
+      <p class="cap-desc">Horizontal bars built from plain divs — no chart library. The outlier takes a status colour.</p></div>
+  </article>
+
+  <!-- 23 · COMPARISON MATRIX -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Plan comparison</h2>
+        <div class="data-table-wrap"><table class="data-table">
+          <thead><tr><th>Capability</th><th style="text-align:center">Basic</th><th style="text-align:center">Pro</th><th style="text-align:center">Enterprise</th></tr></thead>
+          <tbody>
+            <tr><td>Call-log export</td><td style="text-align:center"><span class="text-success">✓</span></td><td style="text-align:center"><span class="text-success">✓</span></td><td style="text-align:center"><span class="text-success">✓</span></td></tr>
+            <tr><td>Audit trail</td><td style="text-align:center"><span class="text-muted">✗</span></td><td style="text-align:center"><span class="text-success">✓</span></td><td style="text-align:center"><span class="text-success">✓</span></td></tr>
+            <tr><td>Custom retention</td><td style="text-align:center"><span class="text-muted">✗</span></td><td style="text-align:center"><span class="text-muted">✗</span></td><td style="text-align:center"><span class="text-success">✓</span></td></tr>
+            <tr><td>SSO / SAML</td><td style="text-align:center"><span class="text-muted">✗</span></td><td style="text-align:center"><span class="text-muted">✗</span></td><td style="text-align:center"><span class="text-success">✓</span></td></tr>
+          </tbody>
+        </table></div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">23</span><span class="cap-name">Comparison matrix</span></div>
+      <p class="cap-desc">A capability table of ✓ / ✗ across options — the data table reused as a feature grid.</p></div>
+  </article>
+
+  <!-- 24 · PERSONA CARD -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Primary persona</h2>
+        <div class="persona">
+          <div class="persona-head">
+            <div class="persona-avatar">RC</div>
+            <div><div class="persona-name">Rosa Chen</div><div class="persona-role">Clinic operations lead</div></div>
+          </div>
+          <div class="panel-rule"></div>
+          <div class="kv-block" style="margin:0">
+            <div class="kv-row"><span class="kv-label">Goal</span><span class="kv-value">Close the day's call log fast</span></div>
+            <div class="kv-row"><span class="kv-label">Frustration</span><span class="kv-value">Exports time out on busy days</span></div>
+            <div class="kv-row"><span class="kv-label">Tools</span><span class="kv-value">Reports dashboard · CSV</span></div>
+          </div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">24</span><span class="cap-name">Persona card</span></div>
+      <p class="cap-desc">An avatar, name, and role over an attribute block — for research, stakeholders, or team intros.</p></div>
+  </article>
+
+  <!-- 25 · ANNOTATED MOCK WITH PINS -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Annotated walkthrough</h2>
+        <div class="split split-wide">
+          <div style="position:relative">
+            <div class="mock-frame">
+              <div class="mock-bar"><span class="mock-dot" style="background:#ff5f57"></span><span class="mock-dot" style="background:#febc2e"></span><span class="mock-dot" style="background:#28c840"></span><span class="mock-url">app.careconvoy.ai</span></div>
+              <div class="mock-body" style="min-height:150px">
+                <div style="font-weight:600;margin-bottom:12px">June invoices</div>
+                <div style="display:flex;gap:10px;margin-bottom:16px"><span class="badge badge-success">14 generated</span><span class="badge badge-warning">2 pending</span></div>
+                <div style="height:8px;background:var(--color-surface);border-radius:4px;overflow:hidden"><div style="width:72%;height:100%;background:var(--color-accent)"></div></div>
+              </div>
+            </div>
+            <span class="pin pin-over" style="top:8px;left:300px">1</span>
+            <span class="pin pin-over" style="top:106px;left:298px">2</span>
+            <span class="pin pin-over" style="bottom:24px;left:30px">3</span>
+          </div>
+          <ol class="pin-list">
+            <li><span class="pin">1</span><span>Address bar shows the live tenant route.</span></li>
+            <li><span class="pin">2</span><span>Status badges summarise the run at a glance.</span></li>
+            <li><span class="pin">3</span><span>Progress bar tracks generation completion.</span></li>
+          </ol>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">25</span><span class="cap-name">Annotated mock</span></div>
+      <p class="cap-desc">Numbered <code>pin</code>s over a UI mock, keyed to a legend — for walkthroughs and design critique.</p></div>
+  </article>
+
+  <!-- 26 · Q&A / FAQ -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Open questions</h2>
+        <div class="qa">
+          <div>
+            <div class="qa-q"><span class="qa-marker">Q</span><span>At-least-once or exactly-once delivery?</span></div>
+            <div class="qa-a"><span class="qa-marker">A</span><span>At-least-once with dedupe on the idempotency key — exactly-once isn't worth the coordination cost.</span></div>
+          </div>
+          <div>
+            <div class="qa-q"><span class="qa-marker">Q</span><span>What happens to in-flight events on deploy?</span></div>
+            <div class="qa-a"><span class="qa-marker">A</span><span>They stay in the outbox and the next worker drains them — deploys are safe mid-flush.</span></div>
+          </div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">26</span><span class="cap-name">Q&amp;A / FAQ</span></div>
+      <p class="cap-desc">Question-and-answer pairs with lettered markers — for FAQs, objections, or open issues.</p></div>
+  </article>
+
+  <!-- 27 · KANBAN BOARD -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Workstream status</h2>
+        <div class="kanban">
+          <div>
+            <div class="kanban-col-head"><span>To do</span><span>2</span></div>
+            <div class="kanban-col-body">
+              <div class="kanban-card"><div class="kanban-card-title">Backfill migration</div><div style="margin-top:8px"><span class="badge badge-info">Billing</span></div></div>
+              <div class="kanban-card"><div class="kanban-card-title">CI coverage guard</div><div style="margin-top:8px"><span class="badge badge-info">Platform</span></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="kanban-col-head"><span>In progress</span><span>1</span></div>
+            <div class="kanban-col-body">
+              <div class="kanban-card"><div class="kanban-card-title">Slim middleware</div><div style="margin-top:8px"><span class="badge badge-warning">Shadowing</span></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="kanban-col-head"><span>Done</span><span>2</span></div>
+            <div class="kanban-col-body">
+              <div class="kanban-card"><div class="kanban-card-title">Idempotency key</div><div style="margin-top:8px"><span class="badge badge-success">Merged</span></div></div>
+              <div class="kanban-card"><div class="kanban-card-title">Audit indexes</div><div style="margin-top:8px"><span class="badge badge-success">Merged</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">27</span><span class="cap-name">Kanban board</span></div>
+      <p class="cap-desc">Status columns of cards — to do / in progress / done — for a project or workstream snapshot.</p></div>
+  </article>
+
+  <!-- 28 · CLOSING -->
+  <article class="card">
+    <div class="thumb"><div class="stage">
+      <section class="slide"><div class="slide-inner">
+        <h2 class="slide-title">Closing — summary &amp; footer</h2>
+        <p>Compose these archetypes freely — one major idea per slide, split rather than scroll.</p>
+        <div class="metric-grid">
+          <div class="metric-card"><div class="metric-label">Layouts</div><div class="metric-value">28</div></div>
+          <div class="metric-card"><div class="metric-label">Styles</div><div class="metric-value">7</div></div>
+          <div class="metric-card"><div class="metric-label">Themes</div><div class="metric-value">2</div><div class="metric-sub">light / dark</div></div>
+        </div>
+        <footer class="report-footer"><span>Slide layout gallery</span><span class="report-footer-brand">Generated by Claude Code</span></footer>
+      </div></section>
+    </div></div>
+    <div class="cap"><div class="cap-head"><span class="cap-num">28</span><span class="cap-name">Closing</span></div>
+      <p class="cap-desc">The last slide carries the footer; here paired with a small summary metric grid.</p></div>
+  </article>
+
+</main>
+
+<script>
+  var html = document.documentElement;
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.g-chip'));
+  var graphs = Array.prototype.slice.call(document.querySelectorAll('.mermaid')).map(function (el) { return el.textContent; });
+
+  function renderMermaid() {
+    if (!window.mermaid) return;
+    var dark = html.getAttribute('data-theme') === 'dark';
+    mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', securityLevel: 'loose' });
+    document.querySelectorAll('.mermaid').forEach(function (el, i) {
+      el.removeAttribute('data-processed');
+      el.innerHTML = graphs[i];
+    });
+    try { mermaid.run(); } catch (e) {}
+  }
+
+  function syncChips() {
+    var cur = html.getAttribute('data-style');
+    chips.forEach(function (c) { c.setAttribute('aria-pressed', String(c.dataset.style === cur)); });
+  }
+
+  chips.forEach(function (c) {
+    c.addEventListener('click', function () {
+      html.setAttribute('data-style', c.dataset.style);
+      syncChips();
+      renderMermaid();
+    });
+  });
+
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var dark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', dark ? 'light' : 'dark');
+    document.getElementById('themeIcon').textContent = dark ? '◐' : '◑';
+    renderMermaid();
+  });
+
+  syncChips();
+  renderMermaid();
+</script>
+</body>
+</html>

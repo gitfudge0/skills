@@ -1,0 +1,1328 @@
+/* ================================================================
+   Report — Editorial design system
+   Inspired by: bold typography, warm accents, generous whitespace,
+   minimal chrome, open layouts with thin dividers.
+   ================================================================ */
+
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  --font-display: 'Georgia', 'Times New Roman', serif;
+  --font-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+
+  --color-bg: #ffffff;
+  --color-surface: #faf8f5;
+  --color-border: #e8e4de;
+  --color-border-light: #f0ece6;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #4a4a48;
+  --color-text-tertiary: #8a8884;
+
+  --color-accent: #d4552a;
+  --color-accent-light: #faf0ec;
+  --color-teal: #1a7a5c;
+  --color-teal-light: #eef7f3;
+  --color-amber: #b07318;
+  --color-amber-light: #fdf5e8;
+  --color-red: #b33030;
+  --color-red-light: #fceaea;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 32px;
+  --space-xl: 56px;
+  --space-2xl: 80px;
+}
+
+/* Dark theme — explicit toggle */
+[data-theme="dark"] {
+    --color-bg: #111111;
+    --color-surface: #191917;
+    --color-border: #2a2926;
+    --color-border-light: #222120;
+    --color-text: #e8e6e2;
+    --color-text-secondary: #a8a6a0;
+    --color-text-tertiary: #666460;
+
+    --color-accent: #e8764e;
+    --color-accent-light: #261810;
+    --color-teal: #4ec9a0;
+    --color-teal-light: #0e241c;
+    --color-amber: #e8b44e;
+    --color-amber-light: #261e0e;
+    --color-red: #e86060;
+    --color-red-light: #261010;
+}
+
+/* Dark theme — OS preference fallback */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #111111;
+    --color-surface: #191917;
+    --color-border: #2a2926;
+    --color-border-light: #222120;
+    --color-text: #e8e6e2;
+    --color-text-secondary: #a8a6a0;
+    --color-text-tertiary: #666460;
+
+    --color-accent: #e8764e;
+    --color-accent-light: #261810;
+    --color-teal: #4ec9a0;
+    --color-teal-light: #0e241c;
+    --color-amber: #e8b44e;
+    --color-amber-light: #261e0e;
+    --color-red: #e86060;
+    --color-red-light: #261010;
+  }
+}
+
+/* ─── Theme toggle ──────────────────────────────────────── */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 100;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  font-size: 18px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+.theme-toggle:hover {
+  color: var(--color-text);
+}
+.theme-toggle::after {
+  content: '◐';
+}
+[data-theme="dark"] .theme-toggle::after {
+  content: '◑';
+}
+
+/* Keyboard hint, bottom-left. Injected by deck.js. */
+.style-hint {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  user-select: none;
+  pointer-events: none;
+}
+.style-hint kbd {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  padding: 3px 7px;
+}
+
+/* ─── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── Base ───────────────────────────────────────────────── */
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden; /* deck owns scrolling; each slide scrolls internally */
+}
+
+/* ─── Deck / slideshow ───────────────────────────────────────
+   The deck fills the viewport. One .slide is visible at a time
+   (toggled by the nav script via the .is-active class). Each slide
+   is a flex column that vertically centers its content and scrolls
+   internally if its content is taller than the viewport. */
+.deck {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Inactive slides are hidden with visibility/opacity rather than
+   display:none so they keep their layout dimensions. This is what lets
+   Mermaid (which renders all diagrams once at load) size diagrams on
+   not-yet-shown slides correctly — a display:none container has zero
+   width and produces a collapsed/blank SVG. All slides stack absolutely
+   in the same spot; only the active one is painted and interactive. */
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+  padding: var(--space-2xl) 8%;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.slide.is-active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+/* A slide whose content overflows should top-align so nothing is
+   clipped — the slide scrolls instead of centering. */
+.slide.slide-overflow {
+  justify-content: flex-start;
+}
+
+/* The inner column constrains line length and centers horizontally. */
+.slide-inner {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+/* Slide title — reuses the editorial display face. */
+.slide-title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Title (cover) slide — bigger, no rule, centered feel. */
+.slide-cover .slide-inner { max-width: 760px; }
+.slide-cover h1 {
+  font-size: 52px;
+  margin-bottom: var(--space-lg);
+}
+.slide-cover .lead {
+  font-size: 19px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+.slide-cover .report-header-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+.slide-cover .report-header-date {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.02em;
+}
+
+/* ─── Deck navigation chrome ─────────────────────────────────── */
+.deck-nav {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  gap: 8px;
+  z-index: 50;
+}
+
+.deck-prev,
+.deck-next {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.deck-prev:hover:not(:disabled),
+.deck-next:hover:not(:disabled) {
+  border-color: var(--color-text-tertiary);
+  background: var(--color-border-light);
+}
+.deck-prev:disabled,
+.deck-next:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Progress bar across the top of the viewport. */
+.deck-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0;
+  background: var(--color-accent);
+  z-index: 95;
+  transition: width 0.25s ease;
+}
+
+/* ─── Typography ─────────────────────────────────────────── */
+h1 {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+}
+
+h3 {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+}
+
+p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+}
+p:last-child { margin-bottom: 0; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 2px 7px;
+  background: var(--color-surface);
+  border-radius: 3px;
+  color: var(--color-text);
+}
+
+/* ─── Header ─────────────────────────────────────────────── */
+.report-header {
+  padding-bottom: var(--space-xl);
+  margin-bottom: var(--space-xl);
+  border-bottom: 2px solid var(--color-text);
+}
+
+.report-header-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.report-header-date {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  margin-left: auto;
+  letter-spacing: 0.02em;
+}
+
+.report-header h1 {
+  margin-bottom: var(--space-md);
+}
+
+.report-header .lead {
+  font-size: 17px;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+  max-width: 600px;
+}
+
+/* ─── Section ────────────────────────────────────────────── */
+.section {
+  margin-bottom: var(--space-xl);
+}
+
+.section-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-md);
+}
+
+/* ─── Badges ─────────────────────────────────────────────────
+   Two tiers, one rule: a badge is either BRAND or STATUS, never both.
+   - badge-accent  → brand voice (cover "report type" only); no valence.
+   - badge-success / badge-warning / badge-critical / badge-info
+                   → status only. The color IS the meaning. */
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 12px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid;
+}
+
+/* Brand — wayfinding/identity, carries no good/bad meaning. */
+.badge-accent {
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+  border-color: var(--color-accent);
+}
+/* Status — positive: success / added / safe / done. */
+.badge-success {
+  color: var(--color-teal);
+  background: var(--color-teal-light);
+  border-color: var(--color-teal);
+}
+/* Status — caution: warning / modified / in-progress / needs attention. */
+.badge-warning {
+  color: var(--color-amber);
+  background: var(--color-amber-light);
+  border-color: var(--color-amber);
+}
+/* Status — negative: error / critical / breaking / deleted / blocked. */
+.badge-critical {
+  color: var(--color-red);
+  background: var(--color-red-light);
+  border-color: var(--color-red);
+}
+/* Status — informational / minor / no status. */
+.badge-info {
+  color: var(--color-text-tertiary);
+  background: transparent;
+  border-color: var(--color-border);
+}
+
+/* ─── Summary metric cards ───────────────────────────────── */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: var(--space-lg);
+}
+
+.metric-card {
+  background: var(--color-bg);
+  padding: 20px 22px;
+}
+
+.metric-card .metric-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-sm);
+}
+
+.metric-card .metric-value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-text);
+}
+
+.metric-card .metric-sub {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  margin-top: 6px;
+}
+
+/* ─── Findings list ──────────────────────────────────────── */
+.finding {
+  padding: 12px 0;
+}
+.finding + .finding { margin-top: var(--space-sm); }
+
+.finding-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.finding-num {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-border);
+  min-width: 28px;
+  flex-shrink: 0;
+}
+
+.finding-body { flex: 1; }
+
+.finding-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.finding p {
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+/* ─── Callout ────────────────────────────────────────────── */
+/* Default callout = informational (neutral). It carries no status, so it
+   must not borrow the brand accent. Warning/danger add semantic colour. */
+.callout {
+  border-left: 3px solid var(--color-text-tertiary);
+  padding: 16px 20px;
+  margin: var(--space-lg) 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  background: transparent;
+}
+
+.callout strong {
+  color: var(--color-text);
+}
+
+.callout.callout-warning {
+  border-left-color: var(--color-amber);
+}
+
+.callout.callout-danger {
+  border-left-color: var(--color-red);
+}
+
+/* ─── File tree ──────────────────────────────────────────── */
+.file-tree {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--color-surface);
+  border-radius: 8px;
+  padding: 24px 28px;
+  color: var(--color-text-secondary);
+  line-height: 2;
+}
+
+.file-tree .dir  { color: var(--color-text); font-weight: 600; }
+.file-tree .new  { color: var(--color-teal); }
+.file-tree .mod  { color: var(--color-amber); }
+.file-tree .del  { color: var(--color-red); text-decoration: line-through; }
+.file-tree .note { color: var(--color-text-tertiary); font-style: italic; }
+
+/* ─── Risk / checklist rows ──────────────────────────────── */
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 14px;
+  align-items: start;
+  font-size: 14px;
+}
+
+.item-row-icon {
+  font-size: 14px;
+  padding-top: 1px;
+}
+
+.item-row-title {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.item-row-desc {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  margin-top: 3px;
+  line-height: 1.6;
+}
+
+/* ─── UI mock frame ──────────────────────────────────────── */
+.mock-frame {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.mock-bar {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mock-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mock-url {
+  margin-left: 12px;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+  background: var(--color-bg);
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+
+.mock-body { padding: 28px; }
+
+.mock-caption {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: var(--space-lg);
+  font-style: italic;
+}
+
+/* ─── Diagram container ──────────────────────────────────── */
+.diagram-wrap {
+  background: var(--color-surface);
+  border-radius: 8px;
+  padding: 32px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.diagram-wrap .mermaid {
+  display: flex;
+  justify-content: center;
+}
+
+/* ─── Data table ─────────────────────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-tertiary);
+  border-bottom: 2px solid var(--color-text);
+}
+
+.data-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text);
+  vertical-align: top;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+
+.data-table-wrap {
+  margin-bottom: var(--space-lg);
+  overflow-x: auto;
+}
+
+/* ─── Key-value detail block ─────────────────────────────── */
+.kv-block {
+  margin-bottom: var(--space-lg);
+}
+
+.kv-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-md);
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.kv-label {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+.kv-value {
+  color: var(--color-text);
+  text-align: right;
+}
+
+/* ─── Recommendation / next steps ───────────────────────── */
+.next-steps ol {
+  list-style: none;
+  counter-reset: steps;
+}
+
+.next-steps li {
+  counter-increment: steps;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 10px 0;
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+}
+
+.next-steps li::before {
+  content: counter(steps);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-accent);
+  line-height: 1.3;
+}
+
+/* ─── Footer ─────────────────────────────────────────────── */
+.report-footer {
+  border-top: 2px solid var(--color-text);
+  padding-top: var(--space-lg);
+  margin-top: var(--space-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+}
+
+.report-footer-brand {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* ─── Utility ────────────────────────────────────────────── */
+.text-accent   { color: var(--color-accent); }   /* brand emphasis */
+.text-success  { color: var(--color-teal); }     /* status: positive */
+.text-warning  { color: var(--color-amber); }    /* status: caution */
+.text-critical { color: var(--color-red); }      /* status: negative */
+.text-muted    { color: var(--color-text-tertiary); }
+.mt-sm  { margin-top: 12px; }
+.mt-md  { margin-top: 24px; }
+.mt-lg  { margin-top: 40px; }
+.mb-sm  { margin-bottom: 12px; }
+.mb-md  { margin-bottom: 24px; }
+.mb-lg  { margin-bottom: 40px; }
+
+/* ================================================================
+   COMPOSITION ARCHETYPES
+   ----------------------------------------------------------------
+   Higher-level slide layouts built on the tokens above. Every rule
+   reads only --color-* / --font-* variables and stays flat, so each
+   archetype inherits all 7 data-style remaps and light/dark for free
+   — no per-style work needed. See assets/gallery.html for a live
+   example of each, and SKILL.md for copy-paste skeletons.
+   ================================================================ */
+
+/* Generic surface panel — a bordered card for ad-hoc content. */
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 28px;
+}
+.panel-rule { height: 1px; background: var(--color-border); margin: 18px 0; }
+
+/* Two-column split — symmetric comparison OR asymmetric hero. */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center; }
+.split-wide { grid-template-columns: 1.35fr 1fr; }   /* visual-heavy left, e.g. annotated mock */
+
+/* Section divider — a chapter break between parts of a long deck. */
+.slide-divider { text-align: center; }
+.slide-divider .slide-title { border: none; padding: 0; font-size: 44px; margin: 8px 0 0; }
+.slide-divider p { max-width: 520px; margin-left: auto; margin-right: auto; }
+.divider-num {
+  font-family: var(--font-display); font-size: 104px; font-weight: 700;
+  line-height: 1; color: var(--color-accent);
+}
+
+/* KPI hero — one number set huge when a single figure is the story. */
+.kpi-hero { text-align: center; padding: 24px 0; }
+.kpi-figure {
+  font-family: var(--font-display); font-size: 128px; font-weight: 700;
+  line-height: 0.9; color: var(--color-text);
+}
+.kpi-cap { font-size: 18px; color: var(--color-text-secondary); margin-top: 14px; }
+
+/* Pull-quote / big takeaway — one chrome-less statement. */
+.quote {
+  font-family: var(--font-display); font-size: 40px; line-height: 1.25;
+  font-weight: 700; color: var(--color-text); border: none; margin: 0; padding: 0;
+}
+.quote-attr { margin-top: 22px; color: var(--color-text-tertiary); font-size: 14px; }
+
+/* Stat band — a row of oversized figures split by hairlines. */
+.stat-band { display: flex; align-items: stretch; justify-content: space-between; text-align: center; padding: 30px 0; }
+.stat { flex: 1; }
+.stat-divider { flex: 0 0 1px; background: var(--color-border); }
+.stat-figure { font-family: var(--font-display); font-size: 60px; font-weight: 700; line-height: 1; color: var(--color-text); }
+.stat-figure.is-accent { color: var(--color-accent); }
+.stat-label { margin-top: 10px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-tertiary); }
+
+/* Process — a left-to-right numbered flow with connector arrows. */
+.process { display: flex; align-items: flex-start; justify-content: space-between; }
+.process-step { flex: 1; text-align: center; padding: 0 6px; }
+.process-disc {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 2px solid var(--color-accent); color: var(--color-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 18px; margin: 0 auto 12px;
+}
+.process-step-title { font-weight: 600; color: var(--color-text); font-size: 14px; }
+.process-step-desc { color: var(--color-text-secondary); font-size: 13px; margin-top: 4px; }
+.process-arrow { color: var(--color-text-tertiary); font-size: 22px; margin-top: 10px; }
+
+/* 2×2 quadrant matrix — a priority / positioning grid with axes. */
+.quadrant { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 140px 140px; gap: 12px; }
+.quadrant-cell { border: 1px solid var(--color-border); border-radius: 10px; padding: 14px; }
+.quadrant-cell.is-priority { border-color: var(--color-accent); background: var(--color-accent-light); }
+.quadrant-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 10px; }
+.quadrant-cell.is-priority .quadrant-label { color: var(--color-accent); }
+.axis-y { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-tertiary); padding: 8px 0; }
+.axis-x { text-align: center; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-tertiary); margin-top: 10px; }
+
+/* Bar chart — pure-CSS horizontal bars, no chart library. */
+.bar-chart { display: flex; flex-direction: column; gap: 18px; }
+.bar-row { display: flex; align-items: center; gap: 14px; }
+.bar-name { width: 150px; flex-shrink: 0; font-size: 14px; color: var(--color-text); text-align: right; }
+.bar-track { flex: 1; height: 18px; background: var(--color-surface); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--color-accent); }   /* set width inline, e.g. style="width:82%" */
+.bar-fill.is-critical { background: var(--color-red); }
+.bar-value { width: 54px; flex-shrink: 0; font-size: 13px; color: var(--color-text-secondary); }
+
+/* Persona card — avatar + name/role over an attribute block. */
+.persona { max-width: 560px; margin: 0 auto; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 28px; }
+.persona-head { display: flex; align-items: center; gap: 18px; }
+.persona-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--color-accent-light); color: var(--color-accent); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 24px; flex-shrink: 0; }
+.persona-name { font-size: 20px; font-weight: 600; color: var(--color-text); }
+.persona-role { color: var(--color-text-secondary); font-size: 14px; }
+
+/* Numbered pin — annotation markers over a mock, and the keyed legend. */
+.pin { width: 24px; height: 24px; border-radius: 50%; background: var(--color-accent); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 12px; flex-shrink: 0; }
+.pin-over { position: absolute; }   /* add top/left inline to place over the mock */
+.pin-list { list-style: none; display: flex; flex-direction: column; gap: 16px; margin: 0; padding: 0; }
+.pin-list li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: var(--color-text-secondary); }
+
+/* Q&A / FAQ — question/answer pairs with lettered markers. */
+.qa { display: flex; flex-direction: column; gap: 24px; }
+.qa-q, .qa-a { display: flex; gap: 12px; }
+.qa-q { font-weight: 600; color: var(--color-text); font-size: 15px; }
+.qa-a { color: var(--color-text-secondary); font-size: 14px; margin-top: 8px; }
+.qa-marker { font-family: var(--font-display); font-weight: 700; font-size: 16px; line-height: 1.4; flex-shrink: 0; }
+.qa-q .qa-marker { color: var(--color-accent); }
+.qa-a .qa-marker { color: var(--color-text-tertiary); }
+
+/* Kanban board — status columns of cards. */
+.kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.kanban-col-head { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 12px; }
+.kanban-col-body { display: flex; flex-direction: column; gap: 10px; }
+.kanban-card { border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface); padding: 12px; }
+.kanban-card-title { font-size: 13px; font-weight: 600; color: var(--color-text); }
+
+/* Code block — fenced multi-line code (prefer over inline for snippets). */
+.code-block {
+  font-family: var(--font-mono); font-size: 14px; line-height: 1.7;
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: 8px; padding: 22px 26px; overflow: auto; color: var(--color-text); margin: 0;
+}
+.code-comment { color: var(--color-text-tertiary); }
+.code-string  { color: var(--color-teal); }
+
+/* Timeline — a vertical phased rail with milestone dots. */
+.timeline { border-left: 2px solid var(--color-border); margin-left: 7px; padding-left: 26px; display: flex; flex-direction: column; gap: 22px; }
+.timeline-item { position: relative; }
+.timeline-dot { position: absolute; left: -34px; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--color-accent); border: 3px solid var(--color-bg); }
+.timeline-dot.is-pending { background: var(--color-border); }
+.timeline-title { font-weight: 600; color: var(--color-text); }
+.timeline-desc { color: var(--color-text-secondary); font-size: 14px; }
+
+/* ─── Print / PDF — one slide per landscape page ──────────────
+   Used by scripts/html-to-pdf.sh. The screen layout shows only the
+   active slide (position:fixed, others display:none). For print we
+   must override that and lay every slide out as its own landscape
+   page. Also forces colour fidelity so the meaning-bearing tints
+   survive, and hides interactive chrome. */
+@page {
+  size: landscape;
+  margin: 0;
+}
+
+@media print {
+  /* PDFs are always light, regardless of the active toggle or the OS
+     prefers-color-scheme. Re-declare the light palette on selectors that
+     out-specify both [data-theme="dark"] and the media-query fallback. */
+  :root,
+  :root[data-theme="dark"],
+  :root[data-theme="light"],
+  [data-theme="dark"] {
+    --color-bg: #ffffff;
+    --color-surface: #faf8f5;
+    --color-border: #e8e4de;
+    --color-border-light: #f0ece6;
+    --color-text: #1a1a1a;
+    --color-text-secondary: #4a4a48;
+    --color-text-tertiary: #8a8884;
+    --color-accent: #d4552a;
+    --color-accent-light: #faf0ec;
+    --color-teal: #1a7a5c;
+    --color-teal-light: #eef7f3;
+    --color-amber: #b07318;
+    --color-amber-light: #fdf5e8;
+    --color-red: #b33030;
+    --color-red-light: #fceaea;
+  }
+
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide all interactive chrome. */
+  .theme-toggle,
+  .deck-nav,
+  .deck-progress,
+  .style-hint { display: none !important; }
+
+  html, body { overflow: visible !important; height: auto !important; }
+
+  /* Un-fix the deck so slides flow as block-level pages. */
+  .deck {
+    position: static !important;
+    overflow: visible !important;
+    inset: auto !important;
+  }
+
+  /* Every slide prints — override the screen "only active visible"
+     rule — and each fills its own page. */
+  .slide {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: 100vh !important;        /* one landscape page tall */
+    overflow: hidden !important;     /* clip overlong slides; never paginate one slide across pages */
+    justify-content: center !important;
+    /* One page per slide: force a page boundary before each slide except
+       the first. Don't set break-inside:avoid on the slide itself — it's
+       page-sized, so the rule belongs on inner components only (below). */
+    break-before: page;
+    page-break-before: always;
+  }
+  .slide:first-child {
+    break-before: auto;
+    page-break-before: auto;
+  }
+
+  /* Don't split these components across a page boundary. */
+  .metric-card, .finding, .callout, .item-row, .kv-block,
+  .mock-frame, .diagram-wrap, .data-table-wrap, pre,
+  .panel, .quadrant-cell, .persona, .kanban-card, .code-block,
+  .bar-chart, .process, .stat-band, .timeline, .qa {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  a { color: inherit; text-decoration: none; }
+}
+
+/* ================================================================
+   SELECTABLE VISUAL STYLES  —  data-style themes (ADDITIVE)
+   ----------------------------------------------------------------
+   The deck author sets <html data-style="terminal" data-theme="light">.
+   With no data-style the default editorial look above is unchanged.
+
+   Each style is two layers:
+     (a) a token block remapping the existing --color-* variables the
+         components already read, for light AND dark
+         (dark = :root[data-theme="dark"][data-style="<name>"]);
+     (b) signature treatments on the existing component classes.
+
+   Required Google fonts (load in <head>, see SKILL.md):
+     Inter, Space Grotesk, Plus Jakarta Sans, Instrument Serif,
+     Space Mono, Sora.
+
+   Specificity: [data-style] token blocks live on :root, so they
+   out-rank the bare :root defaults; the dark blocks carry an extra
+   [data-theme="dark"] so they win over their light siblings.
+   ================================================================ */
+
+/* ===== 1 · MARGINALIA — ink on warm paper + hand-drawn marker ===== */
+:root[data-style="marginalia"] {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --color-bg: #FBFAF7; --color-surface: #F3F1EB;
+  --color-border: #E7E3DC; --color-border-light: #F0ECE4;
+  --color-text: #16140F; --color-text-secondary: #4F4A43; --color-text-tertiary: #6B6660;
+  --color-accent: #E1452B; --color-accent-light: #FBEAE5;
+  --color-teal: #1F7A5C; --color-teal-light: #EBF5F0;
+  --color-amber: #A8761C; --color-amber-light: #F8F0E0;
+  --color-red: #C0392B; --color-red-light: #FBEAE7;
+}
+:root[data-theme="dark"][data-style="marginalia"] {
+  --color-bg: #15130F; --color-surface: #1E1B16;
+  --color-border: #2A261F; --color-border-light: #221F19;
+  --color-text: #F2ECE2; --color-text-secondary: #C2B9AD; --color-text-tertiary: #9C948A;
+  --color-accent: #FF6A4D; --color-accent-light: #2A170F;
+  --color-teal: #4ec9a0; --color-teal-light: #14241D;
+  --color-amber: #E8B44E; --color-amber-light: #241D10;
+  --color-red: #FF6B6B; --color-red-light: #261311;
+}
+:root[data-style="marginalia"] .slide-title { font-weight: 700; }
+/* hand-drawn marker: a wobbly underline marks the slide title */
+:root[data-style="marginalia"] .slide-title {
+  border-bottom: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='8' viewBox='0 0 100 8' preserveAspectRatio='none'><path d='M1,5 C20,2 45,7 70,3 C82,1 92,5 99,3' fill='none' stroke='%23E1452B' stroke-width='1.6'/></svg>");
+  background-repeat: no-repeat; background-position: 0 100%; background-size: 38% 7px;
+}
+:root[data-style="marginalia"] .badge {
+  background: transparent; border: 1.5px solid var(--color-text); color: var(--color-text);
+}
+:root[data-style="marginalia"] .badge-accent { border-color: var(--color-accent); color: var(--color-accent); }
+:root[data-style="marginalia"] .badge-success { border-color: var(--color-teal); color: var(--color-teal); }
+:root[data-style="marginalia"] .badge-warning { border-color: var(--color-amber); color: var(--color-amber); }
+:root[data-style="marginalia"] .badge-critical { border-color: var(--color-red); color: var(--color-red); }
+:root[data-style="marginalia"] .finding-num,
+:root[data-style="marginalia"] .next-steps li::before { color: var(--color-accent); }
+
+/* ===== 2 · VERDANT — friendly green, rounded cards ===== */
+:root[data-style="verdant"] {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --color-bg: #F4F6F2; --color-surface: #FFFFFF;
+  --color-border: #E2E8E0; --color-border-light: #EDF1EB;
+  --color-text: #13251A; --color-text-secondary: #45524A; --color-text-tertiary: #5E6B62;
+  --color-accent: #2FB457; --color-accent-light: #E4F4E8;
+  --color-teal: #2FB457; --color-teal-light: #E4F4E8;
+  --color-amber: #B07A18; --color-amber-light: #F7EFDD;
+  --color-red: #C23B3B; --color-red-light: #FAE8E8;
+}
+:root[data-theme="dark"][data-style="verdant"] {
+  --color-bg: #0E1611; --color-surface: #16211A;
+  --color-border: #21302A; --color-border-light: #1B2820;
+  --color-text: #EAF2EC; --color-text-secondary: #B2C0B8; --color-text-tertiary: #90A096;
+  --color-accent: #46D472; --color-accent-light: #1B2C22;
+  --color-teal: #46D472; --color-teal-light: #1B2C22;
+  --color-amber: #E8B44E; --color-amber-light: #241D10;
+  --color-red: #F07070; --color-red-light: #261313;
+}
+:root[data-style="verdant"] h1,
+:root[data-style="verdant"] .slide-title { font-weight: 800; }
+:root[data-style="verdant"] .metric-grid {
+  background: transparent; border: none; gap: var(--space-md); overflow: visible;
+}
+:root[data-style="verdant"] .metric-card {
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px;
+}
+:root[data-style="verdant"] .metric-value { color: var(--color-accent); }
+:root[data-style="verdant"] .badge {
+  border-color: transparent; border-radius: 100px;
+}
+:root[data-style="verdant"] .finding {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: 16px; padding: 16px 20px;
+}
+:root[data-style="verdant"] .item-row {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: 16px; padding: 14px 18px;
+}
+:root[data-style="verdant"] .finding-num { color: var(--color-accent); }
+
+/* ===== 3 · BLUEPRINT — graph-paper grid + dimension lines + mono labels ===== */
+:root[data-style="blueprint"] {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-mono: 'Space Mono', 'SF Mono', monospace;
+  --color-bg: #EEF4FB; --color-surface: #E2EDF9;
+  --color-border: #CFE0F0; --color-border-light: #DCE9F6;
+  --color-text: #102A47; --color-text-secondary: #3E5A78; --color-text-tertiary: #5E7693;
+  --color-accent: #1F6FE0; --color-accent-light: #DCEAFB;
+  --color-teal: #1A7A5C; --color-teal-light: #E2F1EC;
+  --color-amber: #A8761C; --color-amber-light: #F5EBD8;
+  --color-red: #C0392B; --color-red-light: #FAE5E2;
+  --grid-color: rgba(31,111,224,.10);
+}
+:root[data-theme="dark"][data-style="blueprint"] {
+  --color-bg: #0B2A52; --color-surface: #0F315E;
+  --color-border: #1C4A82; --color-border-light: #163C6C;
+  --color-text: #DCEBFF; --color-text-secondary: #AFC8E8; --color-text-tertiary: #8FB0D8;
+  --color-accent: #85B6FF; --color-accent-light: #143358;
+  --color-teal: #4ec9a0; --color-teal-light: #103028;
+  --color-amber: #E8B44E; --color-amber-light: #2A2310;
+  --color-red: #FF8080; --color-red-light: #2E1414;
+  --grid-color: rgba(133,182,255,.16);
+}
+:root[data-style="blueprint"] .slide {
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+:root[data-style="blueprint"] .slide-title {
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-accent);
+  position: relative;
+}
+/* dimension-line ticks at each end of the title rule */
+:root[data-style="blueprint"] .slide-title::before,
+:root[data-style="blueprint"] .slide-title::after {
+  content: ""; position: absolute; bottom: -5px; width: 1px; height: 10px; background: var(--color-accent);
+}
+:root[data-style="blueprint"] .slide-title::before { left: 0; }
+:root[data-style="blueprint"] .slide-title::after { right: 0; }
+:root[data-style="blueprint"] .badge {
+  font-family: var(--font-mono); border-radius: 0; letter-spacing: .04em;
+}
+:root[data-style="blueprint"] .section-label,
+:root[data-style="blueprint"] .metric-label,
+:root[data-style="blueprint"] .data-table th {
+  font-family: var(--font-mono);
+}
+:root[data-style="blueprint"] .metric-value { color: var(--color-accent); }
+:root[data-style="blueprint"] .finding-num { font-family: var(--font-mono); color: var(--color-accent); }
+:root[data-style="blueprint"] .file-tree { border: 1px solid var(--color-border); }
+
+/* ===== 4 · EDITORIAL — italic Instrument Serif display + magenta + drop cap ===== */
+:root[data-style="editorial"] {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Instrument Serif', 'Georgia', serif;
+  --color-bg: #FBF8F4; --color-surface: #F4EFE8;
+  --color-border: #E6DFD6; --color-border-light: #EFEAE2;
+  --color-text: #1A1714; --color-text-secondary: #57504A; --color-text-tertiary: #736B62;
+  --color-accent: #E0218A; --color-accent-light: #FBE6F2;
+  --color-teal: #1A7A5C; --color-teal-light: #EAF4F0;
+  --color-amber: #A8761C; --color-amber-light: #F6EEDE;
+  --color-red: #C0392B; --color-red-light: #FAE7E4;
+}
+:root[data-theme="dark"][data-style="editorial"] {
+  --color-bg: #161310; --color-surface: #1F1B16;
+  --color-border: #2C2620; --color-border-light: #241F1A;
+  --color-text: #F2ECE3; --color-text-secondary: #C0B6AA; --color-text-tertiary: #9C9286;
+  --color-accent: #FF4FA3; --color-accent-light: #2A1019;
+  --color-teal: #4ec9a0; --color-teal-light: #14241D;
+  --color-amber: #E8B44E; --color-amber-light: #241D10;
+  --color-red: #FF6B6B; --color-red-light: #261311;
+}
+:root[data-style="editorial"] h1 { font-weight: 400; font-style: italic; letter-spacing: 0; }
+:root[data-style="editorial"] .slide-title { font-weight: 400; font-size: 38px; letter-spacing: 0; }
+:root[data-style="editorial"] .slide-cover .lead::first-letter {
+  font-family: var(--font-display); font-size: 56px; float: left; line-height: .7;
+  padding: 8px 10px 0 0; color: var(--color-accent);
+}
+:root[data-style="editorial"] .badge {
+  border: none; border-left: 2px solid var(--color-accent); border-radius: 0;
+  background: transparent; color: var(--color-text); letter-spacing: .1em; padding-left: 10px;
+}
+:root[data-style="editorial"] .metric-value { font-family: var(--font-display); font-weight: 400; }
+:root[data-style="editorial"] .finding-num { font-family: var(--font-display); font-weight: 400; color: var(--color-accent); }
+
+/* ===== 5 · TERMINAL — monospace + window chrome + $ prompt + [status] badges ===== */
+:root[data-style="terminal"] {
+  --font-sans: 'Space Mono', 'SF Mono', monospace;
+  --font-display: 'Space Mono', 'SF Mono', monospace;
+  --font-mono: 'Space Mono', 'SF Mono', monospace;
+  --color-bg: #F7F4EC; --color-surface: #EDE9DD;
+  --color-border: #D6D2C4; --color-border-light: #E2DECF;
+  --color-text: #1C2B22; --color-text-secondary: #41534A; --color-text-tertiary: #6F7A6F;
+  --color-accent: #0A7D3C; --color-accent-light: #E1F0E6;
+  --color-teal: #0A7D3C; --color-teal-light: #E1F0E6;
+  --color-amber: #A8761C; --color-amber-light: #F4ECDA;
+  --color-red: #C0392B; --color-red-light: #F8E6E3;
+}
+:root[data-theme="dark"][data-style="terminal"] {
+  --color-bg: #0B0F0D; --color-surface: #121815;
+  --color-border: #1C2A20; --color-border-light: #16201A;
+  --color-text: #CDE9CF; --color-text-secondary: #93BC96; --color-text-tertiary: #6F8A72;
+  --color-accent: #3BE07A; --color-accent-light: #0E2417;
+  --color-teal: #3BE07A; --color-teal-light: #0E2417;
+  --color-amber: #E8B44E; --color-amber-light: #241D10;
+  --color-red: #FF6B6B; --color-red-light: #261311;
+}
+/* window-chrome bar across the top of every slide */
+:root[data-style="terminal"] .slide { padding-top: calc(var(--space-2xl) + 28px); }
+:root[data-style="terminal"] .slide::before {
+  content: "\25CF \25CF \25CF   ~/report";
+  position: absolute; top: 0; left: 0; right: 0; height: 30px;
+  display: flex; align-items: center; padding: 0 16px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em;
+  color: var(--color-text-tertiary);
+  background: var(--color-surface); border-bottom: 1px solid var(--color-border);
+}
+:root[data-style="terminal"] .slide-cover h1::before { content: "$ "; color: var(--color-accent); }
+:root[data-style="terminal"] .slide-title::before { content: "> "; color: var(--color-accent); }
+:root[data-style="terminal"] .slide-title { font-weight: 700; }
+:root[data-style="terminal"] .badge {
+  border: none; border-radius: 0; background: transparent; color: var(--color-accent);
+  letter-spacing: .02em;
+}
+:root[data-style="terminal"] .badge::before { content: "["; }
+:root[data-style="terminal"] .badge::after { content: "]"; }
+:root[data-style="terminal"] .badge-success { color: var(--color-teal); }
+:root[data-style="terminal"] .badge-warning { color: var(--color-amber); }
+:root[data-style="terminal"] .badge-critical { color: var(--color-red); }
+:root[data-style="terminal"] .metric-value,
+:root[data-style="terminal"] .finding-num,
+:root[data-style="terminal"] .next-steps li::before { color: var(--color-accent); }
+
+/* ===== 6 · BRUTALIST — thick borders + hard zero-blur offset shadows + yellow/blue ===== */
+:root[data-style="brutalist"] {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --color-bg: #FAF7EE; --color-surface: #FFFFFF;
+  --color-border: #0B0B0B; --color-border-light: #0B0B0B;
+  --color-text: #0B0B0B; --color-text-secondary: #2E2E2E; --color-text-tertiary: #4A4A4A;
+  --color-accent: #2D5BFF; --color-accent-light: #FFD23F;
+  --color-teal: #128A53; --color-teal-light: #D6F0E2;
+  --color-amber: #9A6B00; --color-amber-light: #FFD23F;
+  --color-red: #D62828; --color-red-light: #FBDADA;
+  --brut-shadow: #0B0B0B;
+}
+:root[data-theme="dark"][data-style="brutalist"] {
+  --color-bg: #15140F; --color-surface: #1D1C16;
+  --color-border: #F7F4EA; --color-border-light: #F7F4EA;
+  --color-text: #F7F4EA; --color-text-secondary: #D6D1C4; --color-text-tertiary: #B9B3A5;
+  --color-accent: #7E97FF; --color-accent-light: #FFDD55;
+  --color-teal: #46D472; --color-teal-light: #15281C;
+  --color-amber: #FFDD55; --color-amber-light: #2A2410;
+  --color-red: #FF6B6B; --color-red-light: #2A1414;
+  --brut-shadow: #000;
+}
+:root[data-style="brutalist"] h1,
+:root[data-style="brutalist"] .slide-title { font-weight: 700; text-transform: uppercase; }
+:root[data-style="brutalist"] .slide-title { border-bottom-width: 2.5px; border-bottom-color: var(--color-border); }
+:root[data-style="brutalist"] .badge {
+  background: var(--color-accent-light); color: #0B0B0B; border: 2px solid #0B0B0B;
+  border-radius: 0; font-weight: 700;
+}
+:root[data-style="brutalist"] .metric-grid { background: transparent; border: none; gap: var(--space-md); overflow: visible; }
+:root[data-style="brutalist"] .metric-card {
+  border: 2.5px solid var(--color-border); border-radius: 0; box-shadow: 6px 6px 0 var(--brut-shadow);
+}
+:root[data-style="brutalist"] .metric-value { color: var(--color-accent); }
+:root[data-style="brutalist"] .finding {
+  border: 2.5px solid var(--color-border); border-radius: 0; padding: 14px 18px;
+  box-shadow: 5px 5px 0 var(--brut-shadow);
+}
+:root[data-style="brutalist"] .item-row {
+  border: 2.5px solid var(--color-border); border-radius: 0; padding: 12px 16px;
+  box-shadow: 5px 5px 0 var(--brut-shadow);
+}
+:root[data-style="brutalist"] .callout { border-left-width: 5px; }
+:root[data-style="brutalist"] .data-table-wrap { border: 2.5px solid var(--color-border); box-shadow: 6px 6px 0 var(--brut-shadow); }
+:root[data-style="brutalist"] .finding-num { color: var(--color-accent); }
+:root[data-style="brutalist"] .panel,
+:root[data-style="brutalist"] .quadrant-cell,
+:root[data-style="brutalist"] .persona,
+:root[data-style="brutalist"] .kanban-card,
+:root[data-style="brutalist"] .code-block {
+  border: 2.5px solid var(--color-border); border-radius: 0; box-shadow: 5px 5px 0 var(--brut-shadow);
+}
+:root[data-style="brutalist"] .kpi-figure,
+:root[data-style="brutalist"] .stat-figure,
+:root[data-style="brutalist"] .divider-num { color: var(--color-accent); }
+
+/* ===== 7 · AURORA GLASS — frosted translucent cards + aurora gradient mesh ===== */
+:root[data-style="glass"] {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Sora', 'Inter', sans-serif;
+  --color-bg: #F3F0FB; --color-surface: rgba(255,255,255,.55);
+  --color-border: rgba(255,255,255,.6); --color-border-light: rgba(255,255,255,.4);
+  --color-text: #1A1430; --color-text-secondary: #423B5C; --color-text-tertiary: #5B5470;
+  --color-accent: #7C3AED; --color-accent-light: rgba(124,58,237,.14);
+  --color-teal: #0E9488; --color-teal-light: rgba(14,148,136,.14);
+  --color-amber: #B45309; --color-amber-light: rgba(180,83,9,.14);
+  --color-red: #DB2777; --color-red-light: rgba(219,39,119,.14);
+}
+:root[data-theme="dark"][data-style="glass"] {
+  --color-bg: #0E0B1C; --color-surface: rgba(255,255,255,.07);
+  --color-border: rgba(255,255,255,.16); --color-border-light: rgba(255,255,255,.10);
+  --color-text: #EDEAFD; --color-text-secondary: #C5BFDF; --color-text-tertiary: #A9A2C8;
+  --color-accent: #A78BFA; --color-accent-light: rgba(167,139,250,.18);
+  --color-teal: #5EEAD4; --color-teal-light: rgba(94,234,212,.14);
+  --color-amber: #FCD34D; --color-amber-light: rgba(252,211,77,.14);
+  --color-red: #F472B6; --color-red-light: rgba(244,114,182,.16);
+}
+/* aurora gradient-mesh background on every slide */
+:root[data-style="glass"] .slide {
+  background:
+    radial-gradient(60% 42% at 12% 6%, rgba(196,181,253,.55), transparent 60%),
+    radial-gradient(52% 40% at 96% 18%, rgba(125,211,252,.5), transparent 56%),
+    radial-gradient(60% 52% at 80% 112%, rgba(240,171,252,.5), transparent 56%),
+    var(--color-bg);
+}
+:root[data-theme="dark"][data-style="glass"] .slide {
+  background:
+    radial-gradient(60% 42% at 10% 4%, rgba(109,40,217,.5), transparent 60%),
+    radial-gradient(55% 40% at 98% 16%, rgba(14,165,233,.42), transparent 56%),
+    radial-gradient(60% 56% at 80% 116%, rgba(219,39,119,.4), transparent 56%),
+    var(--color-bg);
+}
+:root[data-style="glass"] .metric-grid { background: transparent; border: none; gap: var(--space-md); overflow: visible; }
+:root[data-style="glass"] .metric-card,
+:root[data-style="glass"] .finding,
+:root[data-style="glass"] .item-row,
+:root[data-style="glass"] .kv-block,
+:root[data-style="glass"] .file-tree,
+:root[data-style="glass"] .data-table-wrap,
+:root[data-style="glass"] .panel,
+:root[data-style="glass"] .quadrant-cell,
+:root[data-style="glass"] .persona,
+:root[data-style="glass"] .kanban-card,
+:root[data-style="glass"] .code-block {
+  background: var(--color-surface);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border); border-radius: 16px;
+}
+:root[data-style="glass"] .finding,
+:root[data-style="glass"] .item-row { padding: 14px 18px; }
+:root[data-style="glass"] .badge {
+  background: var(--color-surface); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border: 1px solid var(--color-border); color: var(--color-text);
+}
+:root[data-style="glass"] .badge-accent { color: var(--color-accent); }
+:root[data-style="glass"] .finding-num { color: var(--color-accent); }
+:root[data-style="glass"] .code,
+:root[data-style="glass"] code { background: var(--color-surface); }

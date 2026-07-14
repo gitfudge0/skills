@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>FEATURE NAME — Flows &amp; States</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!--
+  CANVAS MOCK SCAFFOLD
+  ====================
+  Copy this file, then:
+  1. SWAP the :root tokens below for the project's real design-system tokens
+     (brand color, border, muted, radius, etc.). Discover them first.
+  2. Fill the <body> with sections + frames (see the sample section at the bottom).
+  3. Keep it self-contained: no external URLs, inline SVG icons, system fonts.
+  4. Ensure the page never scrolls horizontally (frames wrap).
+-->
+<style>
+  :root {
+    /* ---- SWAP THESE for the project's tokens ---- */
+    --primary: #4f46e5;          /* brand / primary action */
+    --primary-press: #4338ca;
+    --board-bg: #f5f5f7;         /* the canvas board */
+    --surface: #ffffff;          /* card / modal surface */
+    --border: #e5e7eb;
+    --muted: #6b7280;
+    --fg: #111827;
+    --accent: rgba(79,70,229,0.08); /* chip / group-header tint (primary at ~8%) */
+    --destructive: #dc2626;
+    --destructive-bg: rgba(220,38,38,0.08);
+    --success: #16a34a;
+    --success-bg: rgba(22,163,74,0.10);
+    --danger-strong: #dc2626;
+    --radius: 8px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--board-bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow-x: hidden;                 /* never scroll the page sideways */
+  }
+  /* faint dot grid so it reads as a design canvas */
+  body {
+    background-image: radial-gradient(circle, #d9d9dc 1px, transparent 1px);
+    background-size: 22px 22px;
+    background-position: -4px -4px;
+  }
+
+  .page { max-width: 1600px; margin: 0 auto; padding: 40px 32px 120px; }
+
+  /* ---- header + legend ---- */
+  .page-header { margin-bottom: 36px; }
+  .page-header h1 { font-size: 26px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .page-header .subtitle { font-size: 14px; color: var(--muted); margin: 0 0 18px; max-width: 760px; }
+  .legend {
+    display: inline-flex; gap: 18px; flex-wrap: wrap; align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 16px; font-size: 12px; color: var(--muted);
+  }
+  .legend b { color: var(--fg); }
+  .legend .tag { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .swatch.before { background: var(--danger-strong); }
+  .swatch.after { background: var(--success); }
+
+  /* ---- section ---- */
+  .section-heading {
+    font-size: 18px; font-weight: 700; margin: 56px 0 6px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--border); display: flex; align-items: baseline; gap: 10px;
+  }
+  .section-letter {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 6px;
+    background: var(--primary); color: #fff; font-size: 13px; font-weight: 700;
+  }
+
+  /* ---- frame layout ---- */
+  .frame-row { display: flex; flex-wrap: wrap; gap: 28px; margin-top: 22px; align-items: flex-start; position: relative; }
+  .frame { width: 440px; max-width: 100%; position: relative; }
+  .frame.wide { width: 520px; }
+  .frame.narrow { width: 380px; }
+
+  .frame-caption { margin-bottom: 10px; }
+  .frame-id {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+    color: #fff; background: #111827; border-radius: 4px; padding: 2px 7px; margin-right: 8px;
+  }
+  .frame-name { font-size: 14px; font-weight: 600; color: var(--fg); }
+  .frame-desc { font-size: 12px; color: var(--muted); margin: 4px 0 0; line-height: 1.5; }
+
+  .frame-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.05); padding: 20px;
+  }
+
+  /* subtle flow connector between frames */
+  .connector-row { display: flex; align-items: center; color: #c7c9cd; font-size: 20px; align-self: center; padding-top: 90px; }
+  .connector-row.tight { padding-top: 40px; }
+
+  /* ---- generic component styles (edit to match project) ---- */
+  .modal-title { font-size: 16px; font-weight: 700; margin: 0; }
+  .modal-subtitle { font-size: 12px; color: var(--muted); margin: 2px 0 0; }
+  .modal-header { margin-bottom: 20px; }
+  .modal-footer { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+  .field .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  .text-input, .select-input {
+    width: 100%; border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 10px; font-size: 14px; color: var(--fg); background: #fff; font-family: inherit;
+  }
+  .select-input { display: flex; align-items: center; justify-content: space-between; cursor: default; }
+
+  .btn {
+    font-family: inherit; font-size: 14px; font-weight: 600; border-radius: 6px; padding: 9px 16px;
+    border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center;
+    justify-content: center; gap: 6px; transition: transform .05s ease, opacity .15s ease;
+  }
+  .btn:active { transform: translateY(1px); opacity: 0.92; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-press); }
+  .btn-secondary { background: #fff; color: var(--fg); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: #f9fafb; }
+  .btn-outline-destructive { background: #fff; color: var(--destructive); border: 1px solid var(--destructive-bg); }
+  .btn-outline-destructive:hover { background: var(--destructive-bg); }
+  .btn-destructive-solid { background: var(--danger-strong); color: #fff; }
+  .btn-dashed { background: #fff; color: var(--fg); border: 1px dashed var(--border); font-size: 13px; padding: 7px 12px; }
+  .btn-block { width: 100%; }
+
+  .icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* removable chip / pill */
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; border-radius: 9999px;
+    border: 1px solid var(--border); background: var(--accent); padding: 2px 6px 2px 10px; font-size: 12px;
+  }
+  .chip button { border: 0; background: transparent; cursor: pointer; color: var(--muted); display: inline-flex; padding: 2px; border-radius: 9999px; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+
+  /* status banner */
+  .banner { display: flex; align-items: center; gap: 8px; border-radius: 8px; padding: 12px; font-size: 13px; }
+  .banner-success { background: var(--success-bg); color: var(--success); }
+  .banner-error { background: var(--destructive-bg); color: var(--destructive); }
+
+  /* empty state */
+  .empty-state { border: 1px dashed var(--border); border-radius: 8px; padding: 16px; text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
+  /* "REMOVE" tag for before/after frames */
+  .remove-banner { position: relative; background: #fef2f2; border: 1.5px solid var(--danger-strong); border-radius: 8px; padding: 14px; }
+  .remove-tag {
+    position: absolute; top: -12px; right: -10px; background: var(--danger-strong); color: #fff;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.04em; padding: 3px 9px; border-radius: 4px;
+    transform: rotate(4deg); box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+
+  /* implementation / decision note — visually distinct from frames */
+  .sticky-note {
+    display: inline-block; background: #fff8c5; border: 1px solid #e6d97a; color: #4a4320;
+    font-size: 12.5px; line-height: 1.55; padding: 14px 16px; max-width: 420px; border-radius: 3px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12); transform: rotate(-1.2deg); margin: 40px 0;
+  }
+  .sticky-note b { color: #2c2810; }
+
+  @media (max-width: 480px) { .page { padding: 24px 14px 80px; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header">
+    <h1>FEATURE NAME — Flows &amp; States</h1>
+    <p class="subtitle">One line: what this mocks and who it's for (e.g. "for PM review before implementation").</p>
+    <div class="legend">
+      <span class="tag"><span class="swatch before"></span><b>BEFORE</b> = existing UI to remove</span>
+      <span class="tag"><span class="swatch after"></span><b>AFTER</b> = new design</span>
+      <span class="tag">Frame IDs (e.g. <b>A1</b>, <b>B3</b>) group related states</span>
+    </div>
+  </div>
+
+  <!-- ================= SECTION A ================= -->
+  <div class="section-heading"><span class="section-letter">A</span> In Context</div>
+  <div class="frame-row">
+
+    <!-- sample frame -->
+    <div class="frame">
+      <div class="frame-caption">
+        <span class="frame-id">A1</span><span class="frame-name">State name</span>
+        <p class="frame-desc">One line describing this state and how it connects to others (e.g. "see B2").</p>
+      </div>
+      <div class="frame-card">
+        <div class="modal-header"><h2 class="modal-title">Card / modal title</h2></div>
+        <div class="field">
+          <label>Field label</label>
+          <input class="text-input" value="Example value" readonly />
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary btn-block">Primary action</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector-row">→</div>
+
+    <!-- add more frames... -->
+
+  </div>
+
+  <!-- implementation note (not part of the UI) -->
+  <div class="sticky-note">
+    <b>Note:</b> put schema / decision / build-phase context here so the reviewer sees it without mistaking it for UI.
+  </div>
+
+</div>
+</body>
+</html>
