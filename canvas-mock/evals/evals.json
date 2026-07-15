@@ -1,0 +1,23 @@
+{
+  "skill_name": "canvas-mock",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "The settings page in this app is pretty plain. Show me a few different ways the 'Data' section (import / export / clear all) could look — I want to pick one before you change anything.",
+      "expected_output": "A single self-contained mock.html with 3-4 distinct variants of the Data section, rendered in the app's real design tokens, light+dark aware, each with a short tradeoff note. Opens it and asks the user to choose.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "I don't love how the 'due for review' list items look on the home dashboard. Mock up a couple of options for the row design (name, ECO code, status badge, review button).",
+      "expected_output": "mock.html with 2-3 variants of the due-list row, using real tokens, both themes, framed in context. User is asked to pick; no live component edited before the pick.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "We need an empty state for the new Repertoire page for users who haven't added any openings yet. Give me some design directions to choose from.",
+      "expected_output": "mock.html with 3-4 genuinely different empty-state approaches (e.g. minimal CTA, guided steps, hero, quick-pick), real tokens, light/dark, tradeoff notes, opened, user asked to choose.",
+      "files": []
+    }
+  ]
+}
