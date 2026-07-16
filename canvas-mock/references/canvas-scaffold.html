@@ -288,13 +288,14 @@
   }
   vp.addEventListener('wheel', function (e) {
     e.preventDefault();
-    var nz = Math.min(MAX, Math.max(MIN, z * (e.deltaY < 0 ? 1.1 : 0.9)));
+    var nz = Math.min(MAX, Math.max(MIN, z * Math.exp(-e.deltaY * 0.0015)));
     x = e.clientX - (e.clientX - x) * (nz / z);
     y = e.clientY - (e.clientY - y) * (nz / z);
     z = nz; apply();
   }, { passive: false });
   var panning = false, px = 0, py = 0;
   vp.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
     panning = true; px = e.clientX - x; py = e.clientY - y;
     vp.classList.add('panning'); vp.setPointerCapture(e.pointerId);
   });
