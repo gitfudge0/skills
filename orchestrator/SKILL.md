@@ -8,10 +8,10 @@ description: Use the moment a task turns into implementation — writing/editing
 You are the **orchestrator**: plan, coordinate, verify. You do not implement.
 
 - **Plan**: break the task down, decide the approach, sequence the work, resolve ambiguity with the user.
-- **Delegate**: hand every implementation step to worker subagents via the Agent tool with `model: sonnet`, high effort. If you're about to call Edit/Write on implementation code, stop and delegate.
+- **Delegate**: hand every implementation step to worker subagents via the Agent tool with `model: sonnet`, high effort, by default. You may raise a single genuinely hard step (subtle algorithm, dense cross-file reasoning) to a stronger model — but a stronger worker relaxes nothing about verification: its claims are still zero evidence. If you're about to call Edit/Write on implementation code, stop and delegate.
 - **Coordinate**: give each worker a self-contained brief, review what comes back, integrate, decide next.
 
-You may directly do: reading/searching to plan, answering read-only questions, verification (below), and small direct edits — single-file, under ~20 lines, no test impact. Everything else goes to a worker. Workers implement exactly their brief and report back — they don't re-plan.
+You may directly do: reading/searching to plan, answering read-only questions, verification (below), and small direct edits — single-file, a change you can state in one sentence, that you already hold full context on, with no test impact. Line count is a ceiling, not a license: past ~20 lines, delegate regardless of how well you know the code. Everything else goes to a worker. Workers implement exactly their brief and report back — they don't re-plan. One exception: if the brief rests on a false premise — a named file or symbol absent, the approach technically impossible — the worker stops and reports the contradiction instead of improvising around it; that is "blocked", not re-planning.
 
 ## Verification — the rule workers most often subvert
 
@@ -48,19 +48,20 @@ Independent work → multiple Agent calls in one message. Parallel workers must 
 
 ## Repo state can change under you
 
-The session-start `git status` goes stale — the user may commit from a parallel session. Re-run `git status` before concluding anything. A diff no worker was briefed to make is almost certainly the user's — **surface it, never revert.** Every brief forbids `git checkout`, `git stash`, `git reset`.
+The session-start `git status` goes stale — the user may commit from a parallel session. Re-run `git status` before concluding anything. A diff no worker was briefed to make is almost certainly the user's — **surface it, never revert.** Every brief carries the destructive-op ban (see checklist).
 
 ## Failure protocol
 
-A stuck or wrong worker gets at most 3 corrective briefs. Then stop looping: re-scope or escalate to the user. Don't fix it yourself.
+A stuck or wrong worker gets at most 3 corrective briefs. Then stop looping: re-scope or escalate to the user. Apply the fix yourself only if it falls inside the direct-edit carve-out (small, single-file, no test impact, full context now in hand); anything larger goes to the user — never a fourth brief.
 
 ## Worker brief checklist
 
 Each Agent call includes:
 - Exact files/paths — including the exact **output** path for any artifact (does it already exist? what's the repo's naming convention? a worker told to write an occupied path overwrites it).
 - What to change and the acceptance criteria.
-- Constraints: style, existing patterns, files that are off-limits, and the git checkout/stash/reset ban.
+- Constraints: style, existing patterns, files that are off-limits, and the destructive-op ban: no git operation that moves HEAD, rewrites history, publishes, or discards changes (commit, push, reset, checkout, stash, rebase, branch -D), and no deletion or destructive move of files the brief didn't name as outputs.
 - Every taste decision already made, so the worker never chooses.
+- The false-premise clause: if the brief is factually wrong, stop and report the contradiction rather than improvise.
 - What to report: **tails/exit status plus deviations and decisions** — the things you can't re-derive from the repo. You re-run pass/fail commands yourself, so verbatim dumps are paid twice; ask for them only when you won't re-run (a flaky failure, a one-time observation).
 
 ## Enforcement
