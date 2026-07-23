@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__TITLE__</title>
+<style>
+  :root {
+    --bg: #f5f6fb;
+    --bg-grid: rgba(90, 95, 130, 0.06);
+    --surface: #ffffff;
+    --surface-2: #f0f1f7;
+    --border: #e3e5ef;
+    --text: #2a2d3a;
+    --text-soft: #6b7080;
+    --shadow: 0 10px 30px rgba(45, 50, 90, 0.10);
+    --shadow-sm: 0 3px 10px rgba(45, 50, 90, 0.08);
+    --root-bg: #eef0ff;
+    --root-border: #c3c8ff;
+    --root-text: #4a3fb8;
+    --c-purple: #7c6cf0;   --c-purple-bg: #efedff;
+    --c-pink:   #f06ca8;   --c-pink-bg:   #ffeef6;
+    --c-orange: #f2953f;   --c-orange-bg: #fff2e2;
+    --c-teal:   #2fb99a;   --c-teal-bg:   #e4f7f2;
+    --c-blue:   #4a9de8;   --c-blue-bg:   #e7f2fd;
+  }
+  html[data-theme="dark"] {
+    --bg: #14151c;
+    --bg-grid: rgba(160, 170, 220, 0.05);
+    --surface: #1e2029;
+    --surface-2: #262935;
+    --border: #333748;
+    --text: #e7e9f2;
+    --text-soft: #9096a8;
+    --shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+    --shadow-sm: 0 3px 12px rgba(0, 0, 0, 0.35);
+    --root-bg: #2b2960;
+    --root-border: #5a55c0;
+    --root-text: #cfc9ff;
+    --c-purple: #9a8cff;   --c-purple-bg: #2c2a4d;
+    --c-pink:   #ff8bbd;   --c-pink-bg:   #45283a;
+    --c-orange: #ffab5e;   --c-orange-bg: #43331f;
+    --c-teal:   #4fd6b6;   --c-teal-bg:   #1e3d38;
+    --c-blue:   #6db6ff;   --c-blue-bg:   #1f3448;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background .45s cubic-bezier(.4,0,.2,1), color .45s cubic-bezier(.4,0,.2,1);
+  }
+
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 60px;
+    display: flex; align-items: center; gap: 14px;
+    padding: 0 20px; z-index: 50;
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    animation: barDrop .6s cubic-bezier(.2,.9,.3,1) both;
+  }
+  @keyframes barDrop { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .brand .dot {
+    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--c-purple), var(--c-pink));
+    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px;
+    box-shadow: var(--shadow-sm);
+    transition: transform .4s cubic-bezier(.2,.9,.3,1.4);
+  }
+  .brand .dot:hover { transform: rotate(-8deg) scale(1.08); }
+  .brand h1 { font-size: 15px; font-weight: 700; letter-spacing: -.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand .sub { font-size: 12px; color: var(--text-soft); font-weight: 500; white-space: nowrap; }
+  .spacer { flex: 1; }
+  .btn {
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text); border-radius: 10px; height: 38px; padding: 0 14px;
+    font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex;
+    align-items: center; gap: 7px; position: relative; overflow: hidden; flex-shrink: 0;
+    transition: transform .18s cubic-bezier(.2,.9,.3,1.4), background .2s, border-color .2s, box-shadow .2s;
+  }
+  .btn:hover { background: var(--surface-2); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+  .btn:active { transform: translateY(0) scale(.96); }
+  .btn svg { width: 16px; height: 16px; transition: transform .4s cubic-bezier(.2,.9,.3,1.4); }
+  #themeBtn:hover svg { transform: rotate(40deg); }
+  #fitBtn:hover svg { transform: scale(1.15); }
+  .ripple { position: absolute; border-radius: 50%; transform: scale(0); background: currentColor; opacity: .18; pointer-events: none; animation: rip .55s ease-out; }
+  @keyframes rip { to { transform: scale(3.2); opacity: 0; } }
+
+  #stage {
+    position: fixed; inset: 60px 0 0 0;
+    background-image: radial-gradient(var(--bg-grid) 1.4px, transparent 1.4px);
+    background-size: 26px 26px;
+    cursor: grab; overflow: hidden;
+  }
+  #stage.dragging { cursor: grabbing; }
+  #world { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+  #links { position: absolute; top: 0; left: 0; overflow: visible; pointer-events: none; }
+
+  .node {
+    position: absolute;
+    border-radius: 16px;
+    padding: 11px 16px;
+    font-weight: 650;
+    font-size: 13.5px;
+    line-height: 1.3;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    user-select: none;
+    max-width: 260px;
+    width: max-content;
+    transform-origin: center;
+    transition: box-shadow .22s ease, border-color .25s ease, background .25s ease;
+    will-change: transform, opacity;
+  }
+  .node .inner { display: inline-flex; align-items: center; }
+  .node:hover { box-shadow: var(--shadow); z-index: 6; }
+  .node:active { transition: none; }
+  .node .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 18px; height: 18px; padding: 0 5px; margin-left: 8px;
+    font-size: 10.5px; font-weight: 700; border-radius: 20px;
+    background: color-mix(in srgb, currentColor 15%, transparent);
+    transition: transform .35s cubic-bezier(.2,.9,.3,1.6), background .2s;
+  }
+  .node.expanded .badge { transform: rotate(180deg); }
+  .node.root {
+    font-size: 17px; font-weight: 800; padding: 16px 24px; border-radius: 20px;
+    background: var(--root-bg); border-color: var(--root-border); color: var(--root-text);
+    box-shadow: var(--shadow);
+  }
+  .node.root::before {
+    content: ""; position: absolute; inset: -6px; border-radius: 26px;
+    border: 2px solid var(--root-border); opacity: 0; animation: rootPulse 3.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes rootPulse { 0%,100% { opacity: 0; transform: scale(.98); } 50% { opacity: .35; transform: scale(1.02); } }
+  .node.purple { color: var(--c-purple); background: var(--c-purple-bg); border-color: color-mix(in srgb, var(--c-purple) 45%, transparent); }
+  .node.pink   { color: var(--c-pink);   background: var(--c-pink-bg);   border-color: color-mix(in srgb, var(--c-pink) 45%, transparent); }
+  .node.orange { color: var(--c-orange); background: var(--c-orange-bg); border-color: color-mix(in srgb, var(--c-orange) 45%, transparent); }
+  .node.teal   { color: var(--c-teal);   background: var(--c-teal-bg);   border-color: color-mix(in srgb, var(--c-teal) 45%, transparent); }
+  .node.blue   { color: var(--c-blue);   background: var(--c-blue-bg);   border-color: color-mix(in srgb, var(--c-blue) 45%, transparent); }
+  .node .label { color: var(--text); }
+  .node.root .label { color: var(--root-text); }
+  .node.selected { box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 35%, transparent), var(--shadow); }
+
+  path.link { fill: none; stroke-linecap: round; }
+
+  .panel {
+    position: fixed; top: 76px; right: 16px; width: 340px; max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 92px); overflow-y: auto;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--border); border-radius: 18px;
+    box-shadow: var(--shadow); padding: 20px; z-index: 40;
+    transform: translateX(calc(100% + 24px)) scale(.96); opacity: 0;
+    transition: transform .42s cubic-bezier(.2,.9,.25,1.05), opacity .3s;
+  }
+  .panel.open { transform: translateX(0) scale(1); opacity: 1; }
+  .panel .ptag {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .4px;
+    text-transform: uppercase; padding: 4px 10px; border-radius: 20px; margin-bottom: 12px;
+  }
+  .panel h2 { font-size: 19px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 10px; }
+  .panel p { font-size: 13.5px; line-height: 1.6; color: var(--text-soft); margin-bottom: 10px; }
+  .panel ul { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .panel li {
+    font-size: 13px; line-height: 1.5; padding: 9px 12px; border-radius: 10px;
+    background: var(--surface-2); color: var(--text); position: relative; padding-left: 30px;
+    opacity: 0; transform: translateX(10px);
+    animation: liIn .4s cubic-bezier(.2,.9,.3,1) forwards;
+  }
+  @keyframes liIn { to { opacity: 1; transform: translateX(0); } }
+  .panel li::before {
+    content: ""; position: absolute; left: 12px; top: 15px;
+    width: 7px; height: 7px; border-radius: 50%; background: currentColor;
+  }
+  .panel .ptag, .panel h2, .panel p {
+    opacity: 0; transform: translateY(8px);
+    animation: fadeUp .45s cubic-bezier(.2,.9,.3,1) forwards;
+  }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .panel .pclose {
+    position: absolute; top: 16px; right: 16px; width: 28px; height: 28px;
+    border: none; border-radius: 8px; background: var(--surface-2); color: var(--text-soft);
+    cursor: pointer; font-size: 18px; line-height: 1; display: grid; place-items: center;
+    transition: background .18s, transform .3s cubic-bezier(.2,.9,.3,1.5);
+  }
+  .panel .pclose:hover { background: var(--border); transform: rotate(90deg); }
+
+  .controls {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 6px; z-index: 45;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    backdrop-filter: blur(12px); border: 1px solid var(--border);
+    border-radius: 14px; padding: 6px; box-shadow: var(--shadow);
+    animation: barRise .6s .15s cubic-bezier(.2,.9,.3,1) both;
+  }
+  @keyframes barRise { from { transform: translateX(-50%) translateY(120%); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+  .controls button {
+    width: 36px; height: 36px; border: none; border-radius: 9px; background: transparent;
+    color: var(--text); cursor: pointer; font-size: 17px; display: grid; place-items: center;
+    position: relative; overflow: hidden;
+    transition: background .15s, transform .18s cubic-bezier(.2,.9,.3,1.5);
+  }
+  .controls button:hover { background: var(--surface-2); transform: translateY(-2px); }
+  .controls button:active { transform: scale(.88); }
+  .controls .zoomval { font-size: 12px; font-weight: 700; color: var(--text-soft); min-width: 46px; text-align: center; transition: color .2s; }
+  .controls .div { width: 1px; height: 22px; background: var(--border); margin: 0 3px; }
+
+  .hint {
+    position: fixed; bottom: 20px; left: 20px; z-index: 44;
+    font-size: 12px; color: var(--text-soft); font-weight: 500;
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border);
+    backdrop-filter: blur(8px); max-width: 210px; line-height: 1.5;
+    animation: hintIn .6s .4s cubic-bezier(.2,.9,.3,1) both;
+  }
+  @keyframes hintIn { from { opacity: 0; transform: translateY(10px); } to { opacity: .95; transform: translateY(0); } }
+  @media (max-width: 640px) { .hint { display: none; } .panel { width: calc(100vw - 24px); right: 12px; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="dot">__GLYPH__</div>
+      <div style="min-width:0;">
+        <h1>__TITLE__</h1>
+        <div class="sub">__SUBTITLE__</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" id="fitBtn" title="Fit to screen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"/></svg>
+      Fit
+    </button>
+    <button class="btn" id="themeBtn" title="Toggle theme">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+      Theme
+    </button>
+  </div>
+
+  <div id="stage">
+    <div id="world">
+      <svg id="links"></svg>
+    </div>
+  </div>
+
+  <aside class="panel" id="panel">
+    <button class="pclose" id="pclose">×</button>
+    <span class="ptag" id="ptag"></span>
+    <h2 id="ptitle"></h2>
+    <div id="pbody"></div>
+  </aside>
+
+  <div class="controls">
+    <button id="zOut" title="Zoom out">−</button>
+    <span class="zoomval" id="zVal">100%</span>
+    <button id="zIn" title="Zoom in">+</button>
+    <div class="div"></div>
+    <button id="zReset" title="Reset view">⊙</button>
+  </div>
+  <div class="hint">Drag to pan · scroll to zoom · click a node to expand &amp; read · click again to collapse</div>
+
+<script>
+/* ============================================================
+   MINDIE — content-agnostic interactive mindmap renderer.
+   The DATA object below is the ONLY thing that changes per map.
+   Everything else (layout, animation, interaction) is generic.
+
+   NODE SHAPE:
+   {
+     id: "unique-string",      // required, unique
+     label: "Short title",     // required
+     color: "purple|pink|orange|teal|blue",  // branch color; leaves inherit if omitted
+     detail: {                 // optional; drives the side panel
+       tag: "Category",
+       summary: "1-3 sentences.",
+       points: ["bullet", "bullet"]   // optional
+     },
+     children: [ ...nodes ]    // optional
+   }
+   The root node uses color:"root" and needs no color assignment.
+   Do NOT set x/y — layout is automatic.
+   ============================================================ */
+const DATA = __DATA__;
+
+const PALETTE = ["purple","pink","orange","teal","blue"];
+
+/* ---- assign colors: each top branch gets a palette color;
+        descendants inherit their branch color unless they set one ---- */
+(function assignColors(){
+  DATA.color = "root";
+  (DATA.children||[]).forEach((b,i)=>{
+    const c = b.color || PALETTE[i % PALETTE.length];
+    (function paint(n, col){
+      if(n.color === undefined || n.color === null) n.color = col;
+      (n.children||[]).forEach(k=>paint(k, n.color || col));
+    })(b, c);
+  });
+})();
+
+/* ============================================================
+   AUTOMATIC LAYOUT — balanced left/right tree.
+   Branches split into two columns around the root; each side
+   stacks vertically. Deeper levels fan outward in the same
+   horizontal direction as their branch. Vertical spacing is
+   allotted by counting leaf "slots" so siblings never overlap.
+   ============================================================ */
+const H_GAP = 250;   // horizontal distance between levels
+const V_GAP = 82;    // vertical distance between adjacent leaves
+
+function countLeaves(n){
+  const k = n.children||[];
+  if(!k.length) return 1;
+  n._leaves = k.reduce((s,c)=>s+countLeaves(c),0);
+  return n._leaves;
+}
+function layout(){
+  const branches = DATA.children||[];
+  countLeaves(DATA);
+  // split branches into right (even idx) and left (odd idx) for balance
+  const right = [], left = [];
+  branches.forEach((b,i)=>{ (i % 2 === 0 ? right : left).push(b); });
+
+  function placeSide(list, dir){
+    // total vertical slots on this side
+    const totalLeaves = list.reduce((s,b)=>s+countLeaves(b),0) || 1;
+    let cursor = -((totalLeaves-1)*V_GAP)/2;
+    list.forEach(b=>{
+      const span = countLeaves(b);
+      const center = cursor + ((span-1)*V_GAP)/2;
+      placeSubtree(b, dir, 1, center);
+      cursor += span*V_GAP;
+    });
+  }
+  // recursively place a subtree: node centered at cy, children fanned outward
+  function placeSubtree(node, dir, depth, cy){
+    node.x = dir * H_GAP * depth;
+    node.y = cy;
+    const kids = node.children||[];
+    if(!kids.length) return;
+    let c = cy - ((countLeaves(node)-1)*V_GAP)/2;
+    kids.forEach(k=>{
+      const span = countLeaves(k);
+      const kc = c + ((span-1)*V_GAP)/2;
+      placeSubtree(k, dir, depth+1, kc);
+      c += span*V_GAP;
+    });
+  }
+  DATA.x = 0; DATA.y = 0;
+  placeSide(right, 1);
+  placeSide(left, -1);
+}
+
+function annotate(node, parent){
+  node.parent = parent || null;
+  node.depth = parent ? parent.depth + 1 : 0;
+  (node.children||[]).forEach(k=>annotate(k, node));
+}
+annotate(DATA, null);
+layout();
+
+const NODES = [];
+(function walk(n){ NODES.push(n); (n.children||[]).forEach(walk); })(DATA);
+
+const colorVar = { root:"--root-border", purple:"--c-purple", pink:"--c-pink", orange:"--c-orange", teal:"--c-teal", blue:"--c-blue" };
+
+/* ============================================================
+   RENDER NODES
+   ============================================================ */
+const world = document.getElementById("world");
+const svg = document.getElementById("links");
+const stage = document.getElementById("stage");
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+NODES.forEach(n=>{
+  const el = document.createElement("div");
+  el.className = "node " + (n.color||"purple");
+  const childCount = (n.children||[]).length;
+  if(childCount) el.classList.add("expandable");
+  el.innerHTML = `<span class="inner"><span class="label">${esc(n.label)}</span>` +
+    (childCount ? `<span class="badge">${childCount}</span>` : "") + `</span>`;
+  world.appendChild(el);
+  n.el = el;
+  n._scale = 1; n._op = 1; n._hs = 1; n._hsTarget = 1;
+  n._ax = n.x; n._ay = n.y;
+  el.addEventListener("click", e=>{ e.stopPropagation(); onNodeClick(n); addRipple(el, e); });
+  el.addEventListener("mouseenter", ()=>{ n._hsTarget = 1.05; kick(); });
+  el.addEventListener("mouseleave", ()=>{ n._hsTarget = 1; kick(); });
+});
+
+/* everything collapsed by default (root open, branches closed) */
+const collapsed = new Set();
+NODES.forEach(n=>{ if((n.children||[]).length && n.id!==DATA.id) collapsed.add(n.id); });
+
+function isVisible(n){
+  let p = n.parent;
+  while(p){ if(collapsed.has(p.id)) return false; p = p.parent; }
+  return true;
+}
+function measure(){ NODES.forEach(n=>{ n.w = n.el.offsetWidth; n.h = n.el.offsetHeight; }); }
+
+/* ============================================================
+   ANIMATION LOOP — springs for reveal, position, hover.
+   ============================================================ */
+let needsFrame = true;
+function kick(){ needsFrame = true; }
+
+function frame(){
+  let active = false;
+  const now = performance.now();
+  NODES.forEach(n=>{
+    const revealed = (n._revealAt || 0) <= now;
+    const vis = isVisible(n) && revealed;
+    const targetScale = vis ? 1 : 0;
+    const targetOp = vis ? 1 : 0;
+    n._scale += (targetScale - n._scale) * 0.22;
+    n._op    += (targetOp - n._op) * 0.25;
+    n._hs    += ((n._hsTarget||1) - n._hs) * 0.2;
+    const src = n.parent || n;
+    const tx = (vis || !n.parent) ? n.x : src.x;
+    const ty = (vis || !n.parent) ? n.y : src.y;
+    n._ax += (tx - n._ax) * 0.24;
+    n._ay += (ty - n._ay) * 0.24;
+    if(Math.abs(targetScale-n._scale)>0.002 || Math.abs(targetOp-n._op)>0.002 ||
+       Math.abs((n._hsTarget||1)-n._hs)>0.002 || Math.abs(tx-n._ax)>0.3 || Math.abs(ty-n._ay)>0.3) active = true;
+    const s = Math.max(0, n._scale) * n._hs;
+    const el = n.el;
+    if(n._op < 0.01){ el.style.display = "none"; }
+    else {
+      el.style.display = "block";
+      el.style.left = (n._ax - n.w/2) + "px";
+      el.style.top  = (n._ay - n.h/2) + "px";
+      el.style.opacity = n._op;
+      el.style.transform = `scale(${s})`;
+      el.style.zIndex = n._hs > 1.01 ? 6 : (n.id===DATA.id?3:2);
+    }
+  });
+  drawLinks();
+  if(active || needsFrame){ needsFrame = false; requestAnimationFrame(frame); }
+  else { requestAnimationFrame(idleCheck); }
+}
+function idleCheck(){ if(needsFrame) requestAnimationFrame(frame); else requestAnimationFrame(idleCheck); }
+
+function drawLinks(){
+  const frag = [];
+  NODES.forEach(n=>{
+    (n.children||[]).forEach(c=>{
+      const shown = isVisible(n) && !collapsed.has(n.id);
+      const op = Math.max(0, Math.min(1, c._op)) * (shown?1:0);
+      if(op < 0.01) return;
+      const x1 = n._ax, y1 = n._ay, x2 = c._ax, y2 = c._ay;
+      const mx = (x1+x2)/2;
+      const cvar = colorVar[c.color] || "--border";
+      const w = n.id===DATA.id ? 3 : 2.2;
+      const baseOp = n.id===DATA.id ? 0.55 : 0.42;
+      frag.push(`<path class="link" d="M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" stroke="var(${cvar})" stroke-width="${w}" stroke-opacity="${(baseOp*op).toFixed(3)}"/>`);
+    });
+  });
+  svg.innerHTML = frag.join("");
+}
+
+/* ============================================================
+   VIEW TRANSFORM — pan / zoom / animated fit
+   ============================================================ */
+let scale = 1, tx = 0, ty = 0;
+function apply(){
+  world.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+  const zv = document.getElementById("zVal");
+  zv.textContent = Math.round(scale*100) + "%";
+  zv.style.color = "var(--text)";
+  clearTimeout(zv._t); zv._t = setTimeout(()=> zv.style.color = "var(--text-soft)", 400);
+}
+function bounds(){
+  let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+  NODES.forEach(n=>{ if(!isVisible(n))return;
+    minX=Math.min(minX,n.x-n.w/2); maxX=Math.max(maxX,n.x+n.w/2);
+    minY=Math.min(minY,n.y-n.h/2); maxY=Math.max(maxY,n.y+n.h/2);
+  });
+  return {minX,minY,maxX,maxY};
+}
+function fit(animated){
+  const {minX,minY,maxX,maxY} = bounds();
+  const pad = 120;
+  const bw = Math.max(1,maxX-minX), bh = Math.max(1,maxY-minY);
+  const vw = stage.clientWidth - pad*2, vh = stage.clientHeight - pad*2;
+  const ns = Math.min(vw/bw, vh/bh, 1.4);
+  const nx = stage.clientWidth/2 - (minX+bw/2)*ns;
+  const ny = stage.clientHeight/2 - (minY+bh/2)*ns;
+  if(animated) tweenView(ns,nx,ny); else { scale=ns; tx=nx; ty=ny; apply(); }
+}
+let viewTween;
+function tweenView(ns,nx,ny){
+  cancelAnimationFrame(viewTween);
+  const s0=scale, x0=tx, y0=ty, dur=520, t0=performance.now();
+  const ease = p => 1-Math.pow(1-p,3);
+  (function step(now){
+    const p = Math.min(1,(now-t0)/dur), e=ease(p);
+    scale = s0+(ns-s0)*e; tx = x0+(nx-x0)*e; ty = y0+(ny-y0)*e; apply();
+    if(p<1) viewTween = requestAnimationFrame(step);
+  })(performance.now());
+}
+
+let dragging=false, sx=0, sy=0, stx=0, sty=0, moved=false;
+stage.addEventListener("mousedown", e=>{
+  if(e.target.closest(".node")) return;
+  dragging=true; moved=false; stage.classList.add("dragging");
+  sx=e.clientX; sy=e.clientY; stx=tx; sty=ty;
+});
+window.addEventListener("mousemove", e=>{
+  if(!dragging)return; tx=stx+(e.clientX-sx); ty=sty+(e.clientY-sy);
+  if(Math.abs(e.clientX-sx)+Math.abs(e.clientY-sy)>4) moved=true;
+  apply();
+});
+window.addEventListener("mouseup", ()=>{ dragging=false; stage.classList.remove("dragging"); });
+
+stage.addEventListener("wheel", e=>{
+  e.preventDefault();
+  const rect = stage.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  const wx=(mx-tx)/scale, wy=(my-ty)/scale;
+  const factor = e.deltaY<0 ? 1.12 : 1/1.12;
+  scale = Math.max(0.3, Math.min(2.6, scale*factor));
+  tx = mx - wx*scale; ty = my - wy*scale; apply();
+},{passive:false});
+
+function zoomTo(mult){
+  const cx=stage.clientWidth/2, cy=stage.clientHeight/2;
+  const wx=(cx-tx)/scale, wy=(cy-ty)/scale;
+  const ns=Math.max(0.3,Math.min(2.6,scale*mult));
+  tweenView(ns, cx-wx*ns, cy-wy*ns);
+}
+document.getElementById("zIn").onclick = e=>{ zoomTo(1.2); addRipple(e.currentTarget,e); };
+document.getElementById("zOut").onclick= e=>{ zoomTo(1/1.2); addRipple(e.currentTarget,e); };
+document.getElementById("zReset").onclick=e=>{ fit(true); addRipple(e.currentTarget,e); };
+document.getElementById("fitBtn").onclick=e=>{ fit(true); addRipple(e.currentTarget,e); };
+
+let touchDist=0, tmode=null;
+stage.addEventListener("touchstart", e=>{
+  if(e.target.closest(".node"))return;
+  if(e.touches.length===1){ tmode="pan"; sx=e.touches[0].clientX; sy=e.touches[0].clientY; stx=tx; sty=ty; }
+  else if(e.touches.length===2){ tmode="pinch"; touchDist=tdist(e); }
+},{passive:false});
+stage.addEventListener("touchmove", e=>{
+  e.preventDefault();
+  if(tmode==="pan"&&e.touches.length===1){ tx=stx+(e.touches[0].clientX-sx); ty=sty+(e.touches[0].clientY-sy); apply(); }
+  else if(tmode==="pinch"&&e.touches.length===2){
+    const d=tdist(e), f=d/touchDist; touchDist=d;
+    const rect=stage.getBoundingClientRect();
+    const mx=(e.touches[0].clientX+e.touches[1].clientX)/2-rect.left;
+    const my=(e.touches[0].clientY+e.touches[1].clientY)/2-rect.top;
+    const wx=(mx-tx)/scale, wy=(my-ty)/scale;
+    scale=Math.max(0.3,Math.min(2.6,scale*f)); tx=mx-wx*scale; ty=my-wy*scale; apply();
+  }
+},{passive:false});
+function tdist(e){const a=e.touches[0],b=e.touches[1];return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
+
+/* ============================================================
+   NODE CLICK — toggle + panel + selection
+   ============================================================ */
+const panel = document.getElementById("panel");
+let selected = null;
+function onNodeClick(n){
+  if((n.children||[]).length){
+    if(collapsed.has(n.id)) collapsed.delete(n.id); else collapsed.add(n.id);
+    n.el.classList.toggle("expanded", !collapsed.has(n.id));
+    kick();
+  }
+  if(selected && selected!==n) selected.el.classList.remove("selected");
+  selected = n; n.el.classList.add("selected");
+  if(n.detail) openPanel(n); else panel.classList.remove("open");
+}
+function openPanel(n){
+  const d = n.detail;
+  const cvar = colorVar[n.color] || "--root-border";
+  const tag = document.getElementById("ptag");
+  tag.textContent = d.tag || "";
+  tag.style.display = d.tag ? "inline-block" : "none";
+  tag.style.color = `var(${cvar})`;
+  tag.style.background = `color-mix(in srgb, var(${cvar}) 16%, transparent)`;
+  document.getElementById("ptitle").textContent = n.label;
+  let html = d.summary ? `<p>${esc(d.summary)}</p>` : "";
+  if(d.points && d.points.length){
+    html += `<ul style="color:var(${cvar})">` +
+      d.points.map((p,i)=>`<li style="animation-delay:${0.12 + i*0.05}s">${esc(p)}</li>`).join("") + `</ul>`;
+  }
+  const body = document.getElementById("pbody");
+  body.innerHTML = html;
+  panel.classList.remove("open"); void panel.offsetWidth;
+  document.querySelectorAll(".panel .ptag,.panel h2,.panel p").forEach((el,i)=>{
+    el.style.animation="none"; void el.offsetWidth;
+    el.style.animation=""; el.style.animationDelay=(i*0.06)+"s";
+  });
+  panel.classList.add("open");
+}
+document.getElementById("pclose").onclick = ()=>{ panel.classList.remove("open"); if(selected){selected.el.classList.remove("selected"); selected=null;} };
+stage.addEventListener("mouseup", e=>{
+  if(!e.target.closest(".node") && !moved){
+    panel.classList.remove("open");
+    if(selected){ selected.el.classList.remove("selected"); selected=null; }
+  }
+});
+
+function addRipple(host, e){
+  const r = document.createElement("span");
+  r.className = "ripple";
+  const rect = host.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  r.style.width = r.style.height = size + "px";
+  r.style.left = (e.clientX - rect.left - size/2) + "px";
+  r.style.top  = (e.clientY - rect.top - size/2) + "px";
+  host.appendChild(r);
+  setTimeout(()=>r.remove(), 560);
+}
+
+/* ============================================================
+   THEME
+   ============================================================ */
+const htmlEl = document.documentElement;
+const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+htmlEl.setAttribute("data-theme", prefersDark ? "dark" : "light");
+document.getElementById("themeBtn").onclick = e=>{
+  const cur = htmlEl.getAttribute("data-theme");
+  htmlEl.setAttribute("data-theme", cur==="dark"?"light":"dark");
+  addRipple(e.currentTarget, e); kick();
+};
+
+/* ============================================================
+   INTRO — staggered reveal of root then branches
+   ============================================================ */
+function intro(){
+  const t0 = performance.now();
+  NODES.forEach(n=>{ n._scale = 0; n._op = 0; n._ax = 0; n._ay = 0; });
+  DATA._revealAt = t0 + 120;
+  (DATA.children||[]).forEach((b,i)=>{ b._revealAt = t0 + 320 + i*90; });
+  fit(false);
+  let n=0; const iv=setInterval(()=>{ kick(); if(++n>16) clearInterval(iv); }, 60);
+}
+
+requestAnimationFrame(()=>{
+  measure();
+  NODES.forEach(n=>{ n._ax = n.x; n._ay = n.y; });
+  intro();
+  requestAnimationFrame(frame);
+});
+window.addEventListener("resize", ()=>{ measure(); kick(); });
+</script>
+</body>
+</html>

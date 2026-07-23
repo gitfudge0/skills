@@ -1,0 +1,59 @@
+{
+  "id": "root",
+  "label": "Ikigai",
+  "detail": {
+    "tag": "Core idea",
+    "summary": "Ikigai (生き甲斐) fuses 'life' and 'to be worthwhile.' It sits at the intersection of what you love, what you're good at, what the world needs, and what you can be paid for — roughly, 'the happiness of always being busy.'",
+    "points": ["Everyone's ikigai differs, but all of us search for meaning", "Finding it takes a patient inward search", "Based on 100 interviews with centenarians in Ogimi, Okinawa"]
+  },
+  "children": [
+    {
+      "id": "def", "label": "What is Ikigai?",
+      "detail": { "tag": "Definition", "summary": "A reason for being — the thing that gives meaning to your days and keeps you going until the very end.", "points": ["Feeling connected to meaning = living more fully", "Losing that connection breeds despair", "People with a clear ikigai pursue their passion no matter what"] },
+      "children": [
+        { "id": "def1", "label": "Intersection of four circles", "detail": { "tag": "Model", "summary": "Love × skill × world's need × livelihood. Where all four overlap, ikigai lives." } },
+        { "id": "def2", "label": "Search for meaning", "detail": { "tag": "Theme", "summary": "The one thing we all share is the search itself. Discovering your ikigai is the first mission." } }
+      ]
+    },
+    {
+      "id": "rules", "label": "Rules of Ikigai",
+      "detail": { "tag": "Practices", "summary": "A short code the Okinawan elders live by — small daily habits, not grand gestures.", "points": ["Stay active; don't retire", "Take it slow — no hurry", "Eat to 80% fullness", "Surround yourself with good friends", "Keep moving your body", "Smile often", "Reconnect with nature", "Give thanks, and mean it", "Live in the moment"] },
+      "children": [
+        { "id": "r1", "label": "Don't retire; stay active", "detail": { "tag": "Rule", "summary": "Keep doing the things you love. Purpose doesn't have a finish line." } },
+        { "id": "r2", "label": "Eat to 80% (hara hachi bu)", "detail": { "tag": "Rule", "summary": "Stop before you're full. Don't fill your stomach to capacity." } },
+        { "id": "r3", "label": "Live in the moment", "detail": { "tag": "Rule", "summary": "Don't dwell on the past or fret the future. Be here, now." } }
+      ]
+    },
+    {
+      "id": "stress", "label": "Avoiding Stress",
+      "detail": { "tag": "Pitfalls", "summary": "Premature ageing is strongly tied to stress and existential drift.", "points": ["Stress accelerates ageing", "Existential crisis: doing what others expect, not what you want", "Filling the gap with money or pleasure numbs the senses", "Give up what you love → lose your purpose"] },
+      "children": [
+        { "id": "s1", "label": "Stress ages you", "detail": { "tag": "Cause", "summary": "Research links premature ageing to chronic stress." } },
+        { "id": "s2", "label": "Existential crisis", "detail": { "tag": "Cause", "summary": "Doing what you're told or what others do, instead of what you want, drains meaning." } }
+      ]
+    },
+    {
+      "id": "flow", "label": "Be in Flow",
+      "detail": { "tag": "State of mind", "summary": "Flow is total immersion — energised focus and enjoyment in the activity itself.", "points": ["Focus on one thing at a time", "Prefer flow over quick immediate pleasure", "Turn routine into micro-flow", "The happiest people spend the most time in flow — not those who achieve most"] },
+      "children": [
+        { "id": "f1", "label": "One thing at a time", "detail": { "tag": "Key", "summary": "Single-tasking may be the single biggest factor in reaching flow." } },
+        { "id": "f2", "label": "Micro-flow in routine", "detail": { "tag": "Key", "summary": "Turning ordinary tasks into something enjoyable is key to being happy." } }
+      ]
+    },
+    {
+      "id": "slow", "label": "Slow Living",
+      "detail": { "tag": "Rhythm", "summary": "Being in a hurry is inversely proportional to quality of life. 'Walk slowly and you'll go far.'", "points": ["Leave urgency behind — time gains new meaning", "Busy ≠ in a hurry", "Never stop doing what you love", "Slow living means dropping hurry, not busyness"] },
+      "children": [
+        { "id": "sl1", "label": "Busy, not hurried", "detail": { "tag": "Distinction", "summary": "You can be fully occupied with beloved work without ever rushing." } }
+      ]
+    },
+    {
+      "id": "secrets", "label": "Centenarians' Secrets",
+      "detail": { "tag": "In their words", "summary": "The elders of Ogimi, asked how to live long and happy, answered plainly.", "points": ["Don't worry", "Cultivate good habits", "Nurture friendships daily", "Live unhurried", "Be optimistic", "Eat, sleep, relax", "Keep mind and body busy"] },
+      "children": [
+        { "id": "sec1", "label": "Nurture friendships daily", "detail": { "tag": "Advice", "summary": "Good company sustains you into old age." } },
+        { "id": "sec2", "label": "Keep body & mind busy", "detail": { "tag": "Advice", "summary": "Keep both engaged and you'll be here a long time." } }
+      ]
+    }
+  ]
+}
