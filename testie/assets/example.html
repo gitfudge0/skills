@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Blueprint — Dynamic lockscreen accent color</title>
+<style>
+/* test-blueprint report design system
+   Inline this whole file into a <style> tag in the final HTML — the report
+   must work as a single, standalone file with no external dependencies. */
+
+:root {
+  --paper: #F5F6F3;
+  --ink: #1C2024;
+  --ink-muted: #5B6470;
+  --line: #D8DBE0;
+  --accent: #2F5D50;
+  --accent-soft: #E4ECE9;
+
+  --crit: #B23B3B;
+  --crit-bg: #F7E9E9;
+  --high: #C17A2B;
+  --high-bg: #FBF0E1;
+  --med: #3B6FA0;
+  --med-bg: #E9F0F7;
+  --low: #6B7280;
+  --low-bg: #EEEFF1;
+
+  --font-display: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  position: relative;
+  padding: 64px 0 36px;
+  margin-bottom: 44px;
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--line) 1px, transparent 1px);
+  background-size: 18px 18px;
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent 85%);
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.hero::after {
+  content: '+';
+  position: absolute;
+  top: 20px;
+  right: 0;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  color: var(--accent);
+  opacity: 0.35;
+}
+
+.hero-inner { position: relative; }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  display: inline-block;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin: 0 0 14px;
+}
+
+.summary {
+  font-size: 16.5px;
+  color: var(--ink-muted);
+  max-width: 62ch;
+  line-height: 1.55;
+  margin: 0 0 22px;
+}
+
+.meta-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.chip {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.chip.risk-critical { color: var(--crit); background: var(--crit-bg); }
+.chip.risk-high     { color: var(--high); background: var(--high-bg); }
+.chip.risk-medium   { color: var(--med);  background: var(--med-bg); }
+.chip.risk-low      { color: var(--low);  background: var(--low-bg); }
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+/* ---------- Section headers ---------- */
+
+section { margin-bottom: 44px; }
+
+section h2 {
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-muted);
+  margin: 0 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.impact p, .out-of-scope li {
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+/* ---------- Strategy stats ---------- */
+
+.stats-row {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat .num { font-family: var(--font-display); font-size: 25px; font-weight: 700; color: var(--ink); }
+.stat.crit .num { color: var(--crit); }
+.stat .label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+}
+
+.rationale {
+  font-size: 15px;
+  color: var(--ink-muted);
+  line-height: 1.6;
+  max-width: 70ch;
+}
+
+.expand-toggle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink-muted);
+  padding: 6px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.expand-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---------- Test type badge ---------- */
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink-muted);
+}
+
+/* ---------- Case list ---------- */
+
+.case-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.case {
+  background: var(--paper);
+  border-left: 3px solid var(--low);
+}
+.case.priority-critical { border-left-color: var(--crit); }
+.case.priority-high     { border-left-color: var(--high); }
+.case.priority-medium   { border-left-color: var(--med); }
+.case.priority-low      { border-left-color: var(--low); }
+
+.case summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 13px 18px;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.case summary::-webkit-details-marker { display: none; }
+.case summary::before {
+  content: '›';
+  font-family: var(--font-display);
+  color: var(--ink-muted);
+  transition: transform .15s ease;
+  flex-shrink: 0;
+}
+.case[open] summary::before { transform: rotate(90deg); }
+
+.case-id {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-muted);
+  flex-shrink: 0;
+  width: 26px;
+}
+
+.case-title {
+  flex: 1;
+  font-size: 14.5px;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.priority-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.priority-tag.critical { color: var(--crit); background: var(--crit-bg); }
+.priority-tag.high     { color: var(--high); background: var(--high-bg); }
+.priority-tag.medium   { color: var(--med);  background: var(--med-bg); }
+.priority-tag.low      { color: var(--low);  background: var(--low-bg); }
+
+.case-body { padding: 0 18px 18px 58px; }
+
+.case-scenario {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+
+.case-expected {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+.case-expected .label {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* ---------- Out of scope ---------- */
+
+.out-of-scope ul {
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin: 0;
+}
+.out-of-scope li {
+  padding-left: 20px;
+  position: relative;
+}
+.out-of-scope li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--ink-muted);
+}
+
+/* ---------- Footer ---------- */
+
+footer {
+  margin-top: 60px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 600px) {
+  .page { padding: 0 16px 80px; }
+  .hero { padding: 44px 0 28px; }
+  h1 { font-size: 24px; }
+  .case-body { padding-left: 18px; }
+  .stats-row { gap: 20px; }
+}
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Test Blueprint</div>
+      <h1>Dynamic lockscreen accent color</h1>
+      <p class="summary">Extracts a dominant color from the now-playing track's album art and applies it as the accent color across the MusicLock lockscreen widget, replacing the fixed default accent.</p>
+      <div class="meta-row">
+        <span class="chip risk-high">Risk: High</span>
+        <span class="meta">11 cases · generated from diff review</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="impact">
+    <h2>What this touches</h2>
+    <p>The extraction logic is new and isolated (bitmap in, color out), but it sits directly in the lockscreen render path, so a slow or crashing extraction affects something users see many times a day, not just once. It depends on Android's Palette API and on album art actually being embedded in the track's metadata, both of which are outside this code and known to be inconsistent in practice. It's also gated by the existing "dynamic theming" setting, so the off-state has to keep working exactly as before. Nothing here touches playback, storage, or other screens.</p>
+  </section>
+
+  <section class="strategy">
+    <h2>Test strategy</h2>
+    <div class="stats-row">
+      <div class="stat crit"><span class="num">3</span><span class="label">Critical</span></div>
+      <div class="stat"><span class="num">5</span><span class="label">Unit</span></div>
+      <div class="stat"><span class="num">3</span><span class="label">Integration</span></div>
+      <div class="stat"><span class="num">3</span><span class="label">E2E</span></div>
+    </div>
+    <p class="rationale">Weighted toward unit tests because the actual risk is concentrated in the extraction function itself — mainly what it does with album art that doesn't cooperate (missing, monochrome, low-contrast). Integration and e2e cases are kept to the handful of places where extraction results actually cross into rendering: track changes, the theming toggle, and a failure not being allowed to take the rest of the lockscreen down with it.</p>
+    <button class="expand-toggle" id="expandToggle" type="button">Expand all</button>
+  </section>
+
+  <section class="cases">
+    <h2><span class="type-badge">U</span> Unit — color extraction</h2>
+    <div class="case-list">
+
+      <details class="case priority-critical">
+        <summary>
+          <span class="case-id">U1</span>
+          <span class="case-title">Extracts a usable accent color from typical album art</span>
+          <span class="priority-tag critical">Critical</span>
+        </summary>
+        <div class="case-body">
+          <p class="case-scenario">Run extraction against a set of representative real album art (vivid cover, muted cover, photo-based cover).</p>
+          <p class="case-expected"><span class="label">Expected</span>Returns a non-null color for every sample, and the returned hue is visibly related to the artwork's dominant color, not a generic fallback.</p>
+        </div>
+      </details>
+
+      <details class="case priority-high">
+        <summary>
+          <span class="case-id">U2</span>
+          <span class="case-title">Falls back cleanly when artwork has no clear dominant color</span>
+          <span class="priority-tag high">High</span>
+        </summary>
+        <div class="case-body">
+          <p class="case-scenario">Run extraction against flat grey/monochrome or near-white album art.</p>
+          <p class="case-expected"><span class="label">Expected</span>Returns the defined default accent color rather than a near-invisible or undefined one — no exception thrown.</p>
+        </div>
+      </details>
+
+      <details class="case priority-high">
+        <summary>
+          <span class="case-id">U3</span>
+          <span class="case-title">Handles missing artwork without crashing</span>
+          <span class="priority-tag high">High</span>
+        </summary>
+        <div class="case-body">
+          <p class="case-scenario">Run extraction on a track with no embedded artwork (null/empty bitmap input).</p>
+          <p class="case-expected"><span class="label">Expected</span>Returns the default accent color immediately; no null-pointer exception, no blocking call to a Palette instance that doesn't exist.</p>
+        </div>
+      </details>
+
+      <details class="case priority-medium">
+        <summary>
+          <span class="case-id">U4</span>
+          <span class="case-title">Extracted color meets minimum contrast against the lockscreen background</span>
+          <span class="priority-tag medium">Medium</span>
+        </summary>
+        <div class="case-body">
+          <p class="case-scenario">Run extraction against artwork whose dominant color is very close in luminance to the lockscreen background (e.g. a near-black cover on a dark lockscreen).</p>
+          <p class="case-expected"><span class="label">Expected</span>The color returned for display is adjusted to meet a minimum contrast ratio, rather than producing text/accents that are effectively invisible.</p>
+        </div>
+      </details>
+
+      <details class="case priority-low">
+        <summary>
+          <span class="case-id">U5</span>
+          <span class="case-title">Extraction result is cached per track</span>
+          <span class="priority-tag low">Low</span>
+        </summary>
+        <div class="case-body">
+          <p class="case-scenario">Call the extraction function twice in a row for the same track.</p>
+          <p class="case-expected"><span class="label">Expected</span>The second call returns the cached result rather than recomputing — verified by call count on the underlying Palette invocation, not by timing.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <section class="cases">
+    <h2><span class="type-badge">I</span> Integration — wiring into the lockscreen</h2>
+    <div class="case-list">
+
+      <details class="case priority-critical">
+        <summary>
+          <span class="case-id">I1</span>
+          <span class="case-title">Track change triggers a new extraction and theme update</span>
+          <span class="priority-tag critical">Critical</span>
+        </summary>
+        <div class="case-body">
+          <p class="case-scenario">Play track A, let the lockscreen settle, then switch to track B with visibly different album art.</p>
+          <p class="case-expected"><span class="label">Expected</span>The lockscreen accent updates to match track B within one render cycle — no stale color left over from track A.</p>
+        </div>
+      </details>
+
+      <details class="case priority-high">
+        <summary>
+          <span class="case-id">I2</span>
+          <span class="case-title">Dynamic theming toggle off bypasses extraction entirely</span>
+          <span class="priority-tag high">High</span>
+        </summary>
+        <div class="case-body">
+          <p class="case-scenario">Disable the "dynamic theming" setting, then play a track with vivid album art.</p>
+          <p class="case-expected"><span class="label">Expected</span>Lockscreen uses the fixed default accent; extraction is not invoked at all (verify via call count, not just visual output — this also protects the battery/perf case).</p>
+        </div>
+      </details>
+
+      <details class="case priority-medium">
+        <summary>
+          <span class="case-id">I3</span>
+          <span class="case-title">Extraction failure doesn't block the rest of the lockscreen</span>
+          <span class="priority-tag medium">Medium</span>
+        </summary>
+        <div class="case-body">
+          <p class="case-scenario">Force the extraction call to throw (simulate corrupted artwork bytes).</p>
+          <p class="case-expected"><span class="label">Expected</span>Lockscreen still renders fully with the default accent — track title, controls, and artwork placeholder all still appear; the failure is contained.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <section class="cases">
+    <h2><span class="type-badge">E</span> End-to-end — real usage</h2>
+    <div class="case-list">
+
+      <details class="case priority-critical">
+        <summary>
+          <span class="case-id">E1</span>
+          <span class="case-title">Playing a song with vivid art visibly re-themes the lockscreen</span>
+          <span class="priority-tag critical">Critical</span>
+        </summary>
+        <div class="case-body">
+          <p class="case-scenario">From a cold app state, lock the phone and start playback of a track with distinctive album art.</p>
+          <p class="case-expected"><span class="label">Expected</span>The lockscreen accent visibly reflects the artwork within a perceptibly instant timeframe — no flash of default color that lingers.</p>
+        </div>
+      </details>
+
+      <details class="case priority-high">
+        <summary>
+          <span class="case-id">E2</span>
+          <span class="case-title">Rapid track-skipping settles on the final track's color without flicker or crash</span>
+          <span class="priority-tag high">High</span>
+        </summary>
+        <div class="case-body">
+          <p class="case-scenario">Skip through 5+ tracks in quick succession (faster than each extraction likely completes).</p>
+          <p class="case-expected"><span class="label">Expected</span>No crash, no visible rapid color-flicker, and the lockscreen settles on the correct color for whichever track is actually playing once skipping stops — not a color from a track that was skipped past.</p>
+        </div>
+      </details>
+
+      <details class="case priority-medium">
+        <summary>
+          <span class="case-id">E3</span>
+          <span class="case-title">Disabling dynamic theming mid-session reverts immediately</span>
+          <span class="priority-tag medium">Medium</span>
+        </summary>
+        <div class="case-body">
+          <p class="case-scenario">While a track with an extracted accent color is playing and visible on the lockscreen, go into settings and turn dynamic theming off.</p>
+          <p class="case-expected"><span class="label">Expected</span>Lockscreen reverts to the default accent immediately, without needing the app or device to restart.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <section class="out-of-scope">
+    <h2>Explicitly not covered here</h2>
+    <ul>
+      <li>Whether the extracted color is the "best" or most aesthetically pleasing choice from a given artwork — that's a design/subjective judgment, not a pass/fail QA concern.</li>
+      <li>Performance under extreme low-memory or low-end-device conditions — deferred to a dedicated perf pass rather than folded into this feature's functional tests.</li>
+      <li>Correctness of the Android Palette API's internal color-extraction algorithm — that's Android platform code, not ours to test.</li>
+      <li>Any existing lockscreen layout/control behavior untouched by this change — covered by the existing suite already, not re-verified here.</li>
+    </ul>
+  </section>
+
+  <footer>test-blueprint · test plan, not test code</footer>
+
+</div>
+
+<script>
+  (function () {
+    var btn = document.getElementById('expandToggle');
+    var all = Array.prototype.slice.call(document.querySelectorAll('.case'));
+    var expanded = false;
+    btn.addEventListener('click', function () {
+      expanded = !expanded;
+      all.forEach(function (d) { d.open = expanded; });
+      btn.textContent = expanded ? 'Collapse all' : 'Expand all';
+    });
+  })();
+</script>
+
+</body>
+</html>
