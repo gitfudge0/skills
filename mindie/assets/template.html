@@ -460,7 +460,10 @@ function drawLinks(){
       const shown = isVisible(n) && !collapsed.has(n.id);
       const op = Math.max(0, Math.min(1, c._op)) * (shown?1:0);
       if(op < 0.01) return;
-      const x1 = n._ax, y1 = n._ay, x2 = c._ax, y2 = c._ay;
+      const dir = c._ax >= n._ax ? 1 : -1;
+      const x1 = n._ax + dir * (n.w/2) * Math.max(0, n._scale) * n._hs;
+      const x2 = c._ax - dir * (c.w/2) * Math.max(0, c._scale) * c._hs;
+      const y1 = n._ay, y2 = c._ay;
       const mx = (x1+x2)/2;
       const cvar = colorVar[c.color] || "--border";
       const w = n.id===DATA.id ? 3 : 2.2;
