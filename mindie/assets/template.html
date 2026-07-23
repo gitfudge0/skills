@@ -316,12 +316,16 @@ const PALETTE = ["purple","pink","orange","teal","blue"];
    horizontal direction as their branch. Vertical spacing is
    allotted by counting leaf "slots" so siblings never overlap.
    ============================================================ */
-const H_GAP = 250;   // horizontal distance between levels
+const H_GAP = 330;   // horizontal distance between levels (> max node width, so boxes never overlap)
 const V_GAP = 82;    // vertical distance between adjacent leaves
+
+const collapsed = new Set(); /* populated after NODES exist; consulted by layout */
 
 function countLeaves(n){
   const k = n.children||[];
-  if(!k.length) return 1;
+  /* a collapsed subtree occupies a single slot, so the visible map stays
+     compact and grows horizontally as branches are expanded */
+  if(!k.length || collapsed.has(n.id)) return 1;
   n._leaves = k.reduce((s,c)=>s+countLeaves(c),0);
   return n._leaves;
 }
@@ -401,8 +405,8 @@ NODES.forEach(n=>{
 });
 
 /* everything collapsed by default (root open, branches closed) */
-const collapsed = new Set();
 NODES.forEach(n=>{ if((n.children||[]).length && n.id!==DATA.id) collapsed.add(n.id); });
+layout(); /* re-run now that collapsed state exists: compact initial spread */
 
 function isVisible(n){
   let p = n.parent;
@@ -578,6 +582,7 @@ function onNodeClick(n){
   if((n.children||[]).length){
     if(collapsed.has(n.id)) collapsed.delete(n.id); else collapsed.add(n.id);
     n.el.classList.toggle("expanded", !collapsed.has(n.id));
+    layout(); /* reflow so only expanded subtrees claim vertical space */
     kick();
   }
   if(selected && selected!==n) selected.el.classList.remove("selected");
