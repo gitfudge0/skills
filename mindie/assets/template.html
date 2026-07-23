@@ -87,6 +87,7 @@
   .btn svg { width: 16px; height: 16px; transition: transform .4s cubic-bezier(.2,.9,.3,1.4); }
   #themeBtn:hover svg { transform: rotate(40deg); }
   #fitBtn:hover svg { transform: scale(1.15); }
+  .btn.on { background: var(--root-bg); border-color: var(--root-border); color: var(--root-text); }
   .ripple { position: absolute; border-radius: 50%; transform: scale(0); background: currentColor; opacity: .18; pointer-events: none; animation: rip .55s ease-out; }
   @keyframes rip { to { transform: scale(3.2); opacity: 0; } }
 
@@ -128,7 +129,7 @@
     background: color-mix(in srgb, currentColor 15%, transparent);
     transition: transform .35s cubic-bezier(.2,.9,.3,1.6), background .2s;
   }
-  .node.expanded .badge { transform: rotate(180deg); }
+  .node.expanded .badge { background: color-mix(in srgb, currentColor 28%, transparent); }
   .node.root {
     font-size: 17px; font-weight: 800; padding: 16px 24px; border-radius: 20px;
     background: var(--root-bg); border-color: var(--root-border); color: var(--root-text);
@@ -239,6 +240,10 @@
       </div>
     </div>
     <div class="spacer"></div>
+    <button class="btn" id="flowBtn" title="Toggle document-order layout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      Flow
+    </button>
     <button class="btn" id="fitBtn" title="Fit to screen">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"/></svg>
       Fit
@@ -320,6 +325,7 @@ const H_GAP = 330;   // horizontal distance between levels (> max node width, so
 const V_GAP = 82;    // vertical distance between adjacent leaves
 
 const collapsed = new Set(); /* populated after NODES exist; consulted by layout */
+let docFlow = false; /* true = document-order layout: all branches stacked right, in source order */
 
 function countLeaves(n){
   const k = n.children||[];
@@ -332,9 +338,10 @@ function countLeaves(n){
 function layout(){
   const branches = DATA.children||[];
   countLeaves(DATA);
-  // split branches into right (even idx) and left (odd idx) for balance
+  // balanced mode: split branches right (even idx) / left (odd idx);
+  // docFlow mode: all branches on the right, in document order top→bottom
   const right = [], left = [];
-  branches.forEach((b,i)=>{ (i % 2 === 0 ? right : left).push(b); });
+  branches.forEach((b,i)=>{ (docFlow || i % 2 === 0 ? right : left).push(b); });
 
   function placeSide(list, dir){
     // total vertical slots on this side
@@ -464,10 +471,11 @@ function drawLinks(){
       const shown = isVisible(n) && !collapsed.has(n.id);
       const op = Math.max(0, Math.min(1, c._op)) * (shown?1:0);
       if(op < 0.01) return;
-      /* anchor at bubble centers: node boxes are opaque and painted above the
-         link layer, so each curve visually emerges from the middle of the facing
-         side regardless of box size — robust to late font/CSS re-measures */
-      const x1 = n._ax, y1 = n._ay, x2 = c._ax, y2 = c._ay;
+      /* anchor at the facing edges of the two boxes (not centers) so curves
+         never travel underneath/over intermediate node faces */
+      const dir = Math.sign(c.x - n.x) || 1;
+      const x1 = n._ax + dir * ((n.w||0)/2), y1 = n._ay;
+      const x2 = c._ax - dir * ((c.w||0)/2), y2 = c._ay;
       const mx = (x1+x2)/2;
       const cvar = colorVar[c.color] || "--border";
       const w = n.id===DATA.id ? 3 : 2.2;
@@ -554,6 +562,11 @@ document.getElementById("zIn").onclick = e=>{ zoomTo(1.2); addRipple(e.currentTa
 document.getElementById("zOut").onclick= e=>{ zoomTo(1/1.2); addRipple(e.currentTarget,e); };
 document.getElementById("zReset").onclick=e=>{ fit(true); addRipple(e.currentTarget,e); };
 document.getElementById("fitBtn").onclick=e=>{ fit(true); addRipple(e.currentTarget,e); };
+document.getElementById("flowBtn").onclick=e=>{
+  docFlow = !docFlow;
+  e.currentTarget.classList.toggle("on", docFlow);
+  layout(); kick(); fit(true); addRipple(e.currentTarget,e);
+};
 
 let touchDist=0, tmode=null;
 stage.addEventListener("touchstart", e=>{
