@@ -464,12 +464,10 @@ function drawLinks(){
       const shown = isVisible(n) && !collapsed.has(n.id);
       const op = Math.max(0, Math.min(1, c._op)) * (shown?1:0);
       if(op < 0.01) return;
-      /* direction from layout targets, not animated positions — a child mid-flight
-         can momentarily sit on the wrong side and flip the anchor edge */
-      const dir = (c.x !== n.x ? c.x >= n.x : c._ax >= n._ax) ? 1 : -1;
-      const x1 = n._ax + dir * (n.w/2) * Math.max(0, n._scale) * n._hs;
-      const x2 = c._ax - dir * (c.w/2) * Math.max(0, c._scale) * c._hs;
-      const y1 = n._ay, y2 = c._ay;
+      /* anchor at bubble centers: node boxes are opaque and painted above the
+         link layer, so each curve visually emerges from the middle of the facing
+         side regardless of box size — robust to late font/CSS re-measures */
+      const x1 = n._ax, y1 = n._ay, x2 = c._ax, y2 = c._ay;
       const mx = (x1+x2)/2;
       const cvar = colorVar[c.color] || "--border";
       const w = n.id===DATA.id ? 3 : 2.2;
@@ -667,6 +665,13 @@ requestAnimationFrame(()=>{
   requestAnimationFrame(frame);
 });
 window.addEventListener("resize", ()=>{ measure(); kick(); });
+/* Node sizes are measured at first paint, but host pages (e.g. artifact wrappers)
+   can late-apply fonts/CSS that rewrap labels and resize bubbles — leaving boxes
+   and link anchors positioned from stale sizes. Re-measure once things settle. */
+function remeasure(){ measure(); layout(); kick(); }
+window.addEventListener("load", remeasure);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
+setTimeout(remeasure, 800);
 </script>
 </body>
 </html>
