@@ -1,0 +1,72 @@
+# === Ikigai source coverage map ===
+# Each line = one atomic unit from the source document.
+# [node_id] = carried by that node; [OMIT: reason] = deliberately excluded.
+
+# --- Framing / definition ---
+[root]  Ikigai combines Japanese letters meaning "life" and "to be worthwhile"
+[root]  Authors try to unravel the secrets of a long and happy life
+[root]  Based on 100 interviews in Ogimi, Okinawa with centenarians and super-centenarians
+[root]  Ogimi has the most centenarians and super-centenarians in the world
+[root]  Ikigai is the intersection of what you love, are good at, world needs, and can be paid for
+[root]  Ikigai roughly translates to "the happiness of always being busy"
+[def]   Ikigai is a reason for being that gives meaning to your days
+[def]   Everyone has a passion/talent that drives them until the end
+[def]   If we don't know it yet, our mission is to discover it
+[def1]  Ikigai is the four-circle intersection model
+[def2]  Everyone's ikigai differs but all search for meaning
+[def2]  Feeling connected to meaning = living more fully; losing it = despair
+[def2]  Ikigai is hidden deep inside and finding it needs patient search
+[def]   People with a clear ikigai pursue their passion no matter what
+
+# --- Rules of ikigai (the list) ---
+[rules] Stay active, don't retire
+[r1]    Keep doing things you love
+[rules] Take it slow, don't be in a hurry all the time
+[rules] Live life fully now, don't wait for the future
+[r2]    Eat less — only about 80% of your hunger (hara hachi bu)
+[rules] Surround yourself with good friends for old age
+[rules] Get in shape, exercise, move body 3-5 days a week
+[rules] Smile and do it often
+[rules] Reconnect with nature, grow a garden, go for a trek
+[rules] Give thanks and mean it
+[r3]    Live in the moment, don't dwell on past or future
+
+# --- Avoiding stress & existential crisis ---
+[stress] Stress has a lot to do with premature ageing
+[s1]     Research links premature ageing to stress
+[s2]     Existential crisis: doing what others expect, not what you want
+[s2]     Peer pressure makes us do things we don't care about
+[stress] People fill the gap with economic power or physical pleasure, numbing senses
+[stress] Those who give up what they love lose their purpose
+
+# --- Flow ---
+[flow]  Flow is full immersion, energised focus, enjoyment in the activity
+[flow]  Increase time in flow rather than activities of immediate pleasure
+[f1]    Concentrating on one thing at a time is key to flow
+[f1]    Doing things in parallel prevents flow
+[f2]    Turning routine tasks into micro-flow is key to happiness
+[flow]  Happiest people spend most time in flow, not those who achieve most
+
+# --- Slow living ---
+[slow]  Being in a hurry is inversely proportional to quality of life
+[slow]  "Walk slowly and you'll go far"
+[slow]  Leaving urgency behind gives life and time new meaning
+[sl1]   Difference between being in a rush vs being busy with what you love
+[slow]  Never stop doing the things you love
+[slow]  Slow living means stop being in a hurry, not stop being busy
+
+# --- Centenarians' secrets (closing list) ---
+[secrets] Don't worry
+[secrets] Cultivate good habits
+[sec1]    Nurture your friendships every day
+[secrets] Live an unhurried life
+[secrets] Be optimistic
+[secrets] Eat and sleep and you'll live a long time
+[secrets] Learn to relax
+[sec2]    Keep mind and body busy and you'll be here a long time
+
+# --- Meta / non-book content ---
+[OMIT: author's framing about Makkajai office reading habit, not book content]  Makkajai buys books and requires one-page monthly summaries
+[OMIT: author's personal note about converting summary to blog post]  Author turned the summary into a blog post
+[OMIT: Medium newsletter signup widget, not source content]  Get Deep Shah's stories in your inbox / Subscribe
+[OMIT: author's closing personal remark]  Author learned a lot and recommends reading it

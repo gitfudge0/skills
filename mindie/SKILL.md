@@ -10,11 +10,14 @@ interactive mindmap with a central topic, colored branches, expandable nodes, a
 reading panel, pan/zoom, spring micro-animations, and automatic light/dark
 theming.
 
-**The goal is comprehension of the entire source.** A reader who explores the
-finished map should understand what the material covers, how its parts relate,
-and what each part says — without opening the original. The map is a faithful,
-navigable summary, not a highlight reel. Getting the tree right *is* the job;
-the rendering is mechanical.
+**The goal is comprehension of the entire source, with nothing left out.** A
+reader explores the finished map *instead of* opening the original, so any idea
+missing from the map is lost to them. Completeness is therefore the top
+priority: every claim, fact, example, rule, and caveat that carries meaning must
+live somewhere in the tree. When completeness and tidiness conflict, completeness
+wins. The map is a faithful, navigable summary, not a highlight reel — and
+"faithful" here means *complete*. Getting the tree right *is* the job; the
+rendering is mechanical.
 
 ## Workflow
 
@@ -30,14 +33,31 @@ long material, skim for structure rather than reading every word.
 
 ### 2. Curate — the important part
 
-Build a **tree of nodes** that faithfully covers the whole source, organized so
-the hierarchy itself explains the material. This is a judgment task with real
-failure modes (dropping content vs. dumping everything flat).
+Build a **tree of nodes** that includes *all* of the source, organized so the
+hierarchy itself explains the material. Completeness is non-negotiable; the
+craft is fitting everything in while keeping the map readable (the answer is
+always *organize and use detail panels*, never *drop content*).
 
-**Read `references/curation.md` before curating** — it lays out the method
-(work top-down in passes, account for every meaningful unit, push detail into
-panels, verify coverage) and the fidelity rules. Don't skip it; the quality of
-the map lives here.
+**Read `references/curation.md` before curating** — it lays out the method and
+the fidelity rules, and it is where the completeness discipline lives. The
+method is a build-then-verify loop:
+
+1. **Segment the source** into atomic units (one idea/fact/example each) and
+   list them in a coverage file.
+2. **Build the tree** so every unit lands somewhere — as a label, a summary, or
+   a point. Group with intermediate nodes when a branch gets crowded; never cut.
+3. **Verify coverage** and make it pass before rendering:
+
+   ```bash
+   python3 scripts/check_coverage.py --coverage cov.txt --data map.json
+   ```
+
+   This fails loudly on any source unit that isn't either mapped to a real node
+   or explicitly marked `[OMIT: reason]` (reserved for non-substance chrome like
+   nav widgets or author meta-remarks). **Curation is not done until this check
+   passes with zero unaccounted units**, and you should be able to defend every
+   recorded omission. Don't rely on a mental "I think I covered it all" pass —
+   that is exactly how content gets dropped.
 
 Node shape:
 
@@ -60,8 +80,8 @@ leaves (they inherit their branch color). You may set a branch `color`
 
 ### 3. Render
 
-Write the tree to a JSON file, then inject it — this is deterministic, so don't
-hand-edit HTML:
+Only after the coverage check passes: write the tree to a JSON file, then inject
+it — this is deterministic, so don't hand-edit HTML:
 
 ```bash
 python3 scripts/build.py \
@@ -88,16 +108,20 @@ toggle. Micro-animated throughout, and respects `prefers-reduced-motion`.
 
 ## Files and references
 
+- `scripts/check_coverage.py` — verifies every source unit is accounted for in
+  the tree. Run it during curation; it must pass before rendering.
 - `scripts/build.py` — validates the tree and injects it into the template.
 - `assets/template.html` — the renderer. Content-agnostic; only the injected
   `DATA` tree and three metadata tokens change per map.
-- `references/curation.md` — **how to build a faithful tree.** Read before
-  curating.
+- `references/curation.md` — **how to build a complete, faithful tree.** Read
+  before curating; the completeness discipline lives here.
 - `references/renderer-spec.md` — complete spec of the renderer: layout math,
   animation constants, palette, structure. Read this only if you need to
   **recreate or modify `template.html`** (e.g. the asset is missing, or the user
   wants design/behavior changes). For a normal map you never touch it.
 - `examples/ikigai.json` — a reference tree showing the target quality and shape.
+- `examples/ikigai-coverage.txt` — its coverage file, showing the format and a
+  passing check (55 units: 51 mapped, 4 justified omissions).
 
 To re-skin the map (palette, spacing, fonts), edit the CSS custom-property
 blocks at the top of `template.html`; see `references/renderer-spec.md` for the
