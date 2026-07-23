@@ -1,585 +1,426 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Test Blueprint — Dynamic lockscreen accent color</title>
+<title>AVA-170 Test Plan</title>
 <style>
-/* test-blueprint report design system
-   Inline this whole file into a <style> tag in the final HTML — the report
-   must work as a single, standalone file with no external dependencies. */
+  :root{
+    --page:#F4F4F2; --ink:#17181B; --gray:#7A7C80; --hair:#E4E4E1; --blue:#2650EE;
+    --accent-contrast:#FFFFFF; --accent-fill:#2650EE;
+    --pri-critical:#C43D3D; --pri-high:#B7791F;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --page:#161719; --ink:#ECECEA; --gray:#9A9CA2; --hair:#2E2F33; --blue:#5B7CFF;
+      --accent-contrast:#FFFFFF; --accent-fill:#2F4BD6;
+      --pri-critical:#E06C6C; --pri-high:#D9A23F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --page:#161719; --ink:#ECECEA; --gray:#9A9CA2; --hair:#2E2F33; --blue:#5B7CFF;
+    --accent-contrast:#FFFFFF; --accent-fill:#2F4BD6;
+    --pri-critical:#E06C6C; --pri-high:#D9A23F;
+  }
+  :root[data-theme="light"]{
+    --page:#F4F4F2; --ink:#17181B; --gray:#7A7C80; --hair:#E4E4E1; --blue:#2650EE;
+    --accent-contrast:#FFFFFF; --accent-fill:#2650EE;
+    --pri-critical:#C43D3D; --pri-high:#B7791F;
+  }
 
-:root {
-  --paper: #F5F6F3;
-  --ink: #1C2024;
-  --ink-muted: #5B6470;
-  --line: #D8DBE0;
-  --accent: #2F5D50;
-  --accent-soft: #E4ECE9;
+  *{box-sizing:border-box;}
+  html,body{
+    background:var(--page); color:var(--ink); margin:0; padding:0;
+    font-family:"Helvetica Neue",Arial,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{background:var(--page); color:var(--ink); width:100%; position:relative;}
+  .container{width:92%; max-width:1400px; margin:0 auto; padding:64px 0 56px;}
 
-  --crit: #B23B3B;
-  --crit-bg: #F7E9E9;
-  --high: #C17A2B;
-  --high-bg: #FBF0E1;
-  --med: #3B6FA0;
-  --med-bg: #E9F0F7;
-  --low: #6B7280;
-  --low-bg: #EEEFF1;
 
-  --font-display: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
-  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
-  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-}
+  .maintitle{font-size:40px; font-weight:700; line-height:1.15; margin:0 0 56px;}
+  .maintitle .l1{color:var(--ink); display:block;}
+  .maintitle .l2{color:var(--blue); display:block;}
 
-* { box-sizing: border-box; }
+  .sectitle{font-size:30px; font-weight:700; line-height:1.15; margin:0 0 44px;}
+  .sectitle .l1{color:var(--ink); display:block;}
+  .sectitle .l2{color:var(--blue); display:block;}
 
-body {
-  margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-}
+  section{margin-bottom:80px;}
+  section:last-child{margin-bottom:0;}
+  .hr{border:none; border-top:1px solid var(--hair); margin:0 0 56px;}
 
-.page {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 0 24px 100px;
-}
+  .label{font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--gray); font-weight:600;}
+  .body-text{font-size:14.5px; color:var(--gray); line-height:1.7; margin:0 0 20px; max-width:52ch;}
+  .body-text:last-child{margin-bottom:0;}
 
-/* ---------- Hero ---------- */
+  /* overview layout */
+  .cols{display:flex; gap:72px; margin-bottom:52px;}
+  .col-l{flex:0 0 38%;}
+  .col-r{flex:1;}
+  .numlist{display:flex; flex-direction:column; gap:36px;}
+  .numitem{display:flex; gap:20px; align-items:flex-start;}
+  .numitem .n{font-size:28px; font-weight:700; color:var(--ink); line-height:1; flex-shrink:0; width:36px;}
+  .numitem .t{font-size:16px; font-weight:600; color:var(--ink); margin:0 0 6px;}
+  .numitem .d{font-size:14.5px; color:var(--gray); line-height:1.7; margin:0;}
 
-.hero {
-  position: relative;
-  padding: 64px 0 36px;
-  margin-bottom: 44px;
-  border-bottom: 1px solid var(--line);
-  overflow: hidden;
-}
+  .stats{display:flex; border-top:1px solid var(--hair);}
+  .stat{flex:1; padding:28px 28px 0; border-left:1px solid var(--hair);}
+  .stat:first-child{border-left:none; padding-left:0;}
+  .stat .figure{font-size:40px; font-weight:700; color:var(--ink); margin-top:10px;}
+  .stat.accent{background:var(--accent-fill); margin:-1px -28px 0; padding:28px; border-left:none;}
+  .stat.accent .label, .stat.accent .figure{color:var(--accent-contrast);}
 
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, var(--line) 1px, transparent 1px);
-  background-size: 18px 18px;
-  -webkit-mask-image: linear-gradient(to bottom, black, transparent 85%);
-  mask-image: linear-gradient(to bottom, black, transparent 85%);
-  opacity: 0.7;
-  pointer-events: none;
-}
+  @media (max-width:760px){
+    .cols{flex-direction:column; gap:40px;}
+    .col-l{flex:none;}
+    .stats{flex-direction:column;}
+    .stat{border-left:none; border-top:1px solid var(--hair); padding:24px 0 0;}
+    .stat:first-child{border-top:none;}
+    .stat.accent{margin:-1px 0 0;}
+  }
 
-.hero::after {
-  content: '+';
-  position: absolute;
-  top: 20px;
-  right: 0;
-  font-family: var(--font-mono);
-  font-size: 20px;
-  color: var(--accent);
-  opacity: 0.35;
-}
+  .tier-label{margin-bottom:24px;}
+  .tier-block{margin-bottom:52px;}
+  .tier-block:last-child{margin-bottom:0;}
 
-.hero-inner { position: relative; }
+  /* case tables */
+  .table-wrap{overflow-x:auto;}
+  .case-table{width:100%; min-width:900px; border-collapse:collapse;}
+  .case-table col.c-id{width:6%;}
+  .case-table col.c-pri{width:9%;}
+  .case-table col.c-title{width:26%;}
+  .case-table col.c-scenario{width:30%;}
+  .case-table col.c-expected{width:29%;}
+  .case-table th{
+    font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--gray);
+    font-weight:600; text-align:left; padding:0 20px 12px 0; border-bottom:2px solid var(--ink);
+    vertical-align:top;
+  }
+  .case-table th:first-child, .case-table td:first-child{padding-left:0;}
+  .case-table td{
+    padding:15px 20px 15px 0; border-bottom:1px solid var(--hair); vertical-align:top;
+  }
+  .case-table tr:last-child td{border-bottom:none;}
+  .case-table td.t-id{font-size:13px; font-weight:700; color:var(--blue);}
+  .case-table td.t-pri{font-size:11px; text-transform:uppercase; font-weight:600;}
+  .case-table td.t-pri.pri-critical{color:var(--pri-critical);}
+  .case-table td.t-pri.pri-high{color:var(--pri-high);}
+  .case-table td.t-pri.pri-medium{color:var(--ink);}
+  .case-table td.t-pri.pri-low{color:var(--gray);}
+  .case-table td.t-pri .dot{display:inline-block; width:6px; height:6px; border-radius:50%; background:currentColor; margin-right:6px; vertical-align:middle;}
+  .case-table td.t-title{font-size:15px; font-weight:600; color:var(--ink); line-height:1.4;}
+  .case-table td.t-scenario, .case-table td.t-expected{font-size:13.5px; color:var(--gray); line-height:1.65;}
+  .case-table td.t-expected .lab{font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink); font-weight:700; margin-right:6px; display:block; margin-bottom:2px;}
+  code{font-family:ui-monospace,"SF Mono",Consolas,monospace; font-size:0.94em;}
 
-.eyebrow {
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 12px;
-  color: var(--accent);
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+  /* gaps */
+  .gap-item{display:flex; gap:20px; margin-bottom:36px;}
+  .gap-item .n-wrap{flex-shrink:0; width:52px; display:flex; align-items:flex-start;}
+  .gap-item .n{font-size:28px; font-weight:700; color:var(--ink);}
+  .gap-circle{width:52px; height:52px; border-radius:50%; background:var(--blue); color:var(--accent-contrast); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700;}
+  .gap-item .gt{font-size:17px; font-weight:600; color:var(--ink); margin:0 0 8px;}
+  .gap-item .gd{font-size:14.5px; color:var(--gray); line-height:1.7; margin:0;}
 
-.eyebrow::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--accent);
-  display: inline-block;
-}
+  .oos-list{list-style:none; margin:28px 0 0; padding:0; counter-reset:oos;}
+  .oos-list li{counter-increment:oos; font-size:14.5px; color:var(--gray); line-height:1.7; margin-bottom:18px; padding-left:30px; position:relative;}
+  .oos-list li:last-child{margin-bottom:0;}
+  .oos-list li::before{content:counter(oos)"."; position:absolute; left:0; font-weight:700; color:var(--ink); font-size:14.5px;}
 
-h1 {
-  font-family: var(--font-display);
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-  margin: 0 0 14px;
-}
+  .footer-line{font-size:12px; color:var(--gray);}
 
-.summary {
-  font-size: 16.5px;
-  color: var(--ink-muted);
-  max-width: 62ch;
-  line-height: 1.55;
-  margin: 0 0 22px;
-}
-
-.meta-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.chip {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  padding: 4px 10px;
-  border-radius: 3px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.chip.risk-critical { color: var(--crit); background: var(--crit-bg); }
-.chip.risk-high     { color: var(--high); background: var(--high-bg); }
-.chip.risk-medium   { color: var(--med);  background: var(--med-bg); }
-.chip.risk-low      { color: var(--low);  background: var(--low-bg); }
-
-.meta {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--ink-muted);
-}
-
-/* ---------- Section headers ---------- */
-
-section { margin-bottom: 44px; }
-
-section h2 {
-  font-family: var(--font-display);
-  font-size: 12.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--ink-muted);
-  margin: 0 0 18px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.impact p, .out-of-scope li {
-  font-size: 15.5px;
-  line-height: 1.65;
-  color: var(--ink);
-}
-
-/* ---------- Strategy stats ---------- */
-
-.stats-row {
-  display: flex;
-  gap: 30px;
-  margin-bottom: 18px;
-  flex-wrap: wrap;
-}
-
-.stat { display: flex; flex-direction: column; gap: 2px; }
-.stat .num { font-family: var(--font-display); font-size: 25px; font-weight: 700; color: var(--ink); }
-.stat.crit .num { color: var(--crit); }
-.stat .label {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink-muted);
-}
-
-.rationale {
-  font-size: 15px;
-  color: var(--ink-muted);
-  line-height: 1.6;
-  max-width: 70ch;
-}
-
-.expand-toggle {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: none;
-  border: 1px solid var(--line);
-  color: var(--ink-muted);
-  padding: 6px 12px;
-  border-radius: 3px;
-  cursor: pointer;
-  margin-top: 4px;
-}
-.expand-toggle:hover { border-color: var(--accent); color: var(--accent); }
-
-/* ---------- Test type badge ---------- */
-
-.type-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 19px;
-  height: 19px;
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 700;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  color: var(--ink-muted);
-}
-
-/* ---------- Case list ---------- */
-
-.case-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.case {
-  background: var(--paper);
-  border-left: 3px solid var(--low);
-}
-.case.priority-critical { border-left-color: var(--crit); }
-.case.priority-high     { border-left-color: var(--high); }
-.case.priority-medium   { border-left-color: var(--med); }
-.case.priority-low      { border-left-color: var(--low); }
-
-.case summary {
-  list-style: none;
-  cursor: pointer;
-  padding: 13px 18px;
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-}
-.case summary::-webkit-details-marker { display: none; }
-.case summary::before {
-  content: '›';
-  font-family: var(--font-display);
-  color: var(--ink-muted);
-  transition: transform .15s ease;
-  flex-shrink: 0;
-}
-.case[open] summary::before { transform: rotate(90deg); }
-
-.case-id {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--ink-muted);
-  flex-shrink: 0;
-  width: 26px;
-}
-
-.case-title {
-  flex: 1;
-  font-size: 14.5px;
-  color: var(--ink);
-  line-height: 1.4;
-}
-
-.priority-tag {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 2px 8px;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-.priority-tag.critical { color: var(--crit); background: var(--crit-bg); }
-.priority-tag.high     { color: var(--high); background: var(--high-bg); }
-.priority-tag.medium   { color: var(--med);  background: var(--med-bg); }
-.priority-tag.low      { color: var(--low);  background: var(--low-bg); }
-
-.case-body { padding: 0 18px 18px 58px; }
-
-.case-scenario {
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--ink);
-  margin: 0 0 12px;
-}
-
-.case-expected {
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--ink);
-  margin: 0;
-  padding-top: 12px;
-  border-top: 1px dashed var(--line);
-}
-.case-expected .label {
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  display: block;
-  margin-bottom: 5px;
-}
-
-/* ---------- Out of scope ---------- */
-
-.out-of-scope ul {
-  padding-left: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-  margin: 0;
-}
-.out-of-scope li {
-  padding-left: 20px;
-  position: relative;
-}
-.out-of-scope li::before {
-  content: '—';
-  position: absolute;
-  left: 0;
-  color: var(--ink-muted);
-}
-
-/* ---------- Footer ---------- */
-
-footer {
-  margin-top: 60px;
-  padding-top: 20px;
-  border-top: 1px solid var(--line);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--ink-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-/* ---------- Responsive ---------- */
-
-@media (max-width: 600px) {
-  .page { padding: 0 16px 80px; }
-  .hero { padding: 44px 0 28px; }
-  h1 { font-size: 24px; }
-  .case-body { padding-left: 18px; }
-  .stats-row { gap: 20px; }
-}
-
+  /* theme switcher */
+  .theme-toggle{
+    position:fixed; top:20px; right:24px; z-index:10; width:36px; height:36px; border-radius:50%;
+    border:1px solid var(--hair); background:var(--page); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; padding:0;
+  }
+  .theme-toggle:focus-visible{outline:2px solid var(--blue); outline-offset:2px;}
+  .theme-toggle svg{width:18px; height:18px; stroke:var(--ink); fill:none;}
+  .theme-toggle .icon-sun{display:none;}
+  .theme-toggle .icon-moon{display:block;}
+  @media (prefers-color-scheme: dark){
+    .theme-toggle .icon-sun{display:block;}
+    .theme-toggle .icon-moon{display:none;}
+  }
+  :root[data-theme="dark"] .theme-toggle .icon-sun{display:block;}
+  :root[data-theme="dark"] .theme-toggle .icon-moon{display:none;}
+  :root[data-theme="light"] .theme-toggle .icon-sun{display:none;}
+  :root[data-theme="light"] .theme-toggle .icon-moon{display:block;}
 </style>
-</head>
-<body>
+
 <div class="page">
 
-  <header class="hero">
-    <div class="hero-inner">
-      <div class="eyebrow">Test Blueprint</div>
-      <h1>Dynamic lockscreen accent color</h1>
-      <p class="summary">Extracts a dominant color from the now-playing track's album art and applies it as the accent color across the MusicLock lockscreen widget, replacing the fixed default accent.</p>
-      <div class="meta-row">
-        <span class="chip risk-high">Risk: High</span>
-        <span class="meta">11 cases · generated from diff review</span>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" type="button">
+  <svg class="icon-moon" viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <svg class="icon-sun" viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+</button>
+
+<div class="container">
+
+  <!-- OVERVIEW -->
+  <section>
+    <h1 class="maintitle"><span class="l1">AVA-170</span><span class="l2">Test Plan.</span></h1>
+
+    <div class="cols">
+      <div class="col-l">
+        <p class="body-text">A risk-first plan for the AVA-170 report-UI fixes: regression coverage on the exact reported symptoms, unit tests pinning the applyEnabled boundary conditions, and integration/e2e checks confirming the fixes hold end-to-end. Critical paths guarded first, edge cases close behind.</p>
+        <p class="body-text">Unit tier (7 cases, U1&ndash;U7) pins the applyEnabled boundary conditions and the two supporting-copy fixes so a future refactor can't silently reintroduce the stuck-Apply bug.</p>
+        <p class="body-text">Three flows are worth a human pass before merge: default-preset Apply in the Run Now modal, the Interactions search placeholder copy, and the Between field's custom DatePicker/TimePicker click affordance.</p>
+        <p class="body-text">Three coverage gaps identified &mdash; unexecuted e2e specs, no direct applyEnabled test (now closed), orphaned equality helper (now removed).</p>
+      </div>
+      <div class="col-r">
+        <div class="numlist">
+          <div class="numitem">
+            <div class="n">1.</div>
+            <div>
+              <p class="t">Stuck Apply on re-selected preset</p>
+              <p class="d">Run Now / Quick Download modals defaulting to last30days kept Apply disabled even when re-selecting the already-applied preset.</p>
+            </div>
+          </div>
+          <div class="numitem">
+            <div class="n">2.</div>
+            <div>
+              <p class="t">Interactions search copy mismatch</p>
+              <p class="d">Placeholder/aria-label read phone-only despite the field actually matching by phone number or Call ID.</p>
+            </div>
+          </div>
+          <div class="numitem">
+            <div class="n">3.</div>
+            <div>
+              <p class="t">Between field click affordance</p>
+              <p class="d">Native datetime inputs were replaced by the app's custom DatePicker with an embedded TimePicker; clicking anywhere in the field now opens it (value format unchanged).</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </header>
 
-  <section class="impact">
-    <h2>What this touches</h2>
-    <p>The extraction logic is new and isolated (bitmap in, color out), but it sits directly in the lockscreen render path, so a slow or crashing extraction affects something users see many times a day, not just once. It depends on Android's Palette API and on album art actually being embedded in the track's metadata, both of which are outside this code and known to be inconsistent in practice. It's also gated by the existing "dynamic theming" setting, so the off-state has to keep working exactly as before. Nothing here touches playback, storage, or other screens.</p>
-  </section>
-
-  <section class="strategy">
-    <h2>Test strategy</h2>
-    <div class="stats-row">
-      <div class="stat crit"><span class="num">3</span><span class="label">Critical</span></div>
-      <div class="stat"><span class="num">5</span><span class="label">Unit</span></div>
-      <div class="stat"><span class="num">3</span><span class="label">Integration</span></div>
-      <div class="stat"><span class="num">3</span><span class="label">E2E</span></div>
-    </div>
-    <p class="rationale">Weighted toward unit tests because the actual risk is concentrated in the extraction function itself — mainly what it does with album art that doesn't cooperate (missing, monochrome, low-contrast). Integration and e2e cases are kept to the handful of places where extraction results actually cross into rendering: track changes, the theming toggle, and a failure not being allowed to take the rest of the lockscreen down with it.</p>
-    <button class="expand-toggle" id="expandToggle" type="button">Expand all</button>
-  </section>
-
-  <section class="cases">
-    <h2><span class="type-badge">U</span> Unit — color extraction</h2>
-    <div class="case-list">
-
-      <details class="case priority-critical">
-        <summary>
-          <span class="case-id">U1</span>
-          <span class="case-title">Extracts a usable accent color from typical album art</span>
-          <span class="priority-tag critical">Critical</span>
-        </summary>
-        <div class="case-body">
-          <p class="case-scenario">Run extraction against a set of representative real album art (vivid cover, muted cover, photo-based cover).</p>
-          <p class="case-expected"><span class="label">Expected</span>Returns a non-null color for every sample, and the returned hue is visibly related to the artwork's dominant color, not a generic fallback.</p>
-        </div>
-      </details>
-
-      <details class="case priority-high">
-        <summary>
-          <span class="case-id">U2</span>
-          <span class="case-title">Falls back cleanly when artwork has no clear dominant color</span>
-          <span class="priority-tag high">High</span>
-        </summary>
-        <div class="case-body">
-          <p class="case-scenario">Run extraction against flat grey/monochrome or near-white album art.</p>
-          <p class="case-expected"><span class="label">Expected</span>Returns the defined default accent color rather than a near-invisible or undefined one — no exception thrown.</p>
-        </div>
-      </details>
-
-      <details class="case priority-high">
-        <summary>
-          <span class="case-id">U3</span>
-          <span class="case-title">Handles missing artwork without crashing</span>
-          <span class="priority-tag high">High</span>
-        </summary>
-        <div class="case-body">
-          <p class="case-scenario">Run extraction on a track with no embedded artwork (null/empty bitmap input).</p>
-          <p class="case-expected"><span class="label">Expected</span>Returns the default accent color immediately; no null-pointer exception, no blocking call to a Palette instance that doesn't exist.</p>
-        </div>
-      </details>
-
-      <details class="case priority-medium">
-        <summary>
-          <span class="case-id">U4</span>
-          <span class="case-title">Extracted color meets minimum contrast against the lockscreen background</span>
-          <span class="priority-tag medium">Medium</span>
-        </summary>
-        <div class="case-body">
-          <p class="case-scenario">Run extraction against artwork whose dominant color is very close in luminance to the lockscreen background (e.g. a near-black cover on a dark lockscreen).</p>
-          <p class="case-expected"><span class="label">Expected</span>The color returned for display is adjusted to meet a minimum contrast ratio, rather than producing text/accents that are effectively invisible.</p>
-        </div>
-      </details>
-
-      <details class="case priority-low">
-        <summary>
-          <span class="case-id">U5</span>
-          <span class="case-title">Extraction result is cached per track</span>
-          <span class="priority-tag low">Low</span>
-        </summary>
-        <div class="case-body">
-          <p class="case-scenario">Call the extraction function twice in a row for the same track.</p>
-          <p class="case-expected"><span class="label">Expected</span>The second call returns the cached result rather than recomputing — verified by call count on the underlying Palette invocation, not by timing.</p>
-        </div>
-      </details>
-
+    <div class="stats">
+      <div class="stat"><div class="label">Test cases</div><div class="figure">14</div></div>
+      <div class="stat"><div class="label">Critical</div><div class="figure">4</div></div>
+      <div class="stat accent"><div class="label">Unit tests green</div><div class="figure">1184</div></div>
+      <div class="stat"><div class="label">Gaps found</div><div class="figure">3</div></div>
     </div>
   </section>
 
-  <section class="cases">
-    <h2><span class="type-badge">I</span> Integration — wiring into the lockscreen</h2>
-    <div class="case-list">
+  <hr class="hr" />
 
-      <details class="case priority-critical">
-        <summary>
-          <span class="case-id">I1</span>
-          <span class="case-title">Track change triggers a new extraction and theme update</span>
-          <span class="priority-tag critical">Critical</span>
-        </summary>
-        <div class="case-body">
-          <p class="case-scenario">Play track A, let the lockscreen settle, then switch to track B with visibly different album art.</p>
-          <p class="case-expected"><span class="label">Expected</span>The lockscreen accent updates to match track B within one render cycle — no stale color left over from track A.</p>
-        </div>
-      </details>
+  <!-- REGRESSION + UNIT A -->
+  <section>
+    <h1 class="sectitle"><span class="l1">Coverage</span><span class="l2">Regression &amp; Unit.</span></h1>
 
-      <details class="case priority-high">
-        <summary>
-          <span class="case-id">I2</span>
-          <span class="case-title">Dynamic theming toggle off bypasses extraction entirely</span>
-          <span class="priority-tag high">High</span>
-        </summary>
-        <div class="case-body">
-          <p class="case-scenario">Disable the "dynamic theming" setting, then play a track with vivid album art.</p>
-          <p class="case-expected"><span class="label">Expected</span>Lockscreen uses the fixed default accent; extraction is not invoked at all (verify via call count, not just visual output — this also protects the battery/perf case).</p>
-        </div>
-      </details>
+    <div class="tier-block">
+      <div class="tier-label"><span class="label">Regression &mdash; 3 cases</span></div>
+      <div class="table-wrap">
+        <table class="case-table">
+          <colgroup><col class="c-id"><col class="c-pri"><col class="c-title"><col class="c-scenario"><col class="c-expected"></colgroup>
+          <thead><tr><th>ID</th><th>Priority</th><th>Test Case</th><th>Scenario</th><th>Expected</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="t-id">R1</td>
+              <td class="t-pri pri-critical"><span class="dot"></span>Critical</td>
+              <td class="t-title">Re-selecting the already-applied "Last 30 Days" preset enables Apply</td>
+              <td class="t-scenario">Render <code>&lt;DateRangePicker value="last30days" .../&gt;</code> (the modal default). Without changing anything, call the internal apply-enabled logic via the rendered Apply button's disabled state.</td>
+              <td class="t-expected">Apply button is enabled immediately &mdash; this is the exact symptom in the ticket (Run Now / Quick Download modals defaulting to last30days with Apply stuck disabled).</td>
+            </tr>
+            <tr>
+              <td class="t-id">R2</td>
+              <td class="t-pri pri-high">High</td>
+              <td class="t-title">Interactions search placeholder and aria-label read "Search by phone number or ID"</td>
+              <td class="t-scenario">Render <code>InteractionTable</code> and inspect the rendered <code>PhoneSearch</code> input's <code>placeholder</code> and <code>aria-label</code> attributes.</td>
+              <td class="t-expected">Both attributes read "Search by phone number or ID", matching the copy fix and the field's actual matching behavior (phone number or Call ID).</td>
+            </tr>
+            <tr>
+              <td class="t-id">R3</td>
+              <td class="t-pri pri-medium">Medium</td>
+              <td class="t-title">Clicking anywhere in a "Between" datetime field opens the custom DatePicker</td>
+              <td class="t-scenario">Render <code>FilterRuleBuilder</code> with a "between"-operator datetime rule, now backed by the app's custom DatePicker with an embedded TimePicker. Fire a click on the "From" field body (not just the calendar icon).</td>
+              <td class="t-expected">The DatePicker (with its embedded TimePicker) opens &mdash; the whole field, not just the tiny icon, triggers it, directly fixing the reported "feels dead" behavior; the underlying value format is unchanged.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-      <details class="case priority-medium">
-        <summary>
-          <span class="case-id">I3</span>
-          <span class="case-title">Extraction failure doesn't block the rest of the lockscreen</span>
-          <span class="priority-tag medium">Medium</span>
-        </summary>
-        <div class="case-body">
-          <p class="case-scenario">Force the extraction call to throw (simulate corrupted artwork bytes).</p>
-          <p class="case-expected"><span class="label">Expected</span>Lockscreen still renders fully with the default accent — track title, controls, and artwork placeholder all still appear; the failure is contained.</p>
-        </div>
-      </details>
-
+    <div class="tier-block">
+      <div class="tier-label"><span class="label">Unit &mdash; applyEnabled boundary conditions (Bug A) &mdash; 5 cases</span></div>
+      <div class="table-wrap">
+        <table class="case-table">
+          <colgroup><col class="c-id"><col class="c-pri"><col class="c-title"><col class="c-scenario"><col class="c-expected"></colgroup>
+          <thead><tr><th>ID</th><th>Priority</th><th>Test Case</th><th>Scenario</th><th>Expected</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="t-id">U1</td>
+              <td class="t-pri pri-high">High</td>
+              <td class="t-title">Custom preset with both pending dates set enables Apply</td>
+              <td class="t-scenario">Draft preset is "custom" with both a pending start and pending end date selected on the calendar.</td>
+              <td class="t-expected">Apply is enabled.</td>
+            </tr>
+            <tr>
+              <td class="t-id">U2</td>
+              <td class="t-pri pri-critical"><span class="dot"></span>Critical</td>
+              <td class="t-title">Custom preset with only a start date selected keeps Apply disabled</td>
+              <td class="t-scenario">Draft preset is "custom", pending start is set, pending end is null (user has clicked one calendar day and not a second).</td>
+              <td class="t-expected">Apply stays disabled &mdash; this is the one case the rewritten logic must still gate on; a regression here would let users apply a half-formed custom range and run a report with an undefined end date.</td>
+            </tr>
+            <tr>
+              <td class="t-id">U3</td>
+              <td class="t-pri pri-medium">Medium</td>
+              <td class="t-title">Custom preset with no pending dates keeps Apply disabled</td>
+              <td class="t-scenario">Draft preset is "custom" immediately after switching from a named preset, before any calendar day is clicked.</td>
+              <td class="t-expected">Apply is disabled.</td>
+            </tr>
+            <tr>
+              <td class="t-id">U4</td>
+              <td class="t-pri pri-high">High</td>
+              <td class="t-title">Selecting a different named preset (e.g. Last 90 Days) enables Apply</td>
+              <td class="t-scenario">Committed value is "last30days"; draft preset is changed to "last90days".</td>
+              <td class="t-expected">Apply is enabled &mdash; covers the ordinary "user actually changed something" path so the fix isn't just permanently-enabled camouflage.</td>
+            </tr>
+            <tr>
+              <td class="t-id">U5</td>
+              <td class="t-pri pri-low">Low</td>
+              <td class="t-title">areDateRangePickerSelectionsEqual is no longer referenced by applyEnabled</td>
+              <td class="t-scenario">Static/code check: confirm <code>applyEnabled</code>'s dependency array and body no longer read <code>value</code>, <code>startDate</code>, or <code>endDate</code> for non-custom presets, and that the exported <code>areDateRangePickerSelectionsEqual</code> helper (still covered by its own describe block) has no other call site.</td>
+              <td class="t-expected">Either the helper gets removed/marked intentionally-kept-for-X, or a comment/test documents why it's retained &mdash; prevents the next reader from assuming it still gates Apply and "fixing" it back to the buggy behavior.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 
-  <section class="cases">
-    <h2><span class="type-badge">E</span> End-to-end — real usage</h2>
-    <div class="case-list">
+  <hr class="hr" />
 
-      <details class="case priority-critical">
-        <summary>
-          <span class="case-id">E1</span>
-          <span class="case-title">Playing a song with vivid art visibly re-themes the lockscreen</span>
-          <span class="priority-tag critical">Critical</span>
-        </summary>
-        <div class="case-body">
-          <p class="case-scenario">From a cold app state, lock the phone and start playback of a track with distinctive album art.</p>
-          <p class="case-expected"><span class="label">Expected</span>The lockscreen accent visibly reflects the artwork within a perceptibly instant timeframe — no flash of default color that lingers.</p>
-        </div>
-      </details>
+  <!-- UNIT B/C + INTEGRATION + E2E -->
+  <section>
+    <h1 class="sectitle"><span class="l1">Coverage</span><span class="l2">Unit, Integration &amp; E2E.</span></h1>
 
-      <details class="case priority-high">
-        <summary>
-          <span class="case-id">E2</span>
-          <span class="case-title">Rapid track-skipping settles on the final track's color without flicker or crash</span>
-          <span class="priority-tag high">High</span>
-        </summary>
-        <div class="case-body">
-          <p class="case-scenario">Skip through 5+ tracks in quick succession (faster than each extraction likely completes).</p>
-          <p class="case-expected"><span class="label">Expected</span>No crash, no visible rapid color-flicker, and the lockscreen settles on the correct color for whichever track is actually playing once skipping stops — not a color from a track that was skipped past.</p>
-        </div>
-      </details>
+    <div class="tier-block">
+      <div class="tier-label"><span class="label">Unit &mdash; supporting changes (Bug B and C) &mdash; 2 cases</span></div>
+      <div class="table-wrap">
+        <table class="case-table">
+          <colgroup><col class="c-id"><col class="c-pri"><col class="c-title"><col class="c-scenario"><col class="c-expected"></colgroup>
+          <thead><tr><th>ID</th><th>Priority</th><th>Test Case</th><th>Scenario</th><th>Expected</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="t-id">U6</td>
+              <td class="t-pri pri-medium">Medium</td>
+              <td class="t-title">PhoneSearch falls back to original phone-only copy when no overrides are passed</td>
+              <td class="t-scenario">Render <code>&lt;PhoneSearch initialValue="" onSubmit={fn} /&gt;</code> with no <code>placeholder</code>/<code>ariaLabel</code> props, as the Complaints page still does.</td>
+              <td class="t-expected">Placeholder and aria-label both read "Search by phone number..." / "Search by phone number" (the pre-existing defaults) &mdash; proves the new props are additive and don't change Complaints' intentionally-unchanged behavior.</td>
+            </tr>
+            <tr>
+              <td class="t-id">U7</td>
+              <td class="t-pri pri-low">Low</td>
+              <td class="t-title">The "To" datetime field also opens its DatePicker independently of "From"</td>
+              <td class="t-scenario">Same setup as R3, but fire the click/focus event on the "To" field instead.</td>
+              <td class="t-expected">The custom DatePicker (with its embedded TimePicker) opens for that field specifically &mdash; guards against a copy-paste fix that wired the handler onto only one of the two fields (a real risk given they're near-duplicate JSX blocks).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-      <details class="case priority-medium">
-        <summary>
-          <span class="case-id">E3</span>
-          <span class="case-title">Disabling dynamic theming mid-session reverts immediately</span>
-          <span class="priority-tag medium">Medium</span>
-        </summary>
-        <div class="case-body">
-          <p class="case-scenario">While a track with an extracted accent color is playing and visible on the lockscreen, go into settings and turn dynamic theming off.</p>
-          <p class="case-expected"><span class="label">Expected</span>Lockscreen reverts to the default accent immediately, without needing the app or device to restart.</p>
-        </div>
-      </details>
+    <div class="tier-block">
+      <div class="tier-label"><span class="label">Integration &mdash; cross-component wiring &mdash; 1 case</span></div>
+      <div class="table-wrap">
+        <table class="case-table">
+          <colgroup><col class="c-id"><col class="c-pri"><col class="c-title"><col class="c-scenario"><col class="c-expected"></colgroup>
+          <thead><tr><th>ID</th><th>Priority</th><th>Test Case</th><th>Scenario</th><th>Expected</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="t-id">I1</td>
+              <td class="t-pri pri-medium">Medium</td>
+              <td class="t-title">InteractionTable passes the new placeholder/ariaLabel through to the rendered input, not just the prop</td>
+              <td class="t-scenario">Render the full <code>InteractionTable</code> (as the existing test file does) and query the actual DOM input by its accessible name "Search by phone number or ID".</td>
+              <td class="t-expected">The input is found by that accessible name &mdash; this is stronger than asserting the prop was passed, since it also confirms <code>PhoneSearch</code> correctly forwards <code>ariaLabel</code> to the underlying <code>aria-label</code> attribute end-to-end through both components.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
+    <div class="tier-block">
+      <div class="tier-label"><span class="label">End-to-end &mdash; already written on this branch &mdash; 3 cases</span></div>
+      <div class="table-wrap">
+        <table class="case-table">
+          <colgroup><col class="c-id"><col class="c-pri"><col class="c-title"><col class="c-scenario"><col class="c-expected"></colgroup>
+          <thead><tr><th>ID</th><th>Priority</th><th>Test Case</th><th>Scenario</th><th>Expected</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="t-id">E1</td>
+              <td class="t-pri pri-critical"><span class="dot"></span>Critical</td>
+              <td class="t-title">adhoc-date-range-apply.spec.ts &mdash; full Run Now / Between coverage exists but is unexecuted locally</td>
+              <td class="t-scenario">The branch already ships <code>e2e/tests/reports/adhoc-date-range-apply.spec.ts</code> covering: re-applying the default Last 30 Days preset, switching to Last 90 Days, and filling both Between fields (via the custom DatePicker/TimePicker) on the Edit Definition filter builder &mdash; against a real MDT Helix tenant with seeded report definitions and a datetime filter field.</td>
+              <td class="t-expected">All three specs pass against the docker e2e environment (<code>bun run docker:test:e2e</code>), which provisions the tenant seed data the local test DB lacks. This is the single highest-value action item in this plan &mdash; the fix has not actually been proven against a real browser yet.</td>
+            </tr>
+            <tr>
+              <td class="t-id">E2</td>
+              <td class="t-pri pri-high">High</td>
+              <td class="t-title">search-placeholder.spec.ts &mdash; Interactions vs Complaints divergence, unexecuted locally</td>
+              <td class="t-scenario"><code>e2e/tests/interactions/search-placeholder.spec.ts</code> asserts Interactions now reads "Search by phone number or ID" while Complaints keeps the original copy (with a graceful skip if the tenant lacks the <code>complaints:view</code> feature).</td>
+              <td class="t-expected">Both assertions pass against Saluda Medical in the docker e2e environment; the skip path is exercised (not silently green) only if the feature genuinely isn't provisioned &mdash; worth confirming which branch actually ran.</td>
+            </tr>
+            <tr>
+              <td class="t-id">E3</td>
+              <td class="t-pri pri-medium">Medium</td>
+              <td class="t-title">Rapid preset switching in the Run Now modal doesn't leave Apply in a stale disabled state</td>
+              <td class="t-scenario">Not currently in the e2e spec: open Run Now, switch preset A &rarr; B &rarr; back to A (the original committed value) in quick succession, without closing the popover in between.</td>
+              <td class="t-expected">Apply remains enabled throughout, including when the draft settles back on the originally-committed preset &mdash; the new logic makes this trivially true (always-enabled for non-custom), but it's exactly the kind of "flip back and forth" interaction a real user does and it costs one more test step to add to the existing spec file.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 
-  <section class="out-of-scope">
-    <h2>Explicitly not covered here</h2>
-    <ul>
-      <li>Whether the extracted color is the "best" or most aesthetically pleasing choice from a given artwork — that's a design/subjective judgment, not a pass/fail QA concern.</li>
-      <li>Performance under extreme low-memory or low-end-device conditions — deferred to a dedicated perf pass rather than folded into this feature's functional tests.</li>
-      <li>Correctness of the Android Palette API's internal color-extraction algorithm — that's Android platform code, not ours to test.</li>
-      <li>Any existing lockscreen layout/control behavior untouched by this change — covered by the existing suite already, not re-verified here.</li>
+  <hr class="hr" />
+
+  <!-- GAPS + OOS + FOOTER -->
+  <section>
+    <h1 class="sectitle"><span class="l1">Known</span><span class="l2">Gaps.</span></h1>
+
+    <div class="gap-item">
+      <div class="n-wrap"><div class="gap-circle">!</div></div>
+      <div>
+        <p class="gt">1. Nothing has actually been run</p>
+        <p class="gd">Both new unit test files' coverage of these three fixes is inferred from reading the diff and existing specs, not from a green test run &mdash; CLAUDE.md's Task Completion Checklist requires <code>bun run lint</code>, <code>bun run build</code>, and <code>bun run test:run</code> before calling work done, and the e2e specs for this branch have not been executed against the docker environment. Until that happens this is a plan, not a verified pass.</p>
+      </div>
+    </div>
+    <div class="gap-item">
+      <div class="n-wrap"><div class="n">2.</div></div>
+      <div>
+        <p class="gt">No unit test for applyEnabled directly</p>
+        <p class="gd"><code>date-range-picker.test.ts</code> only tests the two exported pure functions (<code>getPresetCalendarHighlight</code>, <code>areDateRangePickerSelectionsEqual</code>); <code>applyEnabled</code> itself is an internal <code>useMemo</code> with no direct unit coverage &mdash; U1&ndash;U4 above would need a rendered-component test (React Testing Library) asserting the Apply button's disabled state, since the logic isn't exported as a standalone function today.</p>
+      </div>
+    </div>
+    <div class="gap-item">
+      <div class="n-wrap"><div class="n">3.</div></div>
+      <div>
+        <p class="gt">Dead/orphaned helper</p>
+        <p class="gd"><code>areDateRangePickerSelectionsEqual</code> is exported and still has its own passing unit tests, but after this fix nothing in <code>date-range-picker.tsx</code> calls it. Left as-is, it's a maintenance trap: a future reader may assume it still gates Apply and "restore" the old buggy check. Either remove it (and its now-orphaned tests) or leave a comment explaining why it's kept for potential reuse.</p>
+      </div>
+    </div>
+
+    <div class="label" style="margin-top:16px;">Out of scope</div>
+    <ul class="oos-list">
+      <li>Visual/pixel-level verification that the click affordance of the custom DatePicker/TimePicker looks right &mdash; that's a design judgment call, better suited to the repo's <code>careconvoy-visual-verify</code> skill than a pass/fail test case.</li>
+      <li>Cross-browser rendering quirks of the custom DatePicker/TimePicker component library itself (Safari/Firefox quirks) &mdash; that's a third-party component concern, not code this branch owns; the fix no longer depends on the native <code>showPicker()</code> API.</li>
+      <li>Complaints page's underlying search-matching logic (phone-only, no Call ID match) &mdash; explicitly untouched by this branch per the ticket, and not re-verified here.</li>
+      <li>Report execution correctness once a date range or Between filter is actually applied (query building, result correctness) &mdash; this plan covers only the UI-interaction bugs reported in AVA-170, not report data correctness, which is pre-existing and unrelated.</li>
     </ul>
+
+    <hr class="hr" style="margin-top:56px;" />
+    <p class="footer-line">AVA-170 &middot; PR #83 &middot; fix/AVA-170-report-ui-bugs &middot; unit suite 1184 green &middot; branch e2e pending docker run</p>
   </section>
 
-  <footer>test-blueprint · test plan, not test code</footer>
-
+</div>
 </div>
 
 <script>
-  (function () {
-    var btn = document.getElementById('expandToggle');
-    var all = Array.prototype.slice.call(document.querySelectorAll('.case'));
-    var expanded = false;
-    btn.addEventListener('click', function () {
-      expanded = !expanded;
-      all.forEach(function (d) { d.open = expanded; });
-      btn.textContent = expanded ? 'Collapse all' : 'Expand all';
+  (function(){
+    var btn = document.getElementById('themeToggle');
+    btn.addEventListener('click', function(){
+      var root = document.documentElement;
+      var current = root.dataset.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      root.dataset.theme = current === 'dark' ? 'light' : 'dark';
     });
   })();
 </script>
-
-</body>
-</html>
