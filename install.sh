@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# macOS ships bash 3.2, which lacks namerefs (`local -n`) and fractional
+# `read -t` timeouts used by the arrow-key picker. Re-exec under a newer bash
+# if one is available (e.g. Homebrew); otherwise fall back to the plain picker.
+_need_newer_bash() {
+  [ "${BASH_VERSINFO[0]}" -lt 4 ] || { [ "${BASH_VERSINFO[0]}" -eq 4 ] && [ "${BASH_VERSINFO[1]}" -lt 3 ]; }
+}
+if [ -z "${SKILLS_INSTALL_REEXEC:-}" ] && _need_newer_bash; then
+  for _b in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    [ -x "$_b" ] || continue
+    if "$_b" -c '[ "${BASH_VERSINFO[0]}" -gt 4 ] || { [ "${BASH_VERSINFO[0]}" -eq 4 ] && [ "${BASH_VERSINFO[1]}" -ge 3 ]; }' 2>/dev/null; then
+      export SKILLS_INSTALL_REEXEC=1
+      exec "$_b" "$0" "$@"
+    fi
+  done
+fi
+FANCY_OK=1
+_need_newer_bash && FANCY_OK=0
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 COLOR=1
@@ -147,34 +165,37 @@ checkbox_picker() {
   trap - EXIT INT TERM
 }
 
-# Non-interactive fallback: numbered list, read a=all or space/comma-separated numbers.
+# Non-interactive / old-bash fallback: numbered list, read a=all or numbers.
+# Uses eval-based indirection instead of namerefs so it runs on bash 3.2.
 plain_picker() {
-  local title="$1"
-  local -n items_ref="$2"
-  local -n checked_ref="$3"
-  local n="${#items_ref[@]}" i sel
+  local title="$1" items_name="$2" checked_name="$3"
+  local n i sel label
+  eval "n=\${#$items_name[@]}"
   echo "$title"
-  for ((i = 0; i < n; i++)); do printf "  %d) %s\n" "$((i + 1))" "${items_ref[$i]}"; done
+  for ((i = 0; i < n; i++)); do
+    eval "label=\${$items_name[\$i]}"
+    printf "  %d) %s\n" "$((i + 1))" "$label"
+  done
   read -rp "Select (a=all, or numbers space/comma separated): " sel || sel=""
   sel="${sel//,/ }"
-  for ((i = 0; i < n; i++)); do checked_ref[$i]=0; done
+  for ((i = 0; i < n; i++)); do eval "$checked_name[\$i]=0"; done
   if [ "$sel" = "a" ] || [ "$sel" = "A" ]; then
-    for ((i = 0; i < n; i++)); do checked_ref[$i]=1; done
+    for ((i = 0; i < n; i++)); do eval "$checked_name[\$i]=1"; done
   else
     local tok idx
     for tok in $sel; do
       [[ "$tok" =~ ^[0-9]+$ ]] || continue
       idx=$((tok - 1))
-      [ "$idx" -ge 0 ] && [ "$idx" -lt "$n" ] && checked_ref[$idx]=1
+      [ "$idx" -ge 0 ] && [ "$idx" -lt "$n" ] && eval "$checked_name[\$idx]=1"
     done
   fi
 }
 
 is_tty_interactive() { [ -t 0 ] && [ "$ALL" -eq 0 ]; }
 
-# Dispatch to the fancy widget on a tty, plain numbered list otherwise.
+# Dispatch to the fancy widget on a capable tty, plain numbered list otherwise.
 pick() {
-  if is_tty_interactive; then checkbox_picker "$@"; else plain_picker "$@"; fi
+  if is_tty_interactive && [ "$FANCY_OK" -eq 1 ]; then checkbox_picker "$@"; else plain_picker "$@"; fi
 }
 
 do_install() {
@@ -208,7 +229,7 @@ do_install() {
     for ((i = 0; i < ${#all_agents[@]}; i++)); do
       achecked[$i]=0; [ "${all_agents[$i]}" = "claude" ] && achecked[$i]=1
     done
-    checkbox_picker "Select target agents:" all_agents achecked
+    pick "Select target agents:" all_agents achecked
     sel_agents=()
     for ((i = 0; i < ${#all_agents[@]}; i++)); do
       [ "${achecked[$i]}" -eq 1 ] && sel_agents+=("${all_agents[$i]}")

@@ -1,5 +1,5 @@
 ---
-name: rust-production-architecture
+name: rustie
 description: Architect, structure, and harden production-grade Rust applications following idiomatic best practices. Use this skill whenever the user is designing, refactoring, or reviewing a Rust codebase's structure — including questions about project layout, Cargo workspaces, the modular monolith vs microservices decision, domain-driven patterns (Hexagonal/Ports-and-Adapters, Onion, Clean Architecture), the Typestate pattern, dependency injection, configuration management (figment, config-rs, conf), error handling (thiserror vs anyhow, eyre, snafu), observability/tracing, Clippy linting and CI enforcement, or building GUIs with iced (Elm/MVU architecture, layouts, component scaling, async subscriptions). Trigger it even when the user just says things like "how should I structure my Rust project", "should I split this into crates", "how do I handle errors/config/logging in Rust", or "help me build a Rust desktop app" — anytime idiomatic Rust architecture guidance helps, even without a named pattern.
 ---
 
@@ -25,13 +25,13 @@ file(s) before answering. The references contain the detailed rules, code patter
 and trade-off tables. Don't dump a whole reference at the user — pull the specific
 guidance that answers their question and explain the reasoning.
 
-| User's topic | Read |
-|---|---|
-| Project layout, modules, Cargo workspaces, monolith vs microservices, `pub` visibility, re-exports | `references/structure.md` |
-| Hexagonal / Onion / Clean Architecture, DTOs, dependency injection, the Typestate pattern | `references/architecture-patterns.md` |
-| Config management (figment/config-rs/conf), error handling (thiserror/anyhow/eyre/snafu), observability & tracing | `references/infrastructure.md` |
-| Clippy config, banning `unwrap`/`expect`, `clippy.toml` disallowed methods, input validation, `unsafe` discipline | `references/quality-and-security.md` |
-| GUI frameworks overview, iced, the Elm/MVU architecture, layouts, component scaling with `Element::map`, async `Task`/`Subscription` | `references/gui-iced.md` |
+| User's topic                                                                                                                         | Read                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
+| Project layout, modules, Cargo workspaces, monolith vs microservices, `pub` visibility, re-exports                                   | `references/structure.md`             |
+| Hexagonal / Onion / Clean Architecture, DTOs, dependency injection, the Typestate pattern                                            | `references/architecture-patterns.md` |
+| Config management (figment/config-rs/conf), error handling (thiserror/anyhow/eyre/snafu), observability & tracing                    | `references/infrastructure.md`        |
+| Clippy config, banning `unwrap`/`expect`, `clippy.toml` disallowed methods, input validation, `unsafe` discipline                    | `references/quality-and-security.md`  |
+| GUI frameworks overview, iced, the Elm/MVU architecture, layouts, component scaling with `Element::map`, async `Task`/`Subscription` | `references/gui-iced.md`              |
 
 Several references often apply to one question (e.g. "how do I structure a new
 Rust backend" touches structure, architecture-patterns, and infrastructure). Read
