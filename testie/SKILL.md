@@ -1,13 +1,13 @@
 ---
 name: testie
-description: Analyzes a feature, bug fix, or task and produces a right-sized test plan — specific unit, integration, and e2e test cases, prioritized by risk, delivered as a clean minimal HTML report. Use whenever the user wants to know how to test something they're building or fixing, what test cases to write, what edge cases they're missing, or wants confidence before merging/shipping — even without the phrase "test plan." Triggers include "what should I test for this", "what edge cases am I missing", "write test cases for X", "how would QA approach this", or pasting a diff/PR and asking for a test pass. Produces the plan only, not test code — if the user wants tests implemented, use this to decide what's needed, then write the actual test code separately.
+description: Analyzes a feature, bug fix, or task and produces a right-sized test plan — specific unit, integration, and e2e test cases, prioritized by risk, delivered as a clean minimal HTML report. Use whenever the user wants to know how to test something they're building or fixing, what test cases to write, what edge cases they're missing, or wants confidence before merging/shipping — even without the phrase "test plan." Triggers include "what should I test for this", "what edge cases am I missing", "write test cases for X", "how would QA approach this", or pasting a diff/PR and asking for a test pass. Also use when the user wants the plan executed — test cases written, run, and marked PASS/FAIL in the report.
 ---
 
 # Test Blueprint
 
 A test plan is only as good as the thinking behind it. Most bad test plans fail in one of two directions: too thin (only the happy path, because that's what's easiest to imagine) or too thick (a wall of near-identical cases that pad the count without adding coverage). This skill exists to do the thinking a senior QA engineer does *before* writing a single test — understand what changed, model what it touches, and derive the smallest set of cases that would actually catch the ways this could break — and then hand it back as a report the user can act on.
 
-The output is a plan, not code. Resist the urge to write test implementations, even in pseudocode — the value here is the reasoning trail: what to test, why it matters, and how bad it'd be if it broke.
+The primary output is the plan — the reasoning trail: what to test, why it matters, and how bad it'd be if it broke. Don't drop test implementations into the plan itself, even as pseudocode. Execution comes after the plan is complete (step 7): cases that can be automated in the repo's existing test framework get written, run, and marked PASS/FAIL in the report; cases that can't be run get marked NOT RUN with the reason.
 
 ## Workflow
 
@@ -76,15 +76,25 @@ Every test case gets:
 
 List anything you deliberately chose not to cover and why — subjective/design judgment calls, things deferred to a separate performance or security pass, third-party code you don't own, pre-existing behavior this change doesn't touch. This is as much a part of the plan as the cases themselves: it tells the reader the gap was a decision, not an oversight.
 
-### 7. Build the HTML report
+### 7. Execute the cases and mark PASS/FAIL
+
+Once the plan is final, run it — the report should show results, not just intentions.
+
+- **Decide where each case can actually run.** Unit/component and most integration cases belong in the repo's existing test framework (vitest, pytest, jest — whatever the project already uses); write them in the appropriate existing test files (or a new file following the repo's naming conventions) next to the code they cover. Cases needing live infrastructure the session can provide (a local DB for a migration round-trip, a dev server) can be run directly. E2E/manual cases with no available harness stay unexecuted.
+- **Run everything runnable and record the real outcome.** Run the relevant test files (and the repo's full suite if new tests were added, to catch collateral) and read the raw output. A case is **PASS** only if you watched its assertion pass; **FAIL** if it ran and failed (keep the failing output — a FAIL that exposes a real bug is the plan working, not a mistake to hide; report the bug, don't silently fix and re-mark); **NOT RUN** if it couldn't be executed, with a short reason ("needs staging DB", "manual e2e").
+- **Never mark from inference.** "The code obviously handles this" is not a PASS. If a subagent ran the tests, re-run the command yourself before recording the result.
+- Statuses go in the report (step 8) in a Status column per case table, and the stat strip should reflect the tally (e.g. passed/failed/not-run counts).
+
+### 8. Build the HTML report
 
 Read `assets/example.html` for the exact structure, tone, and information density to match, and read `assets/styles.css` for the design system. `assets/example.html` is a fragment — it starts directly at `<title>` and ends after the closing `</script>`, with no `<!doctype>`, `<html>`, `<head>`, or `<body>` wrapper (that's the convention for artifact fragments elsewhere, but it is **not** what you deliver here). Build the final report as a single self-contained, standalone HTML **document**:
 
 - Wrap the content in a proper `<!doctype html><html><head>...</head><body>...</body></html>` shell when you save the file locally — move the `<title>` and inlined `<style>` into `<head>`, and put the `.page` markup, theme-toggle button, and `<script>` in `<body>`. This is required because the file must open correctly as a local file in a browser and via `open <path>`, unlike an artifact fragment that gets wrapped by the artifact host.
 - Inline the CSS from `assets/styles.css` into a `<style>` tag in `<head>` (don't link it externally — the file needs to work standalone if emailed, moved, or opened offline).
 - Include the full light/dark theme token setup (the `:root` custom properties, the `prefers-color-scheme` media query, and the `:root[data-theme="dark"]`/`[data-theme="light"]` overrides) and the fixed top-right circular sun/moon theme-toggle button with its inline script, exactly as in `assets/example.html` — don't drop the toggle or hardcode a single theme.
-- Follow the section order and component patterns in the example: two-line title (line 1 ink, line 2 blue ending with a period), an overview section with strategy paragraphs on the left and a numbered big-numeral bug/feature list on the right, a 4-block stat strip (one inverted accent block), then one `case-table` per test tier (ID | Priority | Test Case | Scenario | Expected columns, uppercase letter-spaced headers over a 2px ink rule, hairline row separators — no boxes or zebra striping), a numbered gaps section (one blue circle for the top item), an out-of-scope numbered list, and a small footer line.
+- Follow the section order and component patterns in the example: two-line title (line 1 ink, line 2 blue ending with a period), an overview section with strategy paragraphs on the left and a numbered big-numeral bug/feature list on the right, a 4-block stat strip (one inverted accent block), then one `case-table` per test tier (ID | Priority | Test Case | Scenario | Expected | Status columns, uppercase letter-spaced headers over a 2px ink rule, hairline row separators — no boxes or zebra striping), a numbered gaps section (one blue circle for the top item), an out-of-scope numbered list, and a small footer line.
 - Apply priority color-coding using the `--pri-critical`/`--pri-high` tokens (with their dark-mode variants) plus the medium (ink) and low (gray) treatments from `styles.css` — Critical gets the colored dot. Case IDs are blue.
+- Render the Status column as a compact uppercase badge per row: **PASS** in green (add a `--status-pass: #1a7f37` token with a lighter dark-mode variant, e.g. `#3fb950`), **FAIL** reusing the `--pri-critical` red with the colored dot treatment, **NOT RUN** in the low/gray treatment with its one-line reason in smaller text beneath. FAIL rows should also carry a one-line pointer to the failing output or the bug it exposed.
 - Write real content, not placeholder-style text — the strategy paragraphs and case descriptions should read like a person who actually looked at this change wrote them, not like generic boilerplate ("This feature is important and should be tested thoroughly").
 - Keep it visually restrained per the design system — the point is fast scanning (ID, priority, and case title visible per row), not a dense wall of prose.
 
