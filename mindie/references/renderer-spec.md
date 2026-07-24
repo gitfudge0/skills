@@ -87,10 +87,13 @@ to keep the loop awake through the intro.
 Redrawn every frame from animated positions (`_ax/_ay`), as SVG cubic Béziers:
 `M x1 y1 C mx y1, mx y2, x2 y2` where `mx` is the horizontal midpoint — giving
 the smooth S-curve seen in the mood board. Stroke color = the child's color
-variable. Root edges are thicker (3px, opacity .55); others 2.2px, opacity .42.
+variable — now unified, since all five color variables resolve to the same
+single indigo ink, so every link reads as one consistent hue. Root edges are thicker (3px, opacity .55); others 2.2px, opacity .42.
 Edge opacity is multiplied by the child's `_op` so links fade in/out in sync
 with node reveal. Links have `pointer-events:none` and the `<svg>` overflows
-visible.
+visible. Links render as dashed leader-lines — `stroke-dasharray="1 7"` with
+`stroke-linecap="round"` — in the child's color, giving the connective tissue a
+crisper, more graphical dotted-dash look rather than a solid line.
 
 ## Interaction
 
@@ -123,31 +126,31 @@ query that collapses every duration to ~0.
 
 Two palettes via `html[data-theme="light"|"dark"]`, expressed entirely as CSS
 custom properties (see the `:root` and `html[data-theme="dark"]` blocks in the
-template). Colors are referenced as `var(--c-purple)` etc. throughout; nothing
-is hard-coded outside the variable blocks, so re-skinning means editing only
-those two blocks. On load, theme is chosen from `prefers-color-scheme`; the
+template). The five `--c-*`/`--c-*-bg` variables are all set to the same
+single indigo value per theme (deep indigo ink on warm cream in light; cream
+ink on indigo-navy in dark) — this is a strict monochromatic design, not a
+multi-hue one. Colors are referenced as `var(--c-purple)` etc. throughout;
+nothing is hard-coded outside the variable blocks, so re-skinning means
+editing only those two blocks (change all five pairs together to keep the
+monochrome intact). On load, theme defaults to **light** (no `prefers-color-scheme` detection); the
 Theme button flips `data-theme` and calls `kick()` so link colors repaint.
 
 ### Palette (light)
 
 ```
---bg #f5f6fb  --surface #ffffff  --surface-2 #f0f1f7  --border #e3e5ef
---text #2a2d3a  --text-soft #6b7080
---root-bg #eef0ff  --root-border #c3c8ff  --root-text #4a3fb8
-purple #7c6cf0 / bg #efedff    pink #f06ca8 / bg #ffeef6
-orange #f2953f / bg #fff2e2    teal #2fb99a / bg #e4f7f2
-blue   #4a9de8 / bg #e7f2fd
+--bg #f4f1e9  --surface #fffdf7  --surface-2 #ece7d8  --border rgba(43,53,160,0.22)
+--text #23265e  --text-soft #5b5f95
+--root-bg #2b35a0  --root-border #232c86  --root-text #f7f3e6
+purple/pink/orange/teal/blue all: #2b35a0 / bg #eae9f6 (one indigo ink, one cream tint)
 ```
 
 ### Palette (dark)
 
 ```
---bg #14151c  --surface #1e2029  --surface-2 #262935  --border #333748
---text #e7e9f2  --text-soft #9096a8
---root-bg #2b2960  --root-border #5a55c0  --root-text #cfc9ff
-purple #9a8cff / bg #2c2a4d    pink #ff8bbd / bg #45283a
-orange #ffab5e / bg #43331f    teal #4fd6b6 / bg #1e3d38
-blue   #6db6ff / bg #1f3448
+--bg #1b1c20  --surface #242529  --surface-2 #2d2e34  --border rgba(235,235,240,0.14)
+--text #ececf0  --text-soft #a3a5b3
+--root-bg #4650c9  --root-border #6670e0  --root-text #fbf7ea
+purple/pink/orange/teal/blue all: #a9b2f0 / bg #2a2c3a (periwinkle ink on neutral gray paper)
 ```
 
 ## Node styling essentials
@@ -157,10 +160,19 @@ blue   #6db6ff / bg #1f3448
 - **`width: max-content; max-width: 260px;`** — sizes to the label so short
   text stays on one line; only labels wider than 260px wrap. (This fixed the
   earlier unwanted-wrapping bug — keep it.)
-- Color classes `.purple/.pink/.orange/.teal/.blue` set text = color var,
-  background = color-bg var, border = 45%-mixed color. `.root` uses the root
-  vars and has the pulsing `::before` ring. `.selected` adds a 3px color glow.
-- Badge (child count) is a small pill; `.expanded .badge` rotates 180°.
+- Color classes `.purple/.pink/.orange/.teal/.blue` all now alias to the same
+  single indigo ink variable/bg — they remain distinct selectors (for JS
+  compatibility) but resolve to identical values. Hierarchy is no longer
+  expressed via hue at all; it comes from the `depth-N` classes set alongside
+  the color class: `.root` is a solid filled ink block with the pulsing
+  `::before` ring; `.depth-1` gets a heavier 2px border and bold (800) weight;
+  `depth-2` and deeper get a thin, low-opacity (42%-mixed) border on plain
+  `--surface` fill, reading as the lightest/quietest tier. `.selected` adds a
+  3px glow (still ink-colored, just via `currentColor`).
+- Badge (child count) is a small pill filled with the root ink color
+  (`--root-bg`/`--root-text`), with a lighter root-specific fill on `.root`
+  badges and darker/lighter overrides on `.expanded`; `.expanded .badge` also
+  rotates 180°.
 
 ## Layout of the HTML file
 

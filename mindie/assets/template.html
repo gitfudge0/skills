@@ -6,42 +6,42 @@
 <title>__TITLE__</title>
 <style>
   :root {
-    --bg: #f5f6fb;
-    --bg-grid: rgba(90, 95, 130, 0.06);
-    --surface: #ffffff;
-    --surface-2: #f0f1f7;
-    --border: #e3e5ef;
-    --text: #2a2d3a;
-    --text-soft: #6b7080;
-    --shadow: 0 10px 30px rgba(45, 50, 90, 0.10);
-    --shadow-sm: 0 3px 10px rgba(45, 50, 90, 0.08);
-    --root-bg: #eef0ff;
-    --root-border: #c3c8ff;
-    --root-text: #4a3fb8;
-    --c-purple: #7c6cf0;   --c-purple-bg: #efedff;
-    --c-pink:   #f06ca8;   --c-pink-bg:   #ffeef6;
-    --c-orange: #f2953f;   --c-orange-bg: #fff2e2;
-    --c-teal:   #2fb99a;   --c-teal-bg:   #e4f7f2;
-    --c-blue:   #4a9de8;   --c-blue-bg:   #e7f2fd;
+    --bg: #f4f1e9;
+    --bg-grid: rgba(43, 53, 160, 0.08);
+    --surface: #fffdf7;
+    --surface-2: #ece7d8;
+    --border: rgba(43, 53, 160, 0.22);
+    --text: #23265e;
+    --text-soft: #5b5f95;
+    --shadow: 0 10px 30px rgba(43, 53, 160, 0.12);
+    --shadow-sm: 0 3px 10px rgba(43, 53, 160, 0.10);
+    --root-bg: #2b35a0;
+    --root-border: #232c86;
+    --root-text: #f7f3e6;
+    --c-purple: #2b35a0;   --c-purple-bg: #eae9f6;
+    --c-pink:   #2b35a0;   --c-pink-bg:   #eae9f6;
+    --c-orange: #2b35a0;   --c-orange-bg: #eae9f6;
+    --c-teal:   #2b35a0;   --c-teal-bg:   #eae9f6;
+    --c-blue:   #2b35a0;   --c-blue-bg:   #eae9f6;
   }
   html[data-theme="dark"] {
-    --bg: #14151c;
-    --bg-grid: rgba(160, 170, 220, 0.05);
-    --surface: #1e2029;
-    --surface-2: #262935;
-    --border: #333748;
-    --text: #e7e9f2;
-    --text-soft: #9096a8;
+    --bg: #1b1c20;
+    --bg-grid: rgba(235, 235, 240, 0.05);
+    --surface: #242529;
+    --surface-2: #2d2e34;
+    --border: rgba(235, 235, 240, 0.14);
+    --text: #ececf0;
+    --text-soft: #a3a5b3;
     --shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
     --shadow-sm: 0 3px 12px rgba(0, 0, 0, 0.35);
-    --root-bg: #2b2960;
-    --root-border: #5a55c0;
-    --root-text: #cfc9ff;
-    --c-purple: #9a8cff;   --c-purple-bg: #2c2a4d;
-    --c-pink:   #ff8bbd;   --c-pink-bg:   #45283a;
-    --c-orange: #ffab5e;   --c-orange-bg: #43331f;
-    --c-teal:   #4fd6b6;   --c-teal-bg:   #1e3d38;
-    --c-blue:   #6db6ff;   --c-blue-bg:   #1f3448;
+    --root-bg: #4650c9;
+    --root-border: #6670e0;
+    --root-text: #fbf7ea;
+    --c-purple: #a9b2f0;   --c-purple-bg: #2a2c3a;
+    --c-pink:   #a9b2f0;   --c-pink-bg:   #2a2c3a;
+    --c-orange: #a9b2f0;   --c-orange-bg: #2a2c3a;
+    --c-teal:   #a9b2f0;   --c-teal-bg:   #2a2c3a;
+    --c-blue:   #a9b2f0;   --c-blue-bg:   #2a2c3a;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -65,15 +65,15 @@
   @keyframes barDrop { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .brand .dot {
-    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--c-purple), var(--c-pink));
-    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px;
+    width: 30px; height: 30px; border-radius: 10px; flex-shrink: 0;
+    background: var(--root-bg);
+    display: grid; place-items: center; color: var(--root-text); font-weight: 800; font-size: 15px;
     box-shadow: var(--shadow-sm);
     transition: transform .4s cubic-bezier(.2,.9,.3,1.4);
   }
   .brand .dot:hover { transform: rotate(-8deg) scale(1.08); }
-  .brand h1 { font-size: 15px; font-weight: 700; letter-spacing: -.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .brand .sub { font-size: 12px; color: var(--text-soft); font-weight: 500; white-space: nowrap; }
+  .brand h1 { font-size: 15px; font-weight: 800; letter-spacing: -.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand .sub { font-size: 11px; color: var(--text-soft); font-weight: 700; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.08em; }
   .spacer { flex: 1; }
   .btn {
     border: 1px solid var(--border); background: var(--surface);
@@ -126,10 +126,12 @@
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 18px; height: 18px; padding: 0 5px; margin-left: 8px;
     font-size: 10.5px; font-weight: 700; border-radius: 20px;
-    background: color-mix(in srgb, currentColor 15%, transparent);
+    background: var(--root-bg); color: var(--root-text);
     transition: transform .35s cubic-bezier(.2,.9,.3,1.6), background .2s;
   }
-  .node.expanded .badge { background: color-mix(in srgb, currentColor 28%, transparent); }
+  .node.root .badge { background: color-mix(in srgb, var(--root-text) 25%, transparent); color: var(--root-text); }
+  .node.expanded .badge { background: var(--root-border); }
+  .node.root.expanded .badge { background: color-mix(in srgb, var(--root-text) 40%, transparent); }
   .node.root {
     font-size: 17px; font-weight: 800; padding: 16px 24px; border-radius: 20px;
     background: var(--root-bg); border-color: var(--root-border); color: var(--root-text);
@@ -141,13 +143,18 @@
     pointer-events: none;
   }
   @keyframes rootPulse { 0%,100% { opacity: 0; transform: scale(.98); } 50% { opacity: .35; transform: scale(1.02); } }
-  .node.purple { color: var(--c-purple); background: var(--c-purple-bg); border-color: color-mix(in srgb, var(--c-purple) 45%, transparent); }
-  .node.pink   { color: var(--c-pink);   background: var(--c-pink-bg);   border-color: color-mix(in srgb, var(--c-pink) 45%, transparent); }
-  .node.orange { color: var(--c-orange); background: var(--c-orange-bg); border-color: color-mix(in srgb, var(--c-orange) 45%, transparent); }
-  .node.teal   { color: var(--c-teal);   background: var(--c-teal-bg);   border-color: color-mix(in srgb, var(--c-teal) 45%, transparent); }
-  .node.blue   { color: var(--c-blue);   background: var(--c-blue-bg);   border-color: color-mix(in srgb, var(--c-blue) 45%, transparent); }
+  .node.purple { color: var(--c-purple); background: var(--c-purple-bg); border-color: color-mix(in srgb, var(--c-purple) 70%, transparent); }
+  .node.pink   { color: var(--c-pink);   background: var(--c-pink-bg);   border-color: color-mix(in srgb, var(--c-pink) 70%, transparent); }
+  .node.orange { color: var(--c-orange); background: var(--c-orange-bg); border-color: color-mix(in srgb, var(--c-orange) 70%, transparent); }
+  .node.teal   { color: var(--c-teal);   background: var(--c-teal-bg);   border-color: color-mix(in srgb, var(--c-teal) 70%, transparent); }
+  .node.blue   { color: var(--c-blue);   background: var(--c-blue-bg);   border-color: color-mix(in srgb, var(--c-blue) 70%, transparent); }
+  .node.depth-1 { border-width: 2px; font-weight: 800; }
+  .node:not(.root):not(.depth-1) {
+    border-color: color-mix(in srgb, currentColor 42%, transparent);
+    background: var(--surface);
+  }
   .node .label { color: var(--text); }
-  .node.root .label { color: var(--root-text); }
+  .node.root .label { color: var(--root-text); font-weight: 800; letter-spacing: -0.015em; }
   .node.selected { box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 35%, transparent), var(--shadow); }
 
   path.link { fill: none; stroke-linecap: round; }
@@ -164,10 +171,10 @@
   }
   .panel.open { transform: translateX(0) scale(1); opacity: 1; }
   .panel .ptag {
-    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .4px;
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
     text-transform: uppercase; padding: 4px 10px; border-radius: 20px; margin-bottom: 12px;
   }
-  .panel h2 { font-size: 19px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 10px; }
+  .panel h2 { font-size: 19px; font-weight: 800; letter-spacing: -0.015em; margin-bottom: 10px; }
   .panel p { font-size: 13.5px; line-height: 1.6; color: var(--text-soft); margin-bottom: 10px; }
   .panel ul { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
   .panel li {
@@ -397,7 +404,7 @@ function esc(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;"
 
 NODES.forEach(n=>{
   const el = document.createElement("div");
-  el.className = "node " + (n.color||"purple");
+  el.className = "node depth-" + (n.depth||0) + " " + (n.color||"purple");
   const childCount = (n.children||[]).length;
   if(childCount) el.classList.add("expandable");
   el.innerHTML = `<span class="inner"><span class="label">${esc(n.label)}</span>` +
@@ -480,7 +487,7 @@ function drawLinks(){
       const cvar = colorVar[c.color] || "--border";
       const w = n.id===DATA.id ? 3 : 2.2;
       const baseOp = n.id===DATA.id ? 0.55 : 0.42;
-      frag.push(`<path class="link" d="M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" stroke="var(${cvar})" stroke-width="${w}" stroke-opacity="${(baseOp*op).toFixed(3)}"/>`);
+      frag.push(`<path class="link" d="M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" stroke="var(${cvar})" stroke-width="${w}" stroke-opacity="${(baseOp*op).toFixed(3)}" stroke-linecap="round" stroke-dasharray="1 7"/>`);
     });
   });
   svg.innerHTML = frag.join("");
@@ -651,8 +658,7 @@ function addRipple(host, e){
    THEME
    ============================================================ */
 const htmlEl = document.documentElement;
-const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-htmlEl.setAttribute("data-theme", prefersDark ? "dark" : "light");
+htmlEl.setAttribute("data-theme", "light"); /* light by default; Theme button toggles */
 document.getElementById("themeBtn").onclick = e=>{
   const cur = htmlEl.getAttribute("data-theme");
   htmlEl.setAttribute("data-theme", cur==="dark"?"light":"dark");
