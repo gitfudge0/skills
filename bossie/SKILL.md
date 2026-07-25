@@ -1,5 +1,5 @@
 ---
-name: orchestrator
+name: bossie
 description: Use the moment a task turns into implementation — writing/editing code, running builds/tests, mechanical edits, producing artifacts — including when a question morphs into a fix mid-conversation. Enforces the orchestrator/worker split: the main agent plans, coordinates, and verifies only; all implementation is delegated to sonnet worker subagents.
 ---
 
@@ -31,20 +31,32 @@ Before dispatching, scan the brief for choices reversible in code but not in tas
 
 **Pre-authorize the gray areas.** Scope decisions stall workers like taste decisions do. Scan for steps a cautious worker could read as "beyond my brief" — a transformation dressed as a pure move, a fixup outside listed files — and explicitly sanction or forbid each. Add: "do not stop early to ask for continuation — stop only when genuinely blocked." A worker stopping to ask costs a full roundtrip.
 
-## Discovery first
+## Discovery first — fan it out too
 
-Do one upfront exploration pass (yourself or an Explore agent) before dispatching. Paste the relevant findings — paths, conventions, gotchas — into every brief so workers don't repeat discovery. For follow-up in an area a worker already knows, resume it via SendMessage rather than spawning fresh.
+One upfront exploration pass before dispatching. If the areas are independent, run several Explore agents **in one message** rather than sweeping serially yourself. Paste the relevant findings — paths, conventions, gotchas — into every brief so workers don't repeat discovery. For follow-up in an area a worker already knows, resume it via SendMessage rather than spawning fresh.
 
-## Sequential plans: one worker, batched
+## Shape the work: parallel by default
 
-For a multi-task plan executed in order (refactors, migrations), default to **one worker resumed across batches**, not a fresh worker per task — it carries learned fix patterns forward.
+Sequential is the fallback, not the starting point. Before dispatching, partition the plan into **lanes** — task groups with disjoint file sets:
 
-- **Batch 3–6 tasks per message**, verifying between batches. One-task batches waste roundtrips; whole-plan batches invite stalling and corner-cutting.
-- Spawn fresh (pasting still-relevant findings) once the transcript is mostly spent history you'd re-pay for on every resume.
+1. Pull out any edit several lanes depend on (shared type, config, helper). Do that one first, alone.
+2. Group the rest by file set. Non-overlapping groups are lanes.
+3. Dispatch every lane in **one message** (multiple Agent calls). Verify once, after they all land.
+4. Only genuinely order-dependent chains stay sequential — and then it's **one worker resumed across batches of 3–6 tasks**, not a fresh worker per task; it carries learned fix patterns forward. One-task batches waste roundtrips; whole-plan batches invite stalling.
 
-## Parallel workers
+If two lanes must touch the same file, either serialize just that file into step 1 or give each `isolation: worktree` and merge yourself.
 
-Independent work → multiple Agent calls in one message. Parallel workers must have **disjoint file sets**; if overlap is unavoidable, use `isolation: worktree` and merge yourself.
+Spawn fresh (pasting still-relevant findings) once a resumed worker's transcript is mostly spent history you'd re-pay for on every turn.
+
+**Don't idle-wait.** While lanes run, do the orchestrator-side work: write the next round's briefs, prepare verify commands, read what you'll need to review.
+
+## Token discipline
+
+- Briefs carry **excerpts, not files** — the path, the ten lines that matter, the convention. Workers read the rest themselves.
+- Verify **once per parallel round**, not once per lane: one build, one test run, one `git status`.
+- Don't re-read a file a worker wrote. `git diff --stat` plus a targeted grep answers "did it land."
+- A fix pattern that will recur across lanes goes in every brief up front — cheaper than N correction roundtrips.
+- Never ask for output you'll re-derive yourself (see the brief checklist).
 
 ## Repo state can change under you
 

@@ -1,5 +1,5 @@
 ---
-name: war-room
+name: roomie
 description: Generates cross-functional personas from the actual project/domain (PM, design, engineering, ops, etc.), gets each one's independent take on a feature, bug, or technical decision, then synthesizes their input into a clear product decision — a recommendation, risks to watch, and open conditions. Produces a decision-first HTML artifact plus a chat summary. Use this whenever the user wants multiple perspectives, a pressure-test, or help deciding on a feature, bug, architecture call, or product change — including indirect phrasing like "is this a good idea," "what would the team think," "what are the tradeoffs here," "should we build this," or "help me decide." Also trigger on explicit phrases like "war room this," "get different perspectives on this," "pressure-test this," or "run this by the team."
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: canvas-mock
+name: mockie
 description: Use whenever the user asks for a mock, mockup, UI mock, design mock, "mock.html", or to visualize a UI flow/states before building — and when they want to explore or compare design options and pick one ("show me options", "give me a few versions", "let me pick", "what could this look like"). Produces a Figma-like canvas — one self-contained HTML file laying out every state and flow of the feature as labeled frames on a board, styled to match the project's real design system, then opens it. An optional variants mode instead renders several distinct designs of ONE state side-by-side to choose from, then wires the winner into the real components.
 ---
 
