@@ -22,9 +22,9 @@ If none of these give you enough to reason about concretely — you don't know w
 
 If you have a bug report rather than a feature, identify the actual root cause (or best hypothesis) before planning tests — a regression test aimed at the symptom instead of the cause gives false confidence.
 
-### 2. Map the impact
+### 2. Trace the blast radius
 
-Before listing test ideas, spend a moment modeling what this actually touches. This is the difference between a generic checklist and a plan specific to this change. Work through, briefly:
+Before listing test ideas, go find out what this actually touches — don't imagine it. This is the difference between a generic checklist and a plan specific to this change. Answer each of these with evidence:
 
 - **What does it do** — the core behavior, in one or two sentences.
 - **What data does it touch** — inputs, ranges, formats, persistence, anything that flows through it.
@@ -32,7 +32,22 @@ Before listing test ideas, spend a moment modeling what this actually touches. T
 - **Who's affected and how** — which users/roles/contexts exercise this, and whether some are higher-stakes than others (e.g. paying users, admins, first-time users mid-onboarding).
 - **What's the blast radius if it breaks** — cosmetic annoyance, silent wrong data, crash, data loss, security/permissions leak. This single judgment drives most of the prioritization in step 4.
 
-Keep this to a short paragraph in your own head (and later, in the report) — this isn't a deliverable in itself, it's what makes the test list that follows actually targeted instead of generic.
+Probe moves — actually do these, don't just think about them:
+- Grep the changed functions/symbols/endpoints for their callers (`grep -rn` the function name, the route path, the exported type) and open the ones that show up.
+- Find who else reads or writes the same table, cache key, queue, config value, or feature flag — grep for the table/column name, the cache key string, the flag name.
+- If a response shape or payload changed, grep for other consumers of that shape (other endpoints, the frontend client, mobile, exports, webhooks).
+- Check migrations and column defaults for existing rows that predate the change — would a null/legacy value break the new logic?
+- Look for background jobs, cron, webhooks, or retry logic that touch the same record and could race with or duplicate this change.
+
+See the `Upstream / downstream` section of `references/test-design-heuristics.md` for the fuller prompt list to run these probe findings through.
+
+Every claim in the impact write-up either names a file/symbol you actually looked at, or is explicitly marked as an assumption. No unsourced "this probably affects billing."
+
+**A wider blast radius raises priority, it does not raise case count.** A probe finding earns its own case only when it represents a distinct failure mode — a way this could break that no existing case would catch. Stale-cache-after-write is distinct: the write can be correct while the cache refresh is broken, and they fail independently. "Billing also reads this column" is not distinct — the column is either right or wrong, and an existing case already checks that; it raises that case's priority instead. Step 4's filtering discipline still governs the final list; this step feeds it evidence, not volume.
+
+One pass is enough: follow the direct dependencies you find, don't transitively map the whole repo. If the probe turns up nothing beyond the changed file, say so and move on — that's a valid result, not a failed search.
+
+The output of this step is the short impact paragraph that goes in the report's overview section.
 
 ### 3. Decide which test types actually apply
 
@@ -69,6 +84,7 @@ Every test case gets:
 - **Title** — one line, states the specific condition being verified, not just the feature name.
 - **Type** — unit / integration / e2e / regression.
 - **Priority** — Critical / High / Medium / Low, from the risk rubric in the references file.
+- **Protects** — the specific dependency or blast-radius finding from step 2 that this case guards (e.g. "billing report reads the same `invoices.status` column"). Omit for cases that only cover the changed code itself.
 - **Scenario** — the concrete setup and action. Specific enough that someone could implement it without asking follow-up questions — real-ish values, not "some invalid input."
 - **Expected result** — the observable, checkable outcome. If you can't state this concretely, the case isn't ready yet.
 
@@ -83,7 +99,7 @@ Once the plan is final, run it — the report should show results, not just inte
 - **Decide where each case can actually run.** Unit/component and most integration cases belong in the repo's existing test framework (vitest, pytest, jest — whatever the project already uses); write them in the appropriate existing test files (or a new file following the repo's naming conventions) next to the code they cover. Cases needing live infrastructure the session can provide (a local DB for a migration round-trip, a dev server) can be run directly. E2E/manual cases with no available harness stay unexecuted.
 - **Run everything runnable and record the real outcome.** Run the relevant test files (and the repo's full suite if new tests were added, to catch collateral) and read the raw output. A case is **PASS** only if you watched its assertion pass; **FAIL** if it ran and failed (keep the failing output — a FAIL that exposes a real bug is the plan working, not a mistake to hide; report the bug, don't silently fix and re-mark); **NOT RUN** if it couldn't be executed, with a short reason ("needs staging DB", "manual e2e").
 - **Never mark from inference.** "The code obviously handles this" is not a PASS. If a subagent ran the tests, re-run the command yourself before recording the result.
-- Statuses go in the report (step 8) in a Status column per case table, and the stat strip should reflect the tally (e.g. passed/failed/not-run counts).
+- Statuses go in the report (step 8) as a Status badge per case row, and the stat strip should reflect the tally (test cases / passed / failed / not run).
 
 ### 8. Build the HTML report
 
@@ -92,9 +108,9 @@ Read `assets/example.html` for the exact structure, tone, and information densit
 - Wrap the content in a proper `<!doctype html><html><head>...</head><body>...</body></html>` shell when you save the file locally — move the `<title>` and inlined `<style>` into `<head>`, and put the `.page` markup, theme-toggle button, and `<script>` in `<body>`. This is required because the file must open correctly as a local file in a browser and via `open <path>`, unlike an artifact fragment that gets wrapped by the artifact host.
 - Inline the CSS from `assets/styles.css` into a `<style>` tag in `<head>` (don't link it externally — the file needs to work standalone if emailed, moved, or opened offline).
 - Include the full light/dark theme token setup (the `:root` custom properties, the `prefers-color-scheme` media query, and the `:root[data-theme="dark"]`/`[data-theme="light"]` overrides) and the fixed top-right circular sun/moon theme-toggle button with its inline script, exactly as in `assets/example.html` — don't drop the toggle or hardcode a single theme.
-- Follow the section order and component patterns in the example: two-line title (line 1 ink, line 2 blue ending with a period), an overview section with strategy paragraphs on the left and a numbered big-numeral bug/feature list on the right, a 4-block stat strip (one inverted accent block), then one `case-table` per test tier (ID | Priority | Test Case | Scenario | Expected | Status columns, uppercase letter-spaced headers over a 2px ink rule, hairline row separators — no boxes or zebra striping), a numbered gaps section (one blue circle for the top item), an out-of-scope numbered list, and a small footer line.
-- Apply priority color-coding using the `--pri-critical`/`--pri-high` tokens (with their dark-mode variants) plus the medium (ink) and low (gray) treatments from `styles.css` — Critical gets the colored dot. Case IDs are blue.
-- Render the Status column as a compact uppercase badge per row: **PASS** in green (add a `--status-pass: #1a7f37` token with a lighter dark-mode variant, e.g. `#3fb950`), **FAIL** reusing the `--pri-critical` red with the colored dot treatment, **NOT RUN** in the low/gray treatment with its one-line reason in smaller text beneath. FAIL rows should also carry a one-line pointer to the failing output or the bug it exposed.
+- Follow the section order and component patterns in the example: two-line title (line 1 ink, line 2 blue ending with a period), an overview section with strategy paragraphs on the left and a numbered big-numeral bug/feature list on the right, a 4-block stat strip (Test cases | Passed | Failed | Not run, accent block inverted on Passed), then one `case-table` per test tier (six columns — ID | Priority | Test Case | Scenario | Expected | Status — uppercase letter-spaced headers over a 2px ink rule, hairline row separators — no boxes or zebra striping), a numbered gaps section (one blue circle for the top item), an out-of-scope numbered list, and a small footer line.
+- Apply priority color-coding using the `--pri-critical`/`--pri-high` tokens (with their dark-mode variants) plus the medium (ink) and low (gray) treatments from `styles.css` — Critical gets the colored dot. Case IDs are blue. Protects isn't a column — render it inside the Scenario cell as a smaller gray line below the scenario text (`Protects: <dependency>`); omit it entirely for cases with no Protects value.
+- Render Status as a compact uppercase badge per row: **PASS** in green (`--status-pass: #1a7f37` light, `#3fb950` dark), **FAIL** reusing the `--pri-critical` red with the colored dot treatment, **NOT RUN** in the low/gray treatment with its one-line reason in smaller text beneath. FAIL rows should also carry a one-line pointer to the failing output or the bug it exposed.
 - Write real content, not placeholder-style text — the strategy paragraphs and case descriptions should read like a person who actually looked at this change wrote them, not like generic boilerplate ("This feature is important and should be tested thoroughly").
 - Keep it visually restrained per the design system — the point is fast scanning (ID, priority, and case title visible per row), not a dense wall of prose.
 

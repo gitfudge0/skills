@@ -18,6 +18,16 @@ Run the changed behavior through whichever of these actually apply. Most changes
 - **Permission/role variation.** If different users see different things, test the boundary between roles, not just "logged in vs. logged out" — the interesting bugs are usually at the edge of a permission tier, not its center.
 - **Disfavored use.** What does a careless or adversarial user do that a careful one wouldn't — double-submitting a form, pasting a huge string into a small field, replaying an old request? Include this when the blast radius of misuse is real (payments, auth, content that gets published); skip it for low-stakes internal tooling.
 
+## Upstream / downstream
+
+These are prompts for the step-2 probe findings — they identify candidate failure modes, not automatic cases. A finding becomes its own case only if it can fail independently of what's already covered; otherwise it just raises the priority of an existing case.
+
+- **Stale cache or derived data.** If the write invalidates or should invalidate a cache entry, materialized view, or denormalized copy of the data, test that the stale copy actually gets refreshed — not just that the source of truth is correct.
+- **Other consumers of a changed response shape.** If an API payload changed, test the other things that parse it — the mobile client, a data export, a webhook payload — not just the primary caller you were editing.
+- **Rows that predate the change.** If you added a column, a new validation rule, or a new required field, test against existing rows created before the change existed, not just newly created ones.
+- **Concurrent background touches.** If a cron job, queue consumer, or background job reads or writes the same record a user can touch interactively, test what happens when both act on it around the same time.
+- **Retries and replays.** If the action can be retried (client retry, webhook redelivery, queue redelivery), test that reprocessing the same event doesn't double-apply the effect.
+
 ## Risk scoring (drives priority)
 
 Score each candidate case on two axes, then combine:
