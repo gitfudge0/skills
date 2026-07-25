@@ -1,3 +1,8 @@
+---
+name: deckie
+description: Design system for standalone HTML report decks. Use whenever the output is a deliverable the user will read, share, or revisit rather than a chat reply — findings, audits, code reviews, research handoffs, architecture decisions, plans, postmortems, migration write-ups. Reach for it any time you'd otherwise produce a multi-section markdown file or a summary longer than a page, since HTML gives it real visual hierarchy. Triggers include "write this up", "give me a report", "make this shareable", "put this in a doc", "document what you found", or asking for a summary substantial enough to be revisited later.
+---
+
 # HTML Report Skill
 
 A design system for standalone report decks. You already know how to code — this file conveys **intent, conventions, and the gotchas you can't infer from the CSS**. For exact component structure, read `assets/report.css`; for the deck runtime, read `assets/deck.js`. Don't re-derive what those files already define.
