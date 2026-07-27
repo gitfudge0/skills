@@ -6,6 +6,7 @@ A personal collection of Claude Code skills, one directory each, each with a `SK
 |---|---|---|
 | bossie | Enforces the orchestrator/worker split — the main agent plans, delegates, and verifies; workers implement. | "this task turned into implementation" |
 | deckie | Design system for standalone HTML report decks — the format to reach for instead of a markdown file. | "need a shareable report, not markdown" |
+| gappie | Reconstructs end-to-end flows from a pile of project docs, then reports the gaps and routes the open questions to whoever can answer them. | "what are we missing in these specs" |
 | mindie | Turns a document, transcript, or pile of notes into an interactive animated HTML mindmap. | "mindmap this document" |
 | mockie | Lays out every state and flow of a feature as labeled frames on a Figma-like HTML canvas, before you build it. | "mock this up before building" |
 | roomie | Cross-functional personas pressure-test a decision independently, then synthesize into one recommendation. | "should we build this" |
