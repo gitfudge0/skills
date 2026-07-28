@@ -33,7 +33,7 @@ Six skills are stages. Fixed order. Stages may be **dropped**, never **reordered
 | `implement` | gf-delegate | Code is being written |
 | `review` | gf-layered-review | **Always, if `implement` ran** — see below |
 
-Users name stages by nickname: **roomie** = `decide`, **mockie** = `design`, **testie** = `verify-plan`, **gappie** = `understand`, **bossie** = `implement`. Map them to stages; if a nickname is unrecognized, ask rather than guess.
+Users name a stage by either column — the stage (`design`) or the skill (`gf-ui-mock`). Both map to the same row. If a name matches neither, ask rather than guess.
 
 **`review` is not droppable.** If code was written, gf-layered-review runs. Omission does not drop it. Only an explicit exclusion ("skip the review", "no review") drops it, and then say so in `route_reason`. Do not ask permission to run it; run it and report.
 
@@ -47,7 +47,7 @@ Three skills are **support** — invoked *inside* a stage, never as a stage of t
 
 ## Routing
 
-**If the user's prompt names stages, that is the route.** "Do a roomie, then mockie, then testie" means exactly those three, in that order. Obey literally: no inferred additions, no "they probably also want".
+**If the user's prompt names stages, that is the route.** "Run gf-decision-room, then gf-ui-mock, then gf-test-plan" means exactly those three, in that order. Obey literally: no inferred additions, no "they probably also want".
 
 **Only when no stages are named** does gf-ship infer a route, from the *Runs when* column. It is judgement, not a rule table — weigh how expensive the work is to unwind.
 
