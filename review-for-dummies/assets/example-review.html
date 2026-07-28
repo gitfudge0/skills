@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>code review — payments-retry-queue</title>
+<style>
+:root{
+--indigo:#2D2DD6; --indigo-d:#1C1C8F; --indigo-l:#8A8AEA;
+--canvas:#E9ECF4; --panel:#FBFCFE; --panel-2:#F3F5FA;
+--ink:#232848; --ink-2:#5D6484; --ink-3:#9AA0B8; --ghost:#C3C8DA;
+--line:#D8DCE9; --hair:#E5E8F1;
+--red:#E0402A; --red-t:#FCF0EE;
+--amber:#8a6d1f; --amber-t:#FBF3DE;
+--teal:#1a7a5c; --teal-t:#EDF6F2;
+}
+@media (prefers-color-scheme:dark){
+:root:not([data-theme]){
+--indigo:#6a6af0; --indigo-d:#4a4ad0; --indigo-l:#9a9af8;
+--canvas:#05060a; --panel:#0f121b; --panel-2:#161a26;
+--ink:#e6e8f0; --ink-2:#9199a6; --ink-3:#7b81a6; --ghost:#3a4258;
+--line:#2a3040; --hair:#1c2130;
+--red:#f0665a; --red-t:#2a1a1c;
+--amber:#e0ab4a; --amber-t:#2e2717;
+--teal:#3fbf94; --teal-t:#12241d;
+}
+}
+html[data-theme="dark"]{
+--indigo:#6a6af0; --indigo-d:#4a4ad0; --indigo-l:#9a9af8;
+--canvas:#05060a; --panel:#0f121b; --panel-2:#161a26;
+--ink:#e6e8f0; --ink-2:#9199a6; --ink-3:#7b81a6; --ghost:#3a4258;
+--line:#2a3040; --hair:#1c2130;
+--red:#f0665a; --red-t:#2a1a1c;
+--amber:#e0ab4a; --amber-t:#2e2717;
+--teal:#3fbf94; --teal-t:#12241d;
+}
+html[data-theme="light"]{
+--indigo:#2D2DD6; --indigo-d:#1C1C8F; --indigo-l:#8A8AEA;
+--canvas:#E9ECF4; --panel:#FBFCFE; --panel-2:#F3F5FA;
+--ink:#232848; --ink-2:#5D6484; --ink-3:#9AA0B8; --ghost:#C3C8DA;
+--line:#D8DCE9; --hair:#E5E8F1;
+--red:#E0402A; --red-t:#FCF0EE;
+--amber:#8a6d1f; --amber-t:#FBF3DE;
+--teal:#1a7a5c; --teal-t:#EDF6F2;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--indigo);color:var(--ink);
+font:14px/1.6 "Helvetica Neue",Inter,ui-sans-serif,-apple-system,"Segoe UI",Arial,sans-serif;
+-webkit-font-smoothing:antialiased;letter-spacing:-.005em;padding:18px}
+
+.page{background:var(--panel);border-radius:2px;min-height:calc(100vh - 36px);
+padding:64px 24px 40px;position:relative;overflow-x:hidden}
+.col{max-width:960px;margin:0 auto}
+
+.eyebrow{text-align:center;font-size:11px;letter-spacing:.24em;text-transform:uppercase;
+color:var(--ink-3);font-weight:700;margin-bottom:22px}
+
+h1.headline{text-align:center;font-size:clamp(26px,4vw,42px);line-height:1.28;font-weight:600;
+letter-spacing:-.02em;color:var(--indigo);max-width:780px;margin:0 auto 8px;padding:0 8px}
+
+.datemeta{text-align:center;font-size:11.5px;color:var(--ink-3);margin-bottom:48px}
+.datemeta code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px}
+.datemeta a{color:var(--indigo)}
+
+.stats-row{display:flex;justify-content:center;gap:56px;flex-wrap:wrap;margin-bottom:64px}
+.stat-item{text-align:center;max-width:150px}
+.stat-item svg{display:block;margin:0 auto 12px}
+.stat-item b{display:block;font-size:30px;font-weight:600;color:var(--indigo);letter-spacing:-.03em;line-height:1}
+.stat-item span{display:block;margin-top:8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+color:var(--ink-3);font-weight:600}
+
+.erow{display:flex;gap:44px;padding:34px 0;border-top:1px solid var(--line)}
+.erow-label{flex:0 0 27%;max-width:27%}
+.erow-label .lbl{font-weight:700;color:var(--indigo);font-size:15.5px;line-height:1.4;letter-spacing:-.01em}
+.erow-label .lblmeta{margin-top:8px;font-size:11px;color:var(--ink-3);letter-spacing:.02em}
+.erow-content{flex:1 1 73%;min-width:0}
+
+.item{display:flex;gap:14px;margin-bottom:26px;scroll-margin-top:28px}
+.item:last-child{margin-bottom:0}
+.numc{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--indigo);
+display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;
+color:var(--indigo);margin-top:1px}
+.item-body{flex:1 1 auto;min-width:0}
+.item-primary{font-weight:600;font-size:14.5px;color:var(--ink);line-height:1.55}
+.subk{margin-top:12px;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+color:var(--ink-3);font-weight:700}
+.subv{margin-top:3px;font-size:12.5px;color:var(--ink-2);line-height:1.55}
+.subv code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11.5px;
+background:var(--panel-2);padding:1px 5px;border-radius:3px}
+
+.pillrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.pill{display:inline-flex;align-items:center;border:1.3px solid var(--indigo-l);color:var(--indigo);
+border-radius:999px;padding:3px 12px;font-size:10.5px;letter-spacing:.02em;font-weight:600;
+text-decoration:none;background:transparent;white-space:nowrap}
+.pill.amber{border-color:var(--amber);color:var(--amber)}
+.pill.red{border-color:var(--red);color:var(--red);background:var(--red-t)}
+.pill.teal{border-color:var(--teal);color:var(--teal);background:var(--teal-t)}
+.pill.muted{border-color:var(--ghost);color:var(--ink-3)}
+
+.divider-wrap{display:flex;justify-content:center;padding:56px 0 44px}
+.divider-pill{border:2px solid var(--indigo);border-radius:999px;padding:15px 38px;
+font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:12.5px;color:var(--indigo)}
+
+ul.clean{margin:0;padding-left:18px;color:var(--ink-2);font-size:12.5px;line-height:1.7}
+ul.clean li{margin-bottom:6px}
+ul.clean code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11.5px;
+background:var(--panel-2);padding:1px 5px;border-radius:3px}
+
+.theme-toggle{position:fixed;top:20px;right:20px;z-index:20;display:inline-flex;align-items:center;
+gap:7px;border:1.3px solid var(--indigo-l);color:var(--indigo);background:var(--panel);
+border-radius:999px;padding:6px 14px;font:inherit;font-size:11.5px;font-weight:600;
+letter-spacing:.02em;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.theme-toggle:hover{background:rgba(45,45,214,.07)}
+
+@media (max-width:720px){
+.erow{flex-direction:column;gap:16px}
+.erow-label{flex:none;max-width:none}
+}
+@media print{
+html, html[data-theme="dark"], html[data-theme="light"]{
+--indigo:#2D2DD6; --indigo-d:#1C1C8F; --indigo-l:#8A8AEA;
+--canvas:#E9ECF4; --panel:#FBFCFE; --panel-2:#F3F5FA;
+--ink:#232848; --ink-2:#5D6484; --ink-3:#9AA0B8; --ghost:#C3C8DA;
+--line:#D8DCE9; --hair:#E5E8F1;
+--red:#E0402A; --red-t:#FCF0EE;
+--amber:#8a6d1f; --amber-t:#FBF3DE;
+--teal:#1a7a5c; --teal-t:#EDF6F2;
+}
+body{background:#fff;padding:0}
+.page{background:#fff;padding:24px 8px;min-height:0}
+.item{break-inside:avoid}
+.erow{break-inside:avoid-page}
+.theme-toggle{display:none}
+}
+</style>
+<script>
+(function(){
+  try{
+    var t = localStorage.getItem("rfd-theme");
+    if(t==="light"||t==="dark") document.documentElement.setAttribute("data-theme", t);
+  }catch(e){}
+})();
+</script>
+</head>
+<body>
+<button class="theme-toggle" id="themeToggle" type="button">theme</button>
+<div class="page"><div class="col">
+
+<div class="eyebrow">code review — payments-retry-queue</div>
+<h1 class="headline">Needs changes — a scheduling race can double-charge a customer before the fixes below land.</h1>
+<div class="datemeta">branch <code>feature/retry-backoff-v2</code> · commit <code>9c1a4e2</code> vs <code>main</code> · <a href="https://github.com/example-org/payments-retry-queue/pull/142">PR&nbsp;#142</a> · 28 July 2026</div>
+
+<div class="stats-row">
+  <div class="stat-item">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="14.5" stroke="var(--red)" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-size="15" font-weight="600" fill="var(--red)" font-family="inherit">!</text></svg>
+    <b>2</b><span>blockers</span>
+  </div>
+  <div class="stat-item">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="14.5" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4.5 4.5"/></svg>
+    <b>1</b><span>should-fix</span>
+  </div>
+  <div class="stat-item">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="14.5" stroke="var(--ghost)" stroke-width="1.5" stroke-dasharray="2 4"/></svg>
+    <b>1</b><span>nit</span>
+  </div>
+  <div class="stat-item">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="14.5" stroke="var(--teal)" stroke-width="1.5"/><path d="M11 17.5l4 4 8-9" stroke="var(--teal)" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>6</b><span>areas checked clean</span>
+  </div>
+</div>
+
+<div class="erow">
+  <div class="erow-label">
+    <div class="lbl">Fixed during review</div>
+    <div class="lblmeta">Resolved on the branch before this review closed; nothing here needs further action.</div>
+  </div>
+  <div class="erow-content">
+
+    <div class="item">
+      <div class="numc">1</div>
+      <div class="item-body">
+        <div class="item-primary">A leftover debug log printed customer card metadata to stdout.</div>
+        <div class="subk">what's happening</div>
+        <div class="subv">A trace statement added while chasing a timing issue printed the full retry payload, including the card's expiry and last four digits, to the process logs on every retry attempt.</div>
+        <div class="subk">why it matters</div>
+        <div class="subv">Those logs ship to a general-purpose log aggregator with broad read access, so this would have put card metadata somewhere well outside its compliance boundary.</div>
+        <div class="subk">the fix</div>
+        <div class="subv">The statement was removed and replaced with a log line that only names the retry ID and attempt count, matching how the rest of the queue already logs.</div>
+        <div class="subk">where</div>
+        <div class="subv"><code>retry-worker/src/processor.ts:88</code></div>
+        <div class="pillrow"><span class="pill red">blocker</span><span class="pill teal">fixed</span><span class="pill muted">logging</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="erow">
+  <div class="erow-label">
+    <div class="lbl">Open — needs a decision</div>
+    <div class="lblmeta">Still on the branch. Blocking until resolved.</div>
+  </div>
+  <div class="erow-content">
+
+    <div class="item">
+      <div class="numc">2</div>
+      <div class="item-body">
+        <div class="item-primary">Two workers can grab the same retry job and both charge the customer.</div>
+        <div class="subk">what's happening</div>
+        <div class="subv">When a job's visibility timeout expires while it's still running, a second worker is allowed to pick up the same job and start its own charge attempt, because nothing marks the job as claimed until after the charge succeeds.</div>
+        <div class="subk">why it matters</div>
+        <div class="subv">Under load, a slow charge call can outlast the visibility timeout often enough that this isn't a rare edge case — the customer sees two charges for one order, and the reconciliation job has no way to tell which attempt was the "real" one.</div>
+        <div class="subk">the fix</div>
+        <div class="subv">Claim the job with a conditional update before making the charge call, the same pattern the settlement worker already uses for its ledger writes, so a second worker's claim fails fast instead of racing to charge.</div>
+        <div class="subk">where</div>
+        <div class="subv"><code>retry-worker/src/queue-consumer.ts:41-63</code></div>
+        <div class="pillrow"><span class="pill red">blocker</span><span class="pill muted">concurrency</span></div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="numc">3</div>
+      <div class="item-body">
+        <div class="item-primary">Backoff delay is computed from the wrong timestamp after a process restart.</div>
+        <div class="subk">what's happening</div>
+        <div class="subv">The exponential backoff timer is calculated from an in-memory value that resets to zero whenever the worker process restarts, rather than from a value stored alongside the job.</div>
+        <div class="subk">why it matters</div>
+        <div class="subv">A deploy or crash mid-backoff makes every in-flight retry immediately eligible again, so a customer's failed payment can be retried in a tight loop right after a routine deploy instead of on the intended schedule.</div>
+        <div class="subk">the fix</div>
+        <div class="subv">Persist the next-eligible-at timestamp on the job record itself and read it back on restart, instead of keeping it only in the worker's local state.</div>
+        <div class="subk">where</div>
+        <div class="subv"><code>retry-worker/src/backoff.ts:19-35</code></div>
+        <div class="pillrow"><span class="pill amber">should-fix</span><span class="pill muted">reliability</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="erow">
+  <div class="erow-label">
+    <div class="lbl">Nits</div>
+    <div class="lblmeta">Worth a line in a follow-up, not worth blocking anything.</div>
+  </div>
+  <div class="erow-content">
+
+    <div class="item">
+      <div class="numc">4</div>
+      <div class="item-body">
+        <div class="item-primary">The retry-count metric is named inconsistently with its sibling metrics.</div>
+        <div class="subk">what's happening</div>
+        <div class="subv">Every other counter in this file follows a <code>queue.&lt;noun&gt;.&lt;verb&gt;</code> naming pattern; the new one reverses the order.</div>
+        <div class="subk">the fix</div>
+        <div class="subv">Rename to match the existing convention before a dashboard gets built against the current name.</div>
+        <div class="subk">where</div>
+        <div class="subv"><code>retry-worker/src/metrics.ts:14</code></div>
+        <div class="pillrow"><span class="pill muted">nit</span><span class="pill muted">observability</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider-wrap"><div class="divider-pill">6 areas checked clean</div></div>
+
+<div class="erow" style="border-top:none;padding-top:0">
+  <div class="erow-label">
+    <div class="lbl">Coverage</div>
+    <div class="lblmeta">Checked and found clean — listed so silence isn't ambiguous.</div>
+  </div>
+  <div class="erow-content">
+    <ul class="clean">
+      <li>Idempotency key generation is stable across retries of the same job — verified it derives from the original order ID, not a per-attempt UUID.</li>
+      <li>Dead-letter routing after max attempts matches the documented policy; no jobs can silently vanish.</li>
+      <li>No secrets or API keys introduced into config files or committed fixtures.</li>
+      <li>Test suite delta vs main baseline: zero new failures; the one pre-existing flaky test also fails on main.</li>
+      <li>Metric cardinality is bounded — no unbounded label values (e.g. customer ID) added to any counter.</li>
+      <li>Backward compatibility of the job schema: new optional field defaults safely for jobs enqueued before this change.</li>
+    </ul>
+  </div>
+</div>
+
+</div></div>
+<script>
+(function(){
+  var b = document.getElementById("themeToggle");
+  function cur(){ return document.documentElement.getAttribute("data-theme") ||
+    (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light"); }
+  function label(){ b.textContent = cur()==="dark" ? "☀ light" : "☾ dark"; }
+  b.addEventListener("click", function(){
+    var next = cur()==="dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try{ localStorage.setItem("rfd-theme", next); }catch(e){}
+    label();
+  });
+  label();
+})();
+</script>
+</body>
+</html>
