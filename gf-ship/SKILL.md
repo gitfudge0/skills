@@ -9,17 +9,16 @@ Runs one feature from idea to reviewed implementation by sequencing the other gf
 
 ## The core principle: gf-ship conducts, it does not produce
 
-Nothing here writes a decision, a mock, a test plan, or code. Each stage hands off to the skill that owns that output, seeds it with everything learned so far, and holds the result. The value gf-ship adds is ordering, continuity between stages, and stopping.
+Nothing here writes a decision, a mock, a test plan, or code. Each stage hands off to the skill that owns that output and holds the result.
 
-Stopping is the load-bearing half. An unattended pipeline that runs decide → design → verify-plan → implement without a human in it produces a confident implementation of the wrong thing, four stages deep, with the artifacts that would have caught it already generated and unread. The gates exist to make a wrong route cost one stage instead of five.
+Stopping is the load-bearing half — the gates make a wrong route cost one stage instead of five.
 
 ## What this skill will not do
 
 - **No parallelism between stages.** Each stage's output is the next stage's input. Running two at once means one is working from stale context.
-- **No cost or time estimation before a run.** Route length is knowable; stage cost is not.
-- **No partial re-run of a single completed stage.** A stage runs once per run. To redo one, start a new run.
 - **No branch, commit, PR, or push** unless the user asks for it in so many words.
 - **No scope expansion.** The request scoped at the start is the request at review. A stage that surfaces adjacent work reports it; it does not absorb it.
+- **No substituting for a missing skill.** If a stage's skill is not installed, halt, name it, and say how to install it. Never hand-roll an ad-hoc equivalent. A missing gf-layered-review is a full stop, not a drop — record `status: blocked`.
 
 ## The stages
 
@@ -32,31 +31,29 @@ Six skills are stages. Fixed order. Stages may be **dropped**, never **reordered
 | `design` | gf-ui-mock | A user-visible surface changes |
 | `verify-plan` | gf-test-plan | Almost always |
 | `implement` | gf-delegate | Code is being written |
-| `review` | gf-layered-review | Code was written |
+| `review` | gf-layered-review | **Always, if `implement` ran** — see below |
+
+Users name stages by nickname: **roomie** = `decide`, **mockie** = `design`, **testie** = `verify-plan`, **gappie** = `understand`, **bossie** = `implement`. Map them to stages; if a nickname is unrecognized, ask rather than guess.
+
+**`review` is not droppable.** If code was written, gf-layered-review runs. Omission does not drop it. Only an explicit exclusion ("skip the review", "no review") drops it, and then say so in `route_reason`. Do not ask permission to run it; run it and report.
 
 Three skills are **support** — invoked *inside* a stage, never as a stage of their own:
 
 - **gf-report-deck** — styles the HTML a stage emits.
-- **gf-mindmap** — offered when the input material is dense enough to be worth mapping.
-- **gf-rust-arch** — loads during `implement` when the target is Rust.
+- **gf-mindmap** — offered during `understand` only, when the corpus is large enough to be worth mapping. A decline is not a gate answer.
+- **gf-rust-arch** — see `implement`.
 
-**gf-delegate is not a producer.** It is a behavioral contract, not a tool that receives work. "Implement via gf-delegate" means the implement stage adopts the orchestrator/worker split — plan and verify here, delegate the editing to workers — not that the stage hands the feature to a separate system and waits.
+**gf-delegate is a behavioral contract, not a producer.** The implement stage adopts the orchestrator/worker split itself: plan and verify here, delegate editing to workers.
 
 ## Routing
 
-**If the user's prompt names stages, that is the route.** "Do a roomie, then mockie, then testie" means exactly those three, in that order. Obey literally: no inferred additions, no helpful extra review stage, no "they probably also want".
+**If the user's prompt names stages, that is the route.** "Do a roomie, then mockie, then testie" means exactly those three, in that order. Obey literally: no inferred additions, no "they probably also want".
 
-**Only when no stages are named** does gf-ship infer a route. Inference is judgement, not a rule table. Signals to weigh:
+**Only when no stages are named** does gf-ship infer a route, from the *Runs when* column. It is judgement, not a rule table — weigh how expensive the work is to unwind.
 
-- Is there a document corpus to mine, and is the ask vague enough to need it?
-- Is the call contested, or has the user already made it?
-- Does a user-visible surface change?
-- Is this reversible in one commit, or expensive to unwind?
-- Is the target language Rust?
+**State the route and the reasoning before running any stage.** Print the chosen stages, and say what was dropped and why.
 
-**State the route and the reasoning before running any stage.** Print the chosen stages, and say what was dropped and why. A wrong route corrected here costs nothing; corrected at review it costs the whole run.
-
-If gf-decision-room's verdict is **don't build**, that is a full stop — not a gate. Report it and end the run. The user may override by saying so, and then the pipeline continues. gf-ship does not argue the point twice.
+If gf-decision-room's verdict is **don't build**, that is a full stop — not a gate. Report it and end the run. The user may override by saying so, and then the pipeline continues. On override, recompute the route from the current understanding and re-state it before continuing. gf-ship does not argue the point twice.
 
 ## Workspace
 
@@ -71,6 +68,8 @@ If gf-decision-room's verdict is **don't build**, that is a full stop — not a 
 
 When `understand` runs, gf-gap-analysis keeps writing its own `.gap-analysis/`. Reference that path from `run.json`; do not move or copy it.
 
+**Ignore the workspace at run creation.** Before writing `run.json`: if this is a git repo, append `.gf-ship/` to the `.gitignore` at the repo root (`git rev-parse --show-toplevel`), creating it if absent and skipping if already ignored. If it is not a git repo, create the workspace and skip this step. Do it at run start, not the end, and mention it in the same message as the route — a silent write to a tracked file is a surprise in someone else's commit.
+
 `run.json` is the source of truth. Exact keys:
 
 ```json
@@ -80,10 +79,14 @@ When `understand` runs, gf-gap-analysis keeps writing its own `.gap-analysis/`. 
   "request": "<the user's original ask, verbatim>",
   "route": ["decide", "design", "verify-plan", "implement", "review"],
   "route_reason": "<why these stages, why not the others>",
+  "implement_baseline": {"head": "<git rev-parse HEAD>", "dirty": "<git status --porcelain>"},
   "stages": {
+    "understand":  {"status": "skipped", "artifact": null,              "summary": null},
     "decide":      {"status": "done",    "artifact": "1-decision.html", "summary": "<one line>"},
     "design":      {"status": "gated",   "artifact": "2-mock.html",     "summary": "<one line>"},
-    "verify-plan": {"status": "pending", "artifact": null,              "summary": null}
+    "verify-plan": {"status": "pending", "artifact": null,              "summary": null},
+    "implement":   {"status": "pending", "artifact": null,              "summary": null},
+    "review":      {"status": "pending", "artifact": null,              "summary": null}
   },
   "gates": {
     "1-decide":      {"answered": true,  "response": "<what the user actually said>", "at": "2026-07-28"},
@@ -93,9 +96,11 @@ When `understand` runs, gf-gap-analysis keeps writing its own `.gap-analysis/`. 
 }
 ```
 
-`status` is one of `pending | running | gated | done | skipped`.
+`status` is one of `pending | running | gated | done | skipped | blocked`.
 
-**`gates.*.response` is not optional and not a boolean in disguise.** Record what the user actually said — "yes but drop the sidebar variant", not "approved". A resumed run can always recover *which* stage it was on from the files on disk; what it cannot reconstruct is *what was approved*, and losing that forces a re-ask that spends the user's attention on a question they already answered.
+`stages` carries an entry for all six stages. Ones not in `route` are `skipped` at run creation, so a resumed run can tell *dropped* from *not yet reached*.
+
+**`gates.*.response` is not optional and not a boolean in disguise.** Record what the user actually said — "yes but drop the sidebar variant", not "approved". Disk recovers *which* stage; only this recovers *what was approved*.
 
 Write `run.json` after **every** stage transition and **every** gate answer. Not at the end.
 
@@ -105,17 +110,17 @@ Write `run.json` after **every** stage transition and **every** gate answer. Not
 
 Read-only exploration of the codebase before the first real stage. Use parallel read-only Explore agents: what exists today in this area, what the design system actually looks like, where the seams are, what the test setup is.
 
-This is not optional politeness. Ungrounded personas give generic advice, and an ungrounded mock renders a UI that does not match the product. Recon is held as context and passed into stages — it is not written to a file and not shown as a deliverable.
+Ungrounded personas give generic advice, and an ungrounded mock renders a UI that does not match the product. Recon is held as context and passed into stages — it is not written to a file and not shown as a deliverable.
 
 ### Seeding
 
-Every stage receives the previous stage's output, not just the original request. The design stage gets the decision's recommendation, risks, and out-of-scope list. The verify-plan stage gets the mock's states. The implement stage gets the plan. A stage that only sees the original prompt is running blind and will contradict the stage before it.
+Every stage receives the previous stage's output, not just the original request — `design` gets the decision's recommendation, risks, and out-of-scope list.
 
 ### Stage notes
 
 - **`decide`** — frame gf-decision-room around the *real* decision, not the feature title. "Should we add session switching" is a title; "do we switch sessions in-place or spawn a second pane, given the existing single-buffer renderer" is the decision.
 - **`design`** — at GATE 2, loop on revisions as many times as the user wants. Each revision re-runs gf-ui-mock and rewrites `2-mock.html`; the gate stays open until the user advances it.
-- **`implement`** — orchestrate via gf-delegate. Load gf-rust-arch first if the target is Rust. When workers report done, **re-run the build, tests, and lint yourself and read the raw output**. A worker's claim of success is zero evidence.
+- **`implement`** — orchestrate via gf-delegate. Load gf-rust-arch first if the target is Rust. Record `git rev-parse HEAD` and `git status --porcelain` into `run.json` as `implement_baseline` before any worker runs. `review` diffs against that baseline and names any pre-existing modifications separately rather than reporting them as this run's work. When workers report done, **re-run the build, tests, and lint yourself and read the raw output**. A worker's claim of success is zero evidence.
 - **`review`** — gf-layered-review over the diff this run produced, written to `4-review.html`.
 
 ## The gates
@@ -126,7 +131,15 @@ Three hard stops. At each one: halt, report the verdict or outcome in chat, give
 - **GATE 2** — after `design`
 - **GATE 3** — after `verify-plan`, before `implement`
 
-**GATE 3 is the one that gets rationalized away.** A user who wrote "…and then proceed to implementation" in their opening prompt has authorized the *stage*, not the skipping of the *gate*. Pre-authorizing a sequence up front is not gate consent. Consent is a response to the artifact, given after seeing it — which is the entire point, since the plan the user is consenting to did not exist when they wrote the prompt.
+**The boundary is mechanical, not a matter of intent.** Until `gates.3-verify-plan.answered` is `true` in `run.json`: no Edit or Write to any file outside `.gf-ship/`, no Bash command that mutates the working tree, and no Agent invocation whose prompt contains implementation instructions. Recon agents are read-only. These are forbidden regardless of what the agent believes it is doing — "I was only planning" is not an exemption.
+
+**A gate advances only on an unambiguous instruction to proceed.** Anything conditional, partial, or a question is not an advance: answer it, keep `status: gated`, and re-present. If the response would change the artifact, re-run the stage rather than carrying the change as an unwritten amendment.
+
+**One answer advances one gate.** A response that pre-approves later gates ("yes, and go ahead through the mock and plan too") advances only the current one. Never write a `response` into a gate that was not individually answered.
+
+A stage runs once per run **after its gate is answered**. While a stage is `gated`, it may be re-run on feedback any number of times — that is a revision, not a re-run, and it applies at every gate.
+
+A user who wrote "…and then proceed to implementation" in their opening prompt has authorized the *stage*, not the skipping of the *gate*. Pre-authorizing a sequence up front is not gate consent. Consent is a response to the artifact, given after seeing it — which is the entire point, since the plan the user is consenting to did not exist when they wrote the prompt.
 
 | Rationalization | Counter |
 |---|---|
@@ -143,9 +156,10 @@ Red flags — if you catch yourself writing any of these, you are mid-violation.
 - "since they already said…"
 - "I'll start on the first task while they look"
 - reading a file with intent to edit it, with no gate answer recorded in `run.json`
+- spawning a worker "just to plan the implementation" before GATE 3 is answered
 
 ## Resume and identity
 
 `resume` or `continue` reads `run.json`, reports the route, the completed stages with their summaries, and the recorded gate responses, then picks up at the gated stage. If more than one open run exists under `.gf-ship/`, list them with slug and date and ask which one — never guess.
 
-The slug is permanent. It names the directory, and it is how the user refers to the run later. Never rename it mid-run.
+Derive the slug as 2-5 kebab-case words from the user's ask, and propose it in the route message so it can be corrected early. After that it is permanent — never rename it mid-run.
