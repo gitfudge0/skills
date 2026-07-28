@@ -13,6 +13,7 @@ A personal collection of Claude Code skills, one directory each, each with a `SK
 | gf-layered-review | Reviews a PR or diff, then layers the findings — verdict, one-line list, drill-down detail — for Slack, GitHub, or an HTML report. | "review this and don't bury me in text" |
 | gf-decision-room | Cross-functional personas pressure-test a decision independently, then synthesize into one recommendation. | "should we build this" |
 | gf-rust-arch | Idiomatic Rust architecture — project layout, workspaces, error handling, config, tracing, iced GUIs. | "structure my rust project" |
+| gf-design-system | Turns a moodboard, screenshots, or aesthetic brief into a full design system — tokens, component contracts, patterns, docs, demo screen. | "make our product look like this" |
 | gf-test-plan | Right-sized, risk-prioritized test plan — then runs the cases and marks PASS/FAIL in an HTML report. | "what should I test here" |
 
 ## Install

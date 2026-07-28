@@ -1,0 +1,146 @@
+{
+  "$schema": "https://design-tokens.org/schema.json",
+  "$description": "Source of truth. Everything downstream is emitted, never hand-edited. Replace every REPLACE marker; delete groups the archetype does not need rather than leaving them empty.",
+
+  "primitive": {
+    "$description": "Tier 1. Raw values, no meaning. Referencing these from product code is a lint error.",
+    "neutral": {
+      "$type": "color",
+      "$description": "The ramp that carries most of the interface. Decide its temperature deliberately — warm, cool, or true — it sets the feel more than the accent does.",
+      "0":   { "$value": "#REPLACE" },
+      "25":  { "$value": "#REPLACE" },
+      "50":  { "$value": "#REPLACE" },
+      "100": { "$value": "#REPLACE" },
+      "200": { "$value": "#REPLACE" },
+      "300": { "$value": "#REPLACE" },
+      "400": { "$value": "#REPLACE" },
+      "500": { "$value": "#REPLACE" },
+      "700": { "$value": "#REPLACE" },
+      "900": { "$value": "#REPLACE" },
+      "950": { "$value": "#REPLACE" }
+    },
+    "accent": {
+      "$type": "color",
+      "$description": "Tune per hue rather than stepping lightness mechanically — mechanical ramps read muddy in the mid tones.",
+      "100": { "$value": "#REPLACE" },
+      "300": { "$value": "#REPLACE" },
+      "500": { "$value": "#REPLACE" },
+      "700": { "$value": "#REPLACE" }
+    },
+    "space": {
+      "$type": "dimension",
+      "$description": "Base unit and scale. The rules for which value applies where live in the docs, not here.",
+      "1": { "$value": "4px" },
+      "2": { "$value": "8px" },
+      "3": { "$value": "12px" },
+      "4": { "$value": "16px" },
+      "6": { "$value": "24px" },
+      "8": { "$value": "32px" },
+      "12": { "$value": "48px" },
+      "16": { "$value": "64px" }
+    },
+    "radius": {
+      "$type": "dimension",
+      "$description": "Derived from the geometry axis of the extraction.",
+      "sm": { "$value": "REPLACE" },
+      "md": { "$value": "REPLACE" },
+      "lg": { "$value": "REPLACE" },
+      "pill": { "$value": "999px" }
+    },
+    "text": {
+      "$type": "dimension",
+      "$description": "Fixed number of steps. If a mock needs a size between two steps, the mock is wrong.",
+      "2xs": { "$value": "11px" },
+      "xs":  { "$value": "12px" },
+      "sm":  { "$value": "13px" },
+      "base":{ "$value": "REPLACE — 14px for dense tools, 16px for reading" },
+      "md":  { "$value": "16px" },
+      "lg":  { "$value": "20px" },
+      "xl":  { "$value": "26px" },
+      "2xl": { "$value": "34px" }
+    },
+    "duration": {
+      "$type": "duration",
+      "instant":  { "$value": "80ms" },
+      "fast":     { "$value": "140ms" },
+      "moderate": { "$value": "220ms" },
+      "slow":     { "$value": "360ms" }
+    }
+  },
+
+  "semantic": {
+    "$description": "Tier 2. The theming seam. Dark mode and alternate brands remap ONLY this tier.",
+    "color": {
+      "$type": "color",
+      "canvas":         { "$value": "{primitive.neutral.50}",  "$description": "Page background behind all surfaces." },
+      "surface":        { "$value": "{primitive.neutral.0}",   "$description": "Default raised surface — panels, cards, rows." },
+      "surface-sunken": { "$value": "{primitive.neutral.25}",  "$description": "Recessed areas: read-only fields, footers." },
+      "surface-hover":  { "$value": "{primitive.neutral.50}" },
+      "rule":           { "$value": "{primitive.neutral.200}", "$description": "Default hairline separator." },
+      "rule-strong":    { "$value": "{primitive.neutral.300}", "$description": "Control borders and hover states." },
+      "text-primary":   { "$value": "{primitive.neutral.900}", "$description": "Must clear 4.5:1 on surface in every theme." },
+      "text-secondary": { "$value": "{primitive.neutral.500}", "$description": "Must clear 4.5:1 — this is the pair that usually fails." },
+      "text-tertiary":  { "$value": "{primitive.neutral.400}", "$description": "Hints only. Never load-bearing information." },
+      "text-inverse":   { "$value": "{primitive.neutral.0}" },
+      "action-solid":   { "$value": "REPLACE", "$description": "Primary control fill. If colour is reserved for state, this is ink rather than a hue." },
+      "focus":          { "$value": "REPLACE", "$description": "Must clear 3:1 against every surface it can appear on." },
+      "overlay-scrim":  { "$value": "REPLACE" }
+    },
+    "state": {
+      "$type": "color",
+      "$description": "Delete this group entirely if colour does not carry meaning in this product. Each level needs foreground, background, and an edge colour, and each must pair with a non-colour signal.",
+      "REPLACE-level-1": { "fg": { "$value": "#REPLACE" }, "bg": { "$value": "#REPLACE" }, "edge": { "$value": "#REPLACE" } },
+      "REPLACE-level-2": { "fg": { "$value": "#REPLACE" }, "bg": { "$value": "#REPLACE" }, "edge": { "$value": "#REPLACE" } }
+    },
+    "elevation": {
+      "$type": "shadow",
+      "$description": "Tie levels to meaning, not blur radii. If the separation device is rules rather than shadow, keep these near-invisible.",
+      "1": { "$value": "REPLACE" },
+      "2": { "$value": "REPLACE" },
+      "3": { "$value": "REPLACE" }
+    },
+    "z": {
+      "$type": "number",
+      "$description": "Named and exhaustive so nobody writes 9999. Ordering encodes a real decision — decide whether toasts sit above modals and why.",
+      "sticky":   { "$value": 100 },
+      "dropdown": { "$value": 200 },
+      "overlay":  { "$value": 300 },
+      "modal":    { "$value": 400 },
+      "toast":    { "$value": 500 },
+      "tooltip":  { "$value": 600 }
+    }
+  },
+
+  "component": {
+    "$description": "Tier 3. The density seam. Density modes remap ONLY this tier. Dimensions only — component-scoped colour tokens multiply without earning anything.",
+    "control": {
+      "$type": "dimension",
+      "height-sm": { "$value": "REPLACE" },
+      "height-md": { "$value": "REPLACE" },
+      "pad-x":     { "$value": "{primitive.space.3}" },
+      "radius":    { "$value": "{primitive.radius.md}" }
+    },
+    "table": {
+      "$type": "dimension",
+      "$description": "Delete if the archetype has no tables.",
+      "row-height": { "$value": "REPLACE" },
+      "cell-pad-x": { "$value": "{primitive.space.3}" },
+      "cell-pad-y": { "$value": "{primitive.space.2}" }
+    },
+    "panel": {
+      "$type": "dimension",
+      "pad":    { "$value": "{primitive.space.5}" },
+      "radius": { "$value": "{primitive.radius.lg}" }
+    }
+  },
+
+  "$themes": {
+    "$description": "Each theme overrides semantic only. If a theme needs to touch tier 1 or tier 3, the tiering is wrong.",
+    "dark": { "semantic.color.surface": "#REPLACE", "semantic.color.text-primary": "#REPLACE" }
+  },
+
+  "$densities": {
+    "$description": "Each density overrides component only.",
+    "compact": { "component.control.height-md": "REPLACE", "component.table.row-height": "REPLACE" }
+  }
+}
