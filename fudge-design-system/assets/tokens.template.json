@@ -29,15 +29,15 @@
     },
     "space": {
       "$type": "dimension",
-      "$description": "Base unit and scale. The rules for which value applies where live in the docs, not here.",
-      "1": { "$value": "4px" },
-      "2": { "$value": "8px" },
-      "3": { "$value": "12px" },
-      "4": { "$value": "16px" },
-      "6": { "$value": "24px" },
-      "8": { "$value": "32px" },
-      "12": { "$value": "48px" },
-      "16": { "$value": "64px" }
+      "$description": "The base unit comes from the density axis of the extraction; every step is a multiple of it. Fixed count, fixed keys. The rules for which value applies where live in the docs, not here.",
+      "1":  { "$value": "REPLACE — one base unit, the tightest gap in the system" },
+      "2":  { "$value": "REPLACE — 2 base units" },
+      "3":  { "$value": "REPLACE — 3 base units, the default control padding" },
+      "4":  { "$value": "REPLACE — 4 base units, the default block gap" },
+      "6":  { "$value": "REPLACE — 6 base units" },
+      "8":  { "$value": "REPLACE — 8 base units, section separation" },
+      "12": { "$value": "REPLACE — 12 base units" },
+      "16": { "$value": "REPLACE — 16 base units, the largest gap the system allows" }
     },
     "radius": {
       "$type": "dimension",
@@ -45,26 +45,27 @@
       "sm": { "$value": "REPLACE" },
       "md": { "$value": "REPLACE" },
       "lg": { "$value": "REPLACE" },
-      "pill": { "$value": "999px" }
+      "pill": { "$value": "REPLACE — fully rounded; delete this token if the geometry has no fully-rounded form" }
     },
     "text": {
       "$type": "dimension",
       "$description": "Fixed number of steps. If a mock needs a size between two steps, the mock is wrong.",
-      "2xs": { "$value": "11px" },
-      "xs":  { "$value": "12px" },
-      "sm":  { "$value": "13px" },
+      "2xs": { "$value": "REPLACE — smallest legible label; two steps below base" },
+      "xs":  { "$value": "REPLACE — metadata and captions; one step below sm" },
+      "sm":  { "$value": "REPLACE — secondary body, just under base" },
       "base":{ "$value": "REPLACE — 14px for dense tools, 16px for reading" },
-      "md":  { "$value": "16px" },
-      "lg":  { "$value": "20px" },
-      "xl":  { "$value": "26px" },
-      "2xl": { "$value": "34px" }
+      "md":  { "$value": "REPLACE — emphasised body, one step above base" },
+      "lg":  { "$value": "REPLACE — smallest heading" },
+      "xl":  { "$value": "REPLACE — section heading; ratio from the typographic contrast of the direction" },
+      "2xl": { "$value": "REPLACE — display; how loud depends on how expressive the direction is" }
     },
     "duration": {
       "$type": "duration",
-      "instant":  { "$value": "80ms" },
-      "fast":     { "$value": "140ms" },
-      "moderate": { "$value": "220ms" },
-      "slow":     { "$value": "360ms" }
+      "$description": "Derived from the motion character of the direction. A system with little motion keeps these short, or deletes the group.",
+      "instant":  { "$value": "REPLACE — state flips that should read as immediate" },
+      "fast":     { "$value": "REPLACE — hover and focus feedback" },
+      "moderate": { "$value": "REPLACE — entrances and exits of small surfaces" },
+      "slow":     { "$value": "REPLACE — the largest movement the direction permits" }
     }
   },
 
@@ -129,7 +130,7 @@
     },
     "panel": {
       "$type": "dimension",
-      "pad":    { "$value": "{primitive.space.5}" },
+      "pad":    { "$value": "{primitive.space.4}" },
       "radius": { "$value": "{primitive.radius.lg}" }
     }
   },
