@@ -43,7 +43,7 @@ Three skills are **support** — invoked *inside* a stage, never as a stage of t
 - **fudge:mindmap** — offered during `understand` only, when the corpus is large enough to be worth mapping. A decline is not a gate answer.
 - **fudge:rust-arch** — see `implement`.
 
-**fudge:delegate is a behavioral contract, not a producer.** The implement stage adopts the orchestrator/worker split itself: plan and verify here, delegate editing to workers.
+**fudge:delegate is a behavioral contract, not a producer, and it governs every stage, not just `implement`.** Producing an artifact is implementation under CLAUDE.md's own definition, so fudge:ship never runs a stage's skill inline. `understand`, `decide`, `design`, `verify-plan`, and `review` are each dispatched to a single worker subagent (`Agent` tool, model and effort tiered to the task per fudge:delegate) that invokes the stage's skill and hands back its artifact — fudge:ship reads that artifact back to verify and report, it does not author one. `implement` is the exception: there is no single document to dispatch for. fudge:ship itself applies fudge:delegate directly — splitting the work, dispatching its own fleet of workers, and verifying their output — rather than handing the whole stage to one intermediary worker.
 
 ## Routing
 
@@ -117,6 +117,8 @@ Ungrounded personas give generic advice, and an ungrounded mock renders a UI tha
 Every stage receives the previous stage's output, not just the original request — `design` gets the decision's recommendation, risks, and out-of-scope list.
 
 ### Stage notes
+
+Every stage below runs through the dispatch pattern above; `implement` is the one exception, where fudge:ship itself is the fudge:delegate orchestrator rather than a stage dispatched to a single worker.
 
 - **`decide`** — frame fudge:decision-room around the *real* decision, not the feature title. "Should we add session switching" is a title; "do we switch sessions in-place or spawn a second pane, given the existing single-buffer renderer" is the decision.
 - **`design`** — at GATE 2, loop on revisions as many times as the user wants. Each revision re-runs fudge:ui-mock and rewrites `2-mock.html`; the gate stays open until the user advances it.

@@ -1,6 +1,6 @@
 ---
 name: fudge:delegate
-description: Use the moment a task turns into implementation — writing/editing code, running builds/tests, mechanical edits, producing artifacts — including when a question morphs into a fix mid-conversation. Enforces the orchestrator/worker split: the main agent plans, coordinates, and verifies only; all implementation is delegated to opus worker subagents.
+description: Use the moment a task turns into implementation — writing/editing code, running builds/tests, mechanical edits, producing artifacts — including when a question morphs into a fix mid-conversation. Enforces the orchestrator/worker split: the main agent plans, coordinates, and verifies only; all implementation is delegated to worker subagents, with model and effort tiered to the task.
 ---
 
 # Orchestrator / worker split
@@ -8,10 +8,26 @@ description: Use the moment a task turns into implementation — writing/editing
 You are the **orchestrator**: plan, coordinate, verify. You do not implement.
 
 - **Plan**: break the task down, decide the approach, sequence the work, resolve ambiguity with the user.
-- **Delegate**: hand every implementation step to worker subagents via the Agent tool with `model: opus`, low effort, by default. You may raise a single genuinely hard step (subtle algorithm, dense cross-file reasoning) to higher effort — but a stronger worker relaxes nothing about verification: its claims are still zero evidence. If you're about to call Edit/Write on implementation code, stop and delegate.
+- **Delegate**: hand every implementation step to worker subagents via the Agent tool. Pick `model` and `effort` per task — see "Picking the worker: model and effort" below — never opus-by-default. A cheaper or stronger worker relaxes nothing about verification: its claims are still zero evidence. If you're about to call Edit/Write on implementation code, stop and delegate.
 - **Coordinate**: give each worker a self-contained brief, review what comes back, integrate, decide next.
 
 You may directly do: reading/searching to plan, answering read-only questions, verification (below), and small direct edits — single-file, a change you can state in one sentence, that you already hold full context on, with no test impact. Line count is a ceiling, not a license: past ~20 lines, delegate regardless of how well you know the code. Everything else goes to a worker. Workers implement exactly their brief and report back — they don't re-plan. One exception: if the brief rests on a false premise — a named file or symbol absent, the approach technically impossible — the worker stops and reports the contradiction instead of improvising around it; that is "blocked", not re-planning.
+
+## Picking the worker: model and effort
+
+Two hard ceilings, no exceptions: **effort never goes past `high`** — `xhigh` and `max` are never used — and **opus never goes past `medium`**. If a task seems to need more than opus-at-medium, that's a signal it's too coarse, not that the dial should go higher: split it smaller instead.
+
+| Task shape | Model | Effort |
+|---|---|---|
+| Pure mechanical — renames, formatting/lint fixes, boilerplate from an established template, config/data edits, a test file that mirrors an existing one | haiku | low |
+| Typical well-scoped work — standard CRUD, a bug fix with root cause already found, one pattern repeated across files, routine test-writing | sonnet | low |
+| Multi-file work with bounded judgment — wiring a feature through several layers, a refactor touching call sites, moderate ambiguity the brief doesn't fully resolve | sonnet | medium |
+| Cross-cutting architecture, new abstractions, security- or money-path code | opus | low |
+| Genuinely hard — subtle algorithms, concurrency/race conditions, a bug that survived a first attempt, dense cross-file reasoning | opus | medium |
+
+- Classify per lane, not per run — a parallel dispatch can send some lanes to haiku and others to opus in the same message.
+- A worker that needs a corrective brief escalates on the retry — bump effort a step first; only move to a stronger model once effort is already maxed for the current one — up to the opus/medium ceiling. Still stuck there? The lane is mis-split, not under-powered — split it smaller yourself rather than pushing past the ceiling.
+- This tiering is independent of `isolation`/`label` — set those per the existing rules regardless of which model runs.
 
 ## Verification — the rule workers most often subvert
 
@@ -37,11 +53,11 @@ One upfront exploration pass before dispatching. If the areas are independent, r
 
 ## Shape the work: parallel by default
 
-Sequential is the fallback, not the starting point. Before dispatching, partition the plan into **lanes** — task groups with disjoint file sets:
+Sequential is the fallback, not the starting point. Splitting into lanes and picking each one's model/effort happens here, at the root — never handed to a spawned "planner" subagent, which would only work from a compressed summary of what you already have directly: the discovery findings, the user's intent, the table above.
 
 1. Pull out any edit several lanes depend on (shared type, config, helper). Do that one first, alone.
-2. Group the rest by file set. Non-overlapping groups are lanes.
-3. Dispatch every lane in **one message** (multiple Agent calls). Verify once, after they all land.
+2. Group the rest by file set. Non-overlapping groups are lanes. Classify each against the table above and assign its model/effort.
+3. Dispatch every lane in **one message** (multiple Agent calls), each with its assigned model/effort. Verify once, after they all land.
 4. Only genuinely order-dependent chains stay sequential — and then it's **one worker resumed across batches of 3–6 tasks**, not a fresh worker per task; it carries learned fix patterns forward. One-task batches waste roundtrips; whole-plan batches invite stalling.
 
 If two lanes must touch the same file, either serialize just that file into step 1 or give each `isolation: worktree` and merge yourself.
