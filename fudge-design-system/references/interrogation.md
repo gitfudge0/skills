@@ -77,6 +77,8 @@ Voice is a system decision and the error state is where it is most visible and m
 
 Decide, state the assumption, move on. Every one of these has a defensible default derivable from the extraction, and asking about them signals that you cannot make a decision.
 
+Several are no longer defaults at all by the time you get here. Radius, stroke, elevation depth and motion temperament were settled the moment the user picked a tile in Phase 2 — read them off the winning direction rather than inventing them, and never put a question to the user about something they have already chosen by pointing at it.
+
 Radius scale · spacing base unit · elevation depth · motion durations and easing · icon stroke weight · z-index layers · border widths · focus ring style · skeleton versus spinner · exact type scale ratio · component naming convention · file organisation.
 
 If the user volunteers an opinion on one, take it. Do not solicit it.

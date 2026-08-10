@@ -66,6 +66,81 @@
       "fast":     { "$value": "REPLACE — hover and focus feedback" },
       "moderate": { "$value": "REPLACE — entrances and exits of small surfaces" },
       "slow":     { "$value": "REPLACE — the largest movement the direction permits" }
+    },
+    "font": {
+      "$type": "fontFamily",
+      "$description": "By role, not by name. One superfamily across all three roles is often the strongest answer — the character transfers even when the exact face is not licensable.",
+      "display": { "$value": "REPLACE — headings, hero type" },
+      "body":    { "$value": "REPLACE — running text, UI labels" },
+      "mono":    { "$value": "REPLACE — code, tabular data, anything that must align" }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "$description": "A system shipping six weights uses three. Pick regular, one for emphasis, one for headings.",
+      "regular":  { "$value": "REPLACE" },
+      "medium":   { "$value": "REPLACE" },
+      "semibold": { "$value": "REPLACE" },
+      "bold":     { "$value": "REPLACE" }
+    },
+    "leading": {
+      "$type": "number",
+      "$description": "Line height is a function of measure and size, not a constant. Tight for display, generous for long-form reading.",
+      "tight":   { "$value": "REPLACE — display sizes" },
+      "snug":    { "$value": "REPLACE — headings, short lines" },
+      "normal":  { "$value": "REPLACE — body text" },
+      "relaxed": { "$value": "REPLACE — long-form reading, prose" }
+    },
+    "tracking": {
+      "$type": "dimension",
+      "$description": "Large type needs negative tracking, uppercase needs positive, body needs neither.",
+      "tight":  { "$value": "REPLACE — large display sizes" },
+      "normal": { "$value": "REPLACE — body text, usually 0" },
+      "wide":   { "$value": "REPLACE — uppercase labels, small caps" }
+    },
+    "border": {
+      "$type": "dimension",
+      "$description": "Widths tie to the separation device from the extraction — if the system separates with rules rather than shadow, these carry more weight than elevation does.",
+      "hairline": { "$value": "REPLACE" },
+      "thin":     { "$value": "REPLACE — default control border" },
+      "thick":    { "$value": "REPLACE — emphasis, selected state" }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "$description": "Entrance and exit are not the same curve — using one for both is the most common motion mistake.",
+      "standard": { "$value": "REPLACE — general-purpose, in-place transitions" },
+      "entrance": { "$value": "REPLACE — decelerate; something arriving should slow into place" },
+      "exit":     { "$value": "REPLACE — accelerate; something leaving should speed away" }
+    },
+    "opacity": {
+      "$type": "number",
+      "$description": "Disabled opacity is the only legitimate use of opacity on text — everything else should be a real colour token so contrast stays computable.",
+      "disabled": { "$value": "REPLACE" },
+      "muted":    { "$value": "REPLACE" },
+      "scrim":    { "$value": "REPLACE — paired with semantic.color.overlay-scrim" }
+    },
+    "icon": {
+      "$type": "dimension",
+      "$description": "Stroke weight must optically match the body text weight or icons read as a different family.",
+      "grid":   { "$value": "REPLACE — 20 or 24, the grid the icon set is built on" },
+      "stroke": { "$value": "REPLACE" },
+      "sm":     { "$value": "REPLACE" },
+      "md":     { "$value": "REPLACE" }
+    },
+    "breakpoint": {
+      "$type": "dimension",
+      "$description": "Breakpoints come from where the content breaks, not from device names.",
+      "sm": { "$value": "REPLACE" },
+      "md": { "$value": "REPLACE" },
+      "lg": { "$value": "REPLACE" },
+      "xl": { "$value": "REPLACE" }
+    },
+    "container": {
+      "$type": "dimension",
+      "$description": "Prose is the measure rule that matters: ~65 characters per line, capped regardless of viewport.",
+      "prose":   { "$value": "REPLACE — ~65ch, long-form reading" },
+      "content": { "$value": "REPLACE — default page content width" },
+      "wide":    { "$value": "REPLACE — data-dense layouts, tables" },
+      "full":    { "$value": "REPLACE — edge-to-edge" }
     }
   },
 
@@ -83,6 +158,10 @@
       "text-secondary": { "$value": "{primitive.neutral.500}", "$description": "Must clear 4.5:1 — this is the pair that usually fails." },
       "text-tertiary":  { "$value": "{primitive.neutral.400}", "$description": "Hints only. Never load-bearing information." },
       "text-inverse":   { "$value": "{primitive.neutral.0}" },
+      "text-disabled":  { "$value": "REPLACE", "$description": "The one place the 4.5:1 rule is formally exempt — still keep it legible, not decorative." },
+      "link":           { "$value": "REPLACE", "$description": "Decide whether the system underlines. Colour alone to signal a link fails for colour-blind users." },
+      "selection-bg":   { "$value": "REPLACE" },
+      "selection-fg":   { "$value": "REPLACE" },
       "action-solid":   { "$value": "REPLACE", "$description": "Primary control fill. If colour is reserved for state, this is ink rather than a hue." },
       "focus":          { "$value": "REPLACE", "$description": "Must clear 3:1 against every surface it can appear on." },
       "overlay-scrim":  { "$value": "REPLACE" }
@@ -109,6 +188,25 @@
       "modal":    { "$value": 400 },
       "toast":    { "$value": 500 },
       "tooltip":  { "$value": 600 }
+    },
+    "focus": {
+      "$type": "dimension",
+      "$description": "Ring geometry is semantic — a global decision, not component-scoped. The focus COLOUR already lives at semantic.color.focus; this group is only the ring's width and offset.",
+      "ring-width":  { "$value": "REPLACE" },
+      "ring-offset": { "$value": "REPLACE" }
+    },
+    "chart": {
+      "$type": "color",
+      "$description": "Optional — delete this group unless the archetype renders charts. Palette construction rules (categorical vs sequential vs diverging, and the accessibility constraints on each) belong to the dataviz skill; this group only reserves the token names so charts do not invent their own colours.",
+      "series": {
+        "1": { "$value": "#REPLACE" },
+        "2": { "$value": "#REPLACE" },
+        "3": { "$value": "#REPLACE" },
+        "4": { "$value": "#REPLACE" }
+      },
+      "axis":       { "$value": "#REPLACE" },
+      "grid":       { "$value": "#REPLACE" },
+      "annotation": { "$value": "#REPLACE" }
     }
   },
 
@@ -116,10 +214,11 @@
     "$description": "Tier 3. The density seam. Density modes remap ONLY this tier. Dimensions only — component-scoped colour tokens multiply without earning anything.",
     "control": {
       "$type": "dimension",
-      "height-sm": { "$value": "REPLACE" },
-      "height-md": { "$value": "REPLACE" },
-      "pad-x":     { "$value": "{primitive.space.3}" },
-      "radius":    { "$value": "{primitive.radius.md}" }
+      "height-sm":  { "$value": "REPLACE" },
+      "height-md":  { "$value": "REPLACE" },
+      "pad-x":      { "$value": "{primitive.space.3}" },
+      "radius":     { "$value": "{primitive.radius.md}" },
+      "target-min": { "$value": "REPLACE", "$description": "44px baseline. A visually smaller control still needs the full target via padding or a pseudo-element." }
     },
     "table": {
       "$type": "dimension",
@@ -136,12 +235,24 @@
   },
 
   "$themes": {
-    "$description": "Each theme overrides semantic only. If a theme needs to touch tier 1 or tier 3, the tiering is wrong.",
+    "$description": "Each theme overrides semantic only — and ALL of it: every token in every semantic group (color, state, focus, chart if kept) must be redeclared, not just the handful shown below. The dark entry here illustrates the override mechanism, not a template to ship as-is — a partial theme is a bug, not a starting point. If a theme needs to touch tier 1 or tier 3, the tiering is wrong.",
     "dark": { "semantic.color.surface": "#REPLACE", "semantic.color.text-primary": "#REPLACE" }
   },
 
   "$densities": {
     "$description": "Each density overrides component only.",
     "compact": { "component.control.height-md": "REPLACE", "component.table.row-height": "REPLACE" }
+  },
+
+  "$print": {
+    "$description": "Print is a real target, not an afterthought. Remaps semantic colour to ink-safe values and declares page geometry. Delete this block if the system never prints. Hairline borders below ~0.5pt disappear on press. The screen type scale is in px; print is in pt — do not reuse px values directly.",
+    "semantic.color.canvas":       "#REPLACE — white",
+    "semantic.color.text-primary": "#REPLACE — true black",
+    "semantic.color.rule":         "#REPLACE — must survive at 600dpi",
+    "semantic.color.surface":      "REPLACE — backgrounds do not print by default; leave transparent unless deliberately forced",
+    "page": {
+      "size":   "REPLACE — e.g. A4 or Letter",
+      "margin": "REPLACE"
+    }
   }
 }

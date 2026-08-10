@@ -1,6 +1,6 @@
 # Coverage
 
-What a complete system contains. Use in Phase 2 to find gaps, and in Phase 5 to check nothing shipped half-built.
+What a complete system contains. Use in Phase 3 to find gaps, and in Phase 5 to check nothing shipped half-built.
 
 ## Contents
 
@@ -43,11 +43,11 @@ Everything below needs a decision. Most are deferrable, but none are skippable.
 
 **Colour** — neutral ramp; accent ramps; semantic mapping to roles; state colours if colour carries meaning; surface hierarchy; border colours; overlay scrim; theme variants.
 
-**Typography** — families by role; type scale with a fixed number of steps; weights; line heights; letter spacing; tabular figures for data; responsive behaviour; uppercase policy.
+**Typography** — families by role; type scale with a fixed number of steps; weights; line heights; letter spacing; tabular figures for data; measure — line length capped by the container token, not eyeballed per breakpoint; responsive behaviour; uppercase policy.
 
 **Space** — base unit; scale; and rules for *which* value applies where. The rules matter more than the scale, and are almost always missing. Label-to-control, field-to-field, section-to-section should each have an answer.
 
-**Layout** — breakpoints; container widths; grid; density modes if the archetype needs them.
+**Layout** — breakpoints set where the content breaks, not at device widths, which drift within a year; container widths; grid; density modes if the archetype needs them.
 
 **Depth** — elevation levels tied to meaning, not just blur radii; a named z-index scale so nobody writes `z-index: 9999`.
 
@@ -56,6 +56,12 @@ Everything below needs a decision. Most are deferrable, but none are skippable.
 **Motion** — durations; easing curves for entrance and exit; what animates and what never does; reduced-motion handling as a global rule.
 
 **Icons** — grid size; stroke weight; optical alignment; naming; delivery format; filled versus outline policy.
+
+**Opacity** — disabled state is the only legitimate use of opacity on text; anywhere else it makes contrast uncomputable, since the ratio depends on whatever sits behind it.
+
+**Focus** — ring colour, width, offset, set once and globally rather than per component — a ring that changes shape between components trains users to stop trusting it.
+
+**Print** — page size and margins; ink-safe colour remap of the semantic tier; backgrounds do not print by default; hairlines below ~0.5pt vanish on press; pt, not px, drives the type scale; link URLs need a visible destination since paper can't be clicked. Print is a target, not a stylesheet afterthought.
 
 ---
 
@@ -85,6 +91,8 @@ Match the pattern set to the archetype rather than emitting a universal list. Id
 *Dashboards, observability, incident response, trading, logistics.* Users are here all day, scanning for exceptions.
 
 Dense data tables · severity and status encoding · filtering and saved views · real-time updates without layout shift · alerting and notification routing · time range selection · drill-down from summary to detail · acknowledgement and assignment · density modes · keyboard-first navigation.
+
+Charts consume system tokens rather than inventing their own — the names are reserved in the template's optional `semantic.chart` group. Palette construction — categorical vs sequential vs diverging, and each one's accessibility constraints — belongs to the `dataviz` skill; don't re-derive it here.
 
 ### CRUD admin
 *Internal tools, back office, configuration.* Users are trained, tasks are repetitive.

@@ -152,4 +152,4 @@ Motion          Not shown                                   —
 Vernacular      Field notebooks, survey markers, ledgers    Medium
 ```
 
-Low confidence and blank rows feed Phase 2. Do not silently upgrade a guess to an observation — an assumption recorded as a fact is the thing that gets discovered three weeks later.
+Low confidence and blank rows feed both Phase 2 and Phase 3 — a silent axis is where the three directions diverge, and a genuine blank is where gap diagnosis starts. Do not silently upgrade a guess to an observation — an assumption recorded as a fact is the thing that gets discovered three weeks later.

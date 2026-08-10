@@ -1,6 +1,6 @@
 ---
 name: fudge:design-system
-description: Build a complete, production-grade design system from a moodboard, screenshots, brand assets, or a written aesthetic brief. Use this whenever the user supplies visual references or describes a look and wants design tokens, a component library, UI patterns, documentation, or anything they call a "design system" — and also when they ask for a style guide, brand-to-UI translation, theming or dark-mode architecture, component library foundations, or say things like "make our product look like this" at more than one-screen scale. The skill interrogates the user to fill the semantic gaps a moodboard cannot answer, locks a written direction, then emits a three-tier token architecture, component contracts, an archetype-matched pattern library, a documentation site, and a working demo screen that provably consumes the same tokens.
+description: Build a complete, production-grade design system from a moodboard, screenshots, brand assets, or a written aesthetic brief. Use this whenever the user supplies visual references or describes a look and wants design tokens, a component library, UI patterns, documentation, or anything they call a "design system" — and also when they ask for a style guide, brand-to-UI translation, theming or dark-mode architecture, component library foundations, or say things like "make our product look like this" at more than one-screen scale. The skill interrogates the user to fill the semantic gaps a moodboard cannot answer, renders three structurally divergent directions as real screens for the user to pick from, locks the winner, then emits a three-tier token architecture, component contracts, an archetype-matched pattern library, a documentation site, and a working demo screen that provably consumes the same tokens.
 ---
 
 # Design System Forge
@@ -19,7 +19,7 @@ Generating a design system from aesthetics alone produces a beautiful token file
 
 ## Workflow
 
-Five phases. Do not skip phase 4.
+Five phases. Skip neither phase 2 nor phase 4 — the picked look and the written lock are the last two cheap places to be wrong.
 
 ### Phase 1 — Intake and extract
 
@@ -31,23 +31,35 @@ Inventory what you were given, then mine it. Read `references/reading-inputs.md`
 | A named reference ("like Stripe", "like Notion") | Name the two or three specific properties being pointed at. People rarely mean "clone it" — they mean one attribute. Confirm which. |
 | A written brief | Extract the same axes. Mark every axis the brief left silent. |
 | Existing product or repo | Audit first: count distinct colours, spacing values, button treatments, font sizes actually in use. The inventory is both scope document and funding argument. |
-| Nothing but a sentence | Say so plainly, and go to Phase 3 with a wider question set. |
+| Nothing but a sentence | Say so plainly. Phase 2's three directions then spread wider, and Phase 4 carries a wider question set. |
 
-Produce an **extraction table**: each axis, what the input said, and your confidence. Low confidence is a signal for Phase 2, not something to paper over.
+Produce an **extraction table**: each axis, what the input said, and your confidence. A low-confidence axis is a silent axis — it is where Phase 2 diverges and where Phase 3 looks for gaps — so record it rather than papering over it.
 
-### Phase 2 — Gap diagnosis
+### Phase 2 — Direction
+
+Nobody can tell from a description whether they will like a room. Agreement to a written direction is therefore worth very little, and the honest reaction turns up after generation, when it is expensive. So show three and lock the look here, on the extraction alone — every token downstream derives from the look, so it cannot sit behind a questionnaire.
+
+**Render three directions** into a single self-contained `directions.html` — three tiles side by side, each a real mini-screen from the archetype's busiest surface, with the *same content* in all three so the design is the only variable. They must diverge structurally on separation device, density, type character, and colour budget; three hues of one layout is one direction wearing three shirts. Each tile carries a name, a one-line thesis, and the axes it differs on. Screen all three against the anti-default guard in `references/generation.md` before showing them — three directions that trip the same default are one direction.
+
+**Diverge on the axes the input left silent, never on ones it settled.** If the moodboard landed a warm neutral ramp, all three keep it and fight elsewhere; three directions arguing with a decision the user already made read as not having looked at their moodboard. Draw the most plausible busiest surface the input implies and name that assumption in the tile label. If the input never says what the product even is, that one question — *what is this, in one line, and who uses it?* — rides along in the same message as the tiles. One question is not a round.
+
+**The user picks one, or mixes named attributes across tiles** ("tile 2's palette, tile 1's density"). Offer the mix explicitly; it is often where the real answer is, because it names the axis they actually care about. A mix gets checked for coherence before it locks. If they reject all three, that is a cheap success at this stage, not a failure.
+
+Thin input makes this phase more valuable, not less: the less the brief settled, the wider the three legitimately spread, and three wide guesses rendered is the cheapest way there is to learn what someone wants. Full procedure — derivation, tile and file contracts, mixes, rejection, and what happens when a later answer collides with the locked look — in `references/direction.md`.
+
+### Phase 3 — Gap diagnosis
 
 Run the coverage checklist in `references/coverage.md` against the extraction. Sort every unresolved decision into three buckets:
 
 - **Blocking** — generation is impossible or meaningless without it. *What is the product? Who uses it, in what conditions? What surfaces exist?* Rarely more than four.
 - **Consequential** — a default is possible, but a wrong default is expensive to unwind. *Does colour carry state meaning? Is dark mode required or nice-to-have? What density does the work demand? What accessibility target? Multi-brand or single?*
-- **Deferrable** — pick a sane default and state it. *Radius scale, motion durations, elevation depth, icon stroke weight.* These get recorded as assumptions, never as questions.
+- **Deferrable** — pick a sane default and state it. *Radius scale, motion durations, elevation depth, icon stroke weight.* These get recorded as assumptions, never as questions — and the locked look has already answered several of them, so radius, stroke, elevation depth and motion temperament are read off the winning tile rather than defaulted.
 
 The bucketing is the skill's core judgement. Getting it wrong in either direction is a failure: ask about deferrables and you burn the user's patience on trivia; assume a consequential and you rebuild later.
 
-### Phase 3 — Interrogation
+### Phase 4 — Interrogation and direction lock
 
-Ask about blocking and consequential unknowns only. Question bank and phrasing in `references/interrogation.md`.
+Ask about blocking and consequential unknowns only. Question bank and phrasing in `references/interrogation.md`. The interrogation is narrower than it would have been, because the look is already settled — you are asking about semantics, not aesthetics, and nothing here is a taste question.
 
 Rules that keep this from becoming an interview:
 
@@ -58,9 +70,7 @@ Rules that keep this from becoming an interview:
 5. **Ask consequences, not preferences.** Not "do you want dark mode?" — everyone says yes. Ask "do people use this at night or on a factory floor, or is dark mode a nice-to-have?" The answer changes whether theming is architected in or bolted on.
 6. **Let them punt.** Offer "you decide" on every question. If they take it, decide, and record it in DECISIONS.md as an assumption rather than a fact.
 
-### Phase 4 — Direction lock
-
-Before generating anything, write a one-page direction and get explicit agreement. This is the cheapest possible place to be wrong.
+**Then fill the one-pager and confirm it.** The locked look supplies Palette, Type, Geometry and Signature directly — those rows are transcription, not invention. Product, Archetype, Principles and Assumptions come from the answers above, which is why this page could not be written in Phase 2.
 
 ```
 ## Direction — [system name]
@@ -77,7 +87,7 @@ Assumptions    [every deferrable you defaulted, listed]
 Rejected       [what you considered and dropped, and why]
 ```
 
-Two checks before showing it:
+Two checks on the winning direction before showing the page:
 
 **The generic test.** Work through a plausible different brief and see whether you arrive somewhere similar. If you would, the direction is a default rather than a choice — revise it and say what changed. See the anti-default list in `references/generation.md`.
 
@@ -102,6 +112,7 @@ Non-negotiable gates:
 
 ```
 <system-name>/
+├── directions.html      Phase 2's three tiles. Throwaway, kept for the record; not part of the system.
 ├── tokens.json          Source of truth, DTCG-shaped. Nothing downstream is hand-edited.
 ├── <system-name>.css    Generated: three token tiers, reset, component classes.
 ├── docs.html            The documentation site.
@@ -128,13 +139,14 @@ If the user asks for everything up front, build it, but say once that shipping a
 
 ## Reference files
 
-Read these when you reach the relevant phase; do not preload all four.
+Read these when you reach the relevant phase; do not preload all five.
 
 | File | When |
 |---|---|
 | `references/reading-inputs.md` | Phase 1. Extraction procedure per input type, and the explicit list of what images cannot tell you. |
-| `references/interrogation.md` | Phase 3. Question bank by bucket, with phrasings that get usable answers. |
-| `references/coverage.md` | Phase 2 and 5. Everything a complete system contains; per-component contract; pattern sets by product archetype. |
+| `references/direction.md` | Phase 2. How to derive three genuinely divergent directions, the tile and `directions.html` contracts, and how to handle a mix or a total rejection. |
+| `references/coverage.md` | Phase 3 and 5. Everything a complete system contains; per-component contract; pattern sets by product archetype. |
+| `references/interrogation.md` | Phase 4. Question bank by bucket, with phrasings that get usable answers. |
 | `references/generation.md` | Phase 5. File contracts, token tiering rules, code conventions, anti-default guard, verification scripts. |
 
 `scripts/build.py` inlines the stylesheet into the HTML consumers and reports whether their token blocks match. `assets/tokens.template.json` is the starting shape for the source of truth.

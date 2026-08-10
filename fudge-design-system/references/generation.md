@@ -41,7 +41,7 @@ Make the tiering *visible* in the documentation rather than merely described. A 
 DTCG-shaped source of truth. Group by tier. Every token carries a `$value`, a `$type`, and a short `$description` saying what it is *for* — the description is what stops the set from drifting into synonyms.
 
 ### `<system>.css`
-Emitted, in this order: tier 1 block, tier 2 block, theme overrides, tier 3 block, density overrides, reset and base, type roles, component classes, minimal layout utilities.
+Emitted, in this order: tier 1 block, tier 2 block, theme overrides, print overrides, tier 3 block, density overrides, reset and base, type roles, component classes, minimal layout utilities. Print overrides sit beside theme overrides because both remap tier 2 only, and tier 3 needs the final values before it renders.
 
 Keep utilities deliberately few. A system that ships a hundred utilities has outsourced its decisions to whoever is writing markup.
 
@@ -106,7 +106,7 @@ Derive it from the vernacular. Then apply Chanel's rule before shipping: look at
 - Namespace component classes with a short prefix so system classes are distinguishable from application classes at a glance.
 - Product and demo code references tier 2 and tier 3 only. No raw values.
 - Use logical properties (`inset-inline-start`, `padding-block`) so RTL works without a second stylesheet.
-- One global `:focus-visible` rule in the reset. Removing an outline requires a written exception.
+- One global `:focus-visible` rule in the reset, built from `semantic.focus.ring-width` and `ring-offset`. Removing an outline requires a written exception.
 - One global `prefers-reduced-motion` block. Never per-component.
 - Tabular figures on anything numeric that appears in a column.
 - Never encode meaning in colour alone — pair it with a label, an icon, or a positional device.
@@ -128,7 +128,9 @@ Run all of these before presenting. Report the numbers rather than claiming comp
 
 **Four states.** Confirm the demo surface handles loading, empty, partial, and error.
 
-**Scale adherence.** Every spacing, radius, and font-size value in the output appears in the declared scales. Off-scale values mean the scale is wrong or the discipline slipped; either way, resolve it rather than shipping both.
+**Scale adherence.** Every spacing, radius, font-size, weight, leading, tracking, border-width, easing curve, opacity, icon grid and stroke, breakpoint, and container value in the output appears in the declared scales. Off-scale values mean the scale is wrong or the discipline slipped; either way, resolve it rather than shipping both.
+
+**Print, if in scope.** Apply the `$print` overrides and check computed values, not intent: every semantic background resolves to none or white, every remapped foreground still clears 4.5:1 against it, and nothing below the declared hairline width survives.
 
 **Keyboard pass.** Tab through the demo. Every interactive element reachable, focus visible on every one, order matching visual order, nothing trapped except deliberately in a modal.
 
@@ -149,3 +151,5 @@ The architecture holds; the emission changes.
 **Figma-first** — variable names must match token names exactly. Parity is a naming discipline problem, not a tooling problem, and it is the hardest thing in the system to sustain.
 
 **Email** — no custom properties, no flexbox. Emit an inlined subset and be explicit about which components exist there, rather than pretending the whole system does.
+
+**Print** — remap the semantic tier rather than writing a parallel stylesheet; that seam is what makes print cheap. Backgrounds, elevation, hover and focus, and anything below hairline weight do not survive the transition, and the type scale runs in points, not pixels. Nothing about this target is visible on screen, so it gets its own verification pass rather than a glance in the browser.

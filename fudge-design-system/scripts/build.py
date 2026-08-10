@@ -44,6 +44,70 @@ def contrast(fg, bg):
 
 
 # --------------------------------------------------------------------------
+# theme scopes
+# --------------------------------------------------------------------------
+# Ceiling: this is a brace-depth splitter, not a CSS parser. It only needs
+# to separate top-level rulesets/at-rules from one another; the token
+# regexes used against a block's raw text don't care about further nesting
+# inside it (e.g. `@media (...) { :root { --x: #fff; } }` still yields
+# `--x: #fff;`), so splitting one level deep is enough for every theme
+# shape this gate is asked to recognise.
+THEME_SELECTOR_PATTERNS = (
+    r'\[data-theme=["\']?([\w-]+)["\']?\]',
+    r'\.theme-([\w-]+)',
+    r':root\.([\w-]+)',
+    r'@media\s*\(\s*prefers-color-scheme:\s*(dark|light)\s*\)',
+)
+
+
+def top_level_blocks(css):
+    """Split a stylesheet into (selector, content) pairs at brace depth 0."""
+    blocks, depth, sel_start, block_start = [], 0, 0, None
+    for i, ch in enumerate(css):
+        if ch == "{":
+            if depth == 0:
+                block_start = i
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0 and block_start is not None:
+                blocks.append((css[sel_start:block_start], css[block_start + 1:i]))
+                sel_start = i + 1
+                block_start = None
+    return blocks
+
+
+def theme_label(selector):
+    """Name a theme from its selector, e.g. "dark" from [data-theme="dark"]."""
+    for pattern in THEME_SELECTOR_PATTERNS:
+        m = re.search(pattern, selector)
+        if m:
+            return m.group(1)
+    return None
+
+
+def theme_scopes(css):
+    """Split a stylesheet into base tokens plus any scoped theme blocks.
+
+    Returns (base_text, [(name, theme_text), ...]). theme_text holds only
+    that theme's own declarations — callers layer it over base_text, since
+    a theme typically redeclares just the semantic tier and inherits tier 1
+    unchanged. Selectors that don't match a known theme shape (:root,
+    body, ...) fall into base_text instead of being dropped.
+    """
+    base_chunks = []
+    themes = {}
+    for selector, content in top_level_blocks(css):
+        label = theme_label(selector)
+        if label is None:
+            base_chunks.append(content)
+        else:
+            themes.setdefault(label, []).append(content)
+    base_text = "\n".join(base_chunks)
+    return base_text, [(name, "\n".join(chunks)) for name, chunks in themes.items()]
+
+
+# --------------------------------------------------------------------------
 # build
 # --------------------------------------------------------------------------
 def build(system_dir: pathlib.Path, out_dir: pathlib.Path):
@@ -111,39 +175,60 @@ def verify(built, css):
     print(f"  off-scale px literals (advisory): {len(used)}"
           f"{' — ' + ', '.join(sorted(used, key=int)[:8]) if used else ''}")
 
-    # Gate 4 — contrast, for any semantic pairs resolvable to literal hexes.
-    prims = dict(re.findall(r"--([\w-]+):\s*(#[0-9a-fA-F]{3,8})\s*;", css))
+    # Gate 4 — contrast, for any semantic pairs resolvable to literal hexes,
+    # checked once per theme so a dark-mode override can't silently mix
+    # into the light palette (or vice versa) the way a single flat dict did.
+    TOKEN_RE = r"--([\w-]+):\s*(#[0-9a-fA-F]{3,8})\s*;"
+    base_text, theme_blocks = theme_scopes(css)
 
-    def resolve(token):
-        m = re.search(rf"--{token}:\s*var\(--([\w-]+)\)", css)
-        return prims.get(m.group(1)) if m else prims.get(token)
+    def layered_prims(theme_text):
+        # dict() keeps the *last* match per key, so theme entries (added
+        # second) override base entries for the same token name.
+        return dict(re.findall(TOKEN_RE, base_text) + re.findall(TOKEN_RE, theme_text))
+
+    def layered_resolver(theme_text, prims):
+        def resolve(token):
+            m = re.search(rf"--{token}:\s*var\(--([\w-]+)\)", theme_text) if theme_text else None
+            if not m:
+                m = re.search(rf"--{token}:\s*var\(--([\w-]+)\)", base_text)
+            return prims.get(m.group(1)) if m else prims.get(token)
+        return resolve
 
     # Inverse text never sits on the surface — it sits on the solid action
     # fill. Checking it against surface would fail every well-built system,
     # and a gate that always fails is a gate everyone learns to ignore.
-    checks = []
-    surface = resolve("color-surface")
-    if surface:
-        for name, _ in re.findall(r"--(color-text-(?!inverse)[\w-]+):\s*var\(--([\w-]+)\)", css):
-            if resolve(name):
-                checks.append((name, "color-surface", resolve(name), surface))
-    action = resolve("color-action-solid")
-    inverse = resolve("color-text-inverse")
-    if action and inverse:
-        checks.append(("color-text-inverse", "color-action-solid", inverse, action))
+    def contrast_checks(theme_text, resolve):
+        checks = []
+        surface = resolve("color-surface")
+        if surface:
+            pat = r"--(color-text-(?!inverse)[\w-]+):\s*var\(--[\w-]+\)"
+            names = list(dict.fromkeys(re.findall(pat, base_text) + re.findall(pat, theme_text)))
+            for name in names:
+                fg = resolve(name)
+                if fg:
+                    checks.append((name, "color-surface", fg, surface))
+        action = resolve("color-action-solid")
+        inverse = resolve("color-text-inverse")
+        if action and inverse:
+            checks.append(("color-text-inverse", "color-action-solid", inverse, action))
+        return checks
 
-    if checks:
-        print("  contrast:")
-        for name, bg_name, fg, bg in checks:
-            ratio = contrast(fg, bg)
-            target = 3.0 if "tertiary" in name else 4.5
-            ok = ratio >= target
-            print(f"      {name:<22} on {bg_name:<20} {ratio:>5.2f}:1"
-                  f"  target {target}  {'pass' if ok else 'FAIL'}")
-            if not ok:
-                failures.append(f"{name} on {bg_name}: {ratio:.2f}:1, below {target}")
-    else:
-        print("  contrast: no resolvable semantic pairs — check manually")
+    print("  contrast:")
+    for theme_name, theme_text in [("default", "")] + theme_blocks:
+        prims = layered_prims(theme_text)
+        resolve = layered_resolver(theme_text, prims)
+        checks = contrast_checks(theme_text, resolve)
+        if checks:
+            for name, bg_name, fg, bg in checks:
+                ratio = contrast(fg, bg)
+                target = 3.0 if "tertiary" in name else 4.5
+                ok = ratio >= target
+                print(f"      {theme_name:<10} {name:<22} on {bg_name:<20} {ratio:>5.2f}:1"
+                      f"  target {target}  {'pass' if ok else 'FAIL'}")
+                if not ok:
+                    failures.append(f"[{theme_name}] {name} on {bg_name}: {ratio:.2f}:1, below {target}")
+        else:
+            print(f"      {theme_name:<10} no resolvable semantic pairs — check manually")
 
     return failures
 
