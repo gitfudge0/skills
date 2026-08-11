@@ -15,6 +15,7 @@ A personal collection of Claude Code skills, one directory each, each with a `SK
 | fudge:rust-arch | Idiomatic Rust architecture — project layout, workspaces, error handling, config, tracing, iced GUIs. | "structure my rust project" |
 | fudge:design-system | Turns a moodboard, screenshots, or aesthetic brief into a full design system — tokens, component contracts, patterns, docs, demo screen. | "make our product look like this" |
 | fudge:test-plan | Right-sized, risk-prioritized test plan — then runs the cases and marks PASS/FAIL in an HTML report. | "what should I test here" |
+| fudge:conventions | Interviews you across structure, architecture, testing, tooling, workflow, docs and security, then emits a project-specific skill encoding the rules agents follow when writing code there. | "what patterns should we use in this project" |
 
 ## Install
 
