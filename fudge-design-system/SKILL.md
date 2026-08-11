@@ -1,6 +1,6 @@
 ---
 name: fudge:design-system
-description: Build a complete, production-grade design system from a moodboard, screenshots, brand assets, or a written aesthetic brief. Use this whenever the user supplies visual references or describes a look and wants design tokens, a component library, UI patterns, documentation, or anything they call a "design system" — and also when they ask for a style guide, brand-to-UI translation, theming or dark-mode architecture, component library foundations, or say things like "make our product look like this" at more than one-screen scale. The skill interrogates the user to fill the semantic gaps a moodboard cannot answer, renders three structurally divergent directions as real screens for the user to pick from, locks the winner, then emits a three-tier token architecture, component contracts, an archetype-matched pattern library, a documentation site, and a working demo screen that provably consumes the same tokens.
+description: Build a complete, production-grade design system from a moodboard, screenshots, brand assets, or a written aesthetic brief. Use this whenever the user supplies visual references or describes a look and wants design tokens, a component library, UI patterns, documentation, or anything they call a "design system" — and also when they ask for a style guide, brand-to-UI translation, theming or dark-mode architecture, component library foundations, or say things like "make our product look like this" at more than one-screen scale. The skill interrogates the user to fill the semantic gaps a moodboard cannot answer, renders three structurally divergent directions as real screens for the user to pick from, locks the winner, then emits a three-tier token architecture, component contracts, an archetype-matched pattern library, a documentation site, and a working demo screen that provably consumes the same tokens — with adapters that let a React, Angular, Svelte, Tailwind or shadcn/ui project pick the tokens up directly.
 ---
 
 # Design System Forge
@@ -35,6 +35,8 @@ Inventory what you were given, then mine it. Read `references/reading-inputs.md`
 
 Produce an **extraction table**: each axis, what the input said, and your confidence. A low-confidence axis is a silent axis — it is where Phase 2 diverges and where Phase 3 looks for gaps — so record it rather than papering over it.
 
+Name the **archetype** in the same breath — console, CRUD admin, editor, marketplace, communication, or content, primary and secondary where the product is two things. It is an output of this phase, not something Phase 3 works out later: it fixes the pattern set and roughly half the component list, and it picks the busiest surface Phase 2 draws its tiles on. If the input will not support even a guess, record it blank and carry it into Phase 3 as blocking.
+
 ### Phase 2 — Direction
 
 Nobody can tell from a description whether they will like a room. Agreement to a written direction is therefore worth very little, and the honest reaction turns up after generation, when it is expensive. So show three and lock the look here, on the extraction alone — every token downstream derives from the look, so it cannot sit behind a questionnaire.
@@ -53,7 +55,7 @@ Run the coverage checklist in `references/coverage.md` against the extraction. S
 
 - **Blocking** — generation is impossible or meaningless without it. *What is the product? Who uses it, in what conditions? What surfaces exist?* Rarely more than four.
 - **Consequential** — a default is possible, but a wrong default is expensive to unwind. *Does colour carry state meaning? Is dark mode required or nice-to-have? What density does the work demand? What accessibility target? Multi-brand or single?*
-- **Deferrable** — pick a sane default and state it. *Radius scale, motion durations, elevation depth, icon stroke weight.* These get recorded as assumptions, never as questions — and the locked look has already answered several of them, so radius, stroke, elevation depth and motion temperament are read off the winning tile rather than defaulted.
+- **Deferrable** — pick a sane default and state it. *Radius scale, motion durations, elevation depth, icon stroke weight.* These get recorded as assumptions, never as questions — and the locked look has already answered several of them. Separation device, radius, stroke, density position, type character, colour budget and signature are read off the winning tile rather than defaulted; a tile carrying no radius anywhere has decided radius, by absence. **Elevation depth and motion temperament are not settled by a static tile** — it never renders a layer above the page, and ten minutes of work buys no motion opinion — so both stay defaults and both go in Assumptions. And the tile settles character and position, never numbers: paddings drawn by eye and a dozen ad-hoc font sizes read literally as a 1px grid, which is not a design system. Regularise them into a spacing base unit and a type scale ratio, and record that regularisation in Assumptions too.
 
 The bucketing is the skill's core judgement. Getting it wrong in either direction is a failure: ask about deferrables and you burn the user's patience on trivia; assume a consequential and you rebuild later.
 
@@ -112,16 +114,20 @@ Non-negotiable gates:
 
 ```
 <system-name>/
-├── directions.html      Phase 2's three tiles. Throwaway, kept for the record; not part of the system.
-├── tokens.json          Source of truth, DTCG-shaped. Nothing downstream is hand-edited.
-├── <system-name>.css    Generated: three token tiers, reset, component classes.
-├── docs.html            The documentation site.
-├── demo-<surface>.html  A real product screen, built only from the system.
-├── DECISIONS.md         Assumptions, rejected alternatives, open questions.
-└── build.py             Injects the stylesheet into both HTML consumers.
+├── directions.html                Phase 2's three tiles. Throwaway, kept for the record; not part of the system.
+├── tokens.json                    Source of truth, DTCG-shaped. Nothing downstream is hand-edited.
+├── DECISIONS.md                   Assumptions, rejected alternatives, open questions.
+├── src/
+│   ├── <system-name>.tokens.css   Emitted from tokens.json by emit.py: tiers 1–3, theme, print and density overrides.
+│   ├── <system-name>.parts.css    Hand-authored on those tokens: reset, type roles, component classes, utilities.
+│   ├── docs.shell.html            The documentation site. Carries the /*__SYSTEM_CSS__*/ marker build.py fills.
+│   └── demo-<surface>.shell.html  A real product screen, built only from the system. Same marker.
+└── dist/                          build.py's output: the concatenated stylesheet, and each shell with it inlined.
 ```
 
-Adjust format to the target — a React or Tailwind consumer needs adapters rather than a CSS file, and a Figma-first team needs variable naming parity. The *architecture* holds regardless: one source, semantic seam for theming, component seam for density.
+**The system has to be pickable up by whatever the target project already is.** CSS custom properties are the portable substrate — React, Angular and Svelte consume them natively, so `dist/<system-name>.css` drops in and `var(--color-text-primary)` works with no adapter at all. Beyond that, `scripts/emit.py --format` projects the same tokens into a target's own idiom: `ts` for a typed module whose leaves are `var()` references rather than resolved literals, `tailwind` for a v4 `@theme` block and a v3 `theme.extend` fragment, `shadcn` for its fixed slot vocabulary on the `.dark` convention. A Figma-first team needs variable naming parity instead.
+
+Adapters project the semantic tier outward; they never become a second source. A consuming project that hand-edits the Tailwind config or the shadcn alias layer has forked the system, and that fork is invisible because it still looks generated. Adapters map semantic names only — bind to `--neutral-700` and you have bound to a value rather than a meaning, and the next theme breaks you. The *architecture* holds regardless: one source, semantic seam for theming, component seam for density.
 
 The demo screen matters more than it looks. It is the proof. A system that has never rendered a real screen with real content is a hypothesis, and the screen is where you discover the token set is missing something.
 
@@ -147,9 +153,9 @@ Read these when you reach the relevant phase; do not preload all five.
 | `references/direction.md` | Phase 2. How to derive three genuinely divergent directions, the tile and `directions.html` contracts, and how to handle a mix or a total rejection. |
 | `references/coverage.md` | Phase 3 and 5. Everything a complete system contains; per-component contract; pattern sets by product archetype. |
 | `references/interrogation.md` | Phase 4. Question bank by bucket, with phrasings that get usable answers. |
-| `references/generation.md` | Phase 5. File contracts, token tiering rules, code conventions, anti-default guard, verification scripts. |
+| `references/generation.md` | Phase 2 and 5. The anti-default guard alone in Phase 2; file contracts, token tiering rules, code conventions and verification scripts in Phase 5. |
 
-`scripts/build.py` inlines the stylesheet into the HTML consumers and reports whether their token blocks match. `assets/tokens.template.json` is the starting shape for the source of truth.
+`scripts/emit.py` renders the token layers — tiers 1 to 3 plus the theme, print and density overrides — from `tokens.json` into `src/`. `scripts/build.py` concatenates that with the hand-authored parts stylesheet, inlines the result into every `src/*.shell.html` consumer, writes `dist/`, and reports whether their token blocks match. `assets/tokens.template.json` is the starting shape for the source of truth.
 
 ---
 

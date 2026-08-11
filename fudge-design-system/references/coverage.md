@@ -87,6 +87,8 @@ The states matrix is what gets underestimated. A button is not one thing; it is 
 
 Match the pattern set to the archetype rather than emitting a universal list. Identify the archetype in Phase 1 and confirm it in the direction lock.
 
+Hybrids are common — most internal products are one archetype with a second one bolted to the side. Name one **primary** and the other **secondary**: the merged set is the primary's whole set plus only those patterns of the secondary the product actually needs. Everything left over, from either set, is dropped explicitly and by name rather than silently, because a pattern dropped without a name reads as a pattern forgotten, and the team that finds the hole later fills it their own way. State the merge in the direction lock beside the archetype — *console primary, CRUD admin secondary; audit trails and bulk operations pulled in; import/export, relationship pickers and drill-down dropped* — so the user can object to a subtraction while it is still one line of text.
+
 ### Console / monitoring
 *Dashboards, observability, incident response, trading, logistics.* Users are here all day, scanning for exceptions.
 

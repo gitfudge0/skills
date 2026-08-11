@@ -15,9 +15,12 @@
       "300": { "$value": "#REPLACE" },
       "400": { "$value": "#REPLACE" },
       "500": { "$value": "#REPLACE" },
+      "600": { "$value": "#REPLACE", "$description": "The step between 500 and 700 — exists to make an AA-passing (4.5:1) light-theme text-secondary reachable without jumping to 700 and reading heavier than the direction intends." },
       "700": { "$value": "#REPLACE" },
       "900": { "$value": "#REPLACE" },
-      "950": { "$value": "#REPLACE" }
+      "950": { "$value": "#REPLACE" },
+      "true-black": { "$value": "#000000", "$description": "Not a general UI colour. Exists for print text and the rare screen scrim that must be genuinely opaque black — never use it for ordinary body text or a surface; screen text takes neutral.900, which is deliberately softer than this." },
+      "true-white": { "$value": "#FFFFFF", "$description": "Not a general UI colour. Exists for print pages and the rare screen surface that must be genuinely pure white — never use it for ordinary UI backgrounds; the screen ramp bottoms out at neutral.0, which is deliberately not pure white." }
     },
     "accent": {
       "$type": "color",
@@ -29,19 +32,19 @@
     },
     "space": {
       "$type": "dimension",
-      "$description": "The base unit comes from the density axis of the extraction; every step is a multiple of it. Fixed count, fixed keys. The rules for which value applies where live in the docs, not here.",
-      "1":  { "$value": "REPLACE — one base unit, the tightest gap in the system" },
+      "$description": "The base unit comes from the density axis of the extraction; every step is a multiple of it, so its absolute size scales with density — at the tightest density position the base can be as small as 2px and the whole scale compresses proportionally with it. A 32px top step at that position is correct, not an error; judge each step by its role below, not by a remembered pixel value. Fixed count, fixed keys. The rules for which value applies where live in the docs, not here.",
+      "1":  { "$value": "REPLACE — 1 base unit, the tightest gap the scale defines" },
       "2":  { "$value": "REPLACE — 2 base units" },
-      "3":  { "$value": "REPLACE — 3 base units, the default control padding" },
-      "4":  { "$value": "REPLACE — 4 base units, the default block gap" },
+      "3":  { "$value": "REPLACE — 3 base units, the step used for default control padding" },
+      "4":  { "$value": "REPLACE — 4 base units, the step used for the default block gap" },
       "6":  { "$value": "REPLACE — 6 base units" },
-      "8":  { "$value": "REPLACE — 8 base units, section separation" },
+      "8":  { "$value": "REPLACE — 8 base units, the step used for section separation" },
       "12": { "$value": "REPLACE — 12 base units" },
-      "16": { "$value": "REPLACE — 16 base units, the largest gap the system allows" }
+      "16": { "$value": "REPLACE — 16 base units, the largest gap the scale defines — its absolute size is whatever 16 base units resolves to at this density, not a fixed largeness" }
     },
     "radius": {
       "$type": "dimension",
-      "$description": "Derived from the geometry axis of the extraction.",
+      "$description": "Derived from the geometry axis of the extraction. A step with no consumer is deleted, not filled with a synonym — a zero-radius system ships one radius token (0) rather than three identical zeros for sm/md/lg.",
       "sm": { "$value": "REPLACE" },
       "md": { "$value": "REPLACE" },
       "lg": { "$value": "REPLACE" },
@@ -76,7 +79,7 @@
     },
     "weight": {
       "$type": "fontWeight",
-      "$description": "A system shipping six weights uses three. Pick regular, one for emphasis, one for headings.",
+      "$description": "A system shipping six weights uses three. Pick regular, one for emphasis, one for headings. A weight with no consumer in the chosen face is deleted, not filled in — a two-family stack with only regular and bold deletes medium and semibold rather than shipping them, because a weight the face does not cut gets synthesised by the rasteriser, and a synthesised weight looks wrong and is a real quality bug.",
       "regular":  { "$value": "REPLACE" },
       "medium":   { "$value": "REPLACE" },
       "semibold": { "$value": "REPLACE" },
@@ -121,7 +124,7 @@
     "icon": {
       "$type": "dimension",
       "$description": "Stroke weight must optically match the body text weight or icons read as a different family.",
-      "grid":   { "$value": "REPLACE — 20 or 24, the grid the icon set is built on" },
+      "grid":   { "$value": "REPLACE — derived, not prescribed: the grid follows the density position and the type size the icon sits beside. An icon must optically match the text it accompanies, not a fixed grid — a 15px status mark in a 28px rail correctly lands at 16, not 20. 20 or 24 are common at comfortable density; they are not defaults." },
       "stroke": { "$value": "REPLACE" },
       "sm":     { "$value": "REPLACE" },
       "md":     { "$value": "REPLACE" }
@@ -168,7 +171,7 @@
     },
     "state": {
       "$type": "color",
-      "$description": "Delete this group entirely if colour does not carry meaning in this product. Each level needs foreground, background, and an edge colour, and each must pair with a non-colour signal.",
+      "$description": "Delete this group entirely if colour does not carry meaning in this product. The foreground/background/edge triple is the common case, not a mandate: a system whose colour budget makes rules or space the primary separation device (a legitimate divergence axis, not a deviation) sets background to transparent and carries the level on the edge and the foreground alone. Whichever shape is used, each level must stay distinguishable without relying on the fill — that discipline is also what makes the level work for colour-blind users.",
       "REPLACE-level-1": { "fg": { "$value": "#REPLACE" }, "bg": { "$value": "#REPLACE" }, "edge": { "$value": "#REPLACE" } },
       "REPLACE-level-2": { "fg": { "$value": "#REPLACE" }, "bg": { "$value": "#REPLACE" }, "edge": { "$value": "#REPLACE" } }
     },
@@ -245,9 +248,9 @@
   },
 
   "$print": {
-    "$description": "Print is a real target, not an afterthought. Remaps semantic colour to ink-safe values and declares page geometry. Delete this block if the system never prints. Hairline borders below ~0.5pt disappear on press. The screen type scale is in px; print is in pt — do not reuse px values directly.",
-    "semantic.color.canvas":       "#REPLACE — white",
-    "semantic.color.text-primary": "#REPLACE — true black",
+    "$description": "Print is a real target, not an afterthought. Remaps semantic colour to ink-safe values and declares page geometry. Delete this block if the system never prints. Hairline borders below ~0.5pt disappear on press. The screen type scale is in px; print is in pt — do not reuse px values directly. Canvas and text-primary reference the true-black/true-white primitives, not the screen ramp's neutral.0/neutral.950 — the screen ramp is deliberately softer than either end and cannot express print's true-black-on-white requirement.",
+    "semantic.color.canvas":       "{primitive.neutral.true-white}",
+    "semantic.color.text-primary": "{primitive.neutral.true-black}",
     "semantic.color.rule":         "#REPLACE — must survive at 600dpi",
     "semantic.color.surface":      "REPLACE — backgrounds do not print by default; leave transparent unless deliberately forced",
     "page": {

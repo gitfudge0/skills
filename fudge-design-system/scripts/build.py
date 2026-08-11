@@ -8,8 +8,12 @@ verification gates from references/generation.md and reports the numbers.
     python build.py <system-dir> [--out <dir>]
 
 Expects, inside <system-dir>:
-    src/<name>.css          the system stylesheet
+    src/<name>.tokens.css   the emitted token layers (from emit.py)
+    src/<name>.parts.css    the hand-authored stylesheet on those tokens
     src/*.shell.html        HTML consumers containing the marker below
+
+A system that keeps everything in one stylesheet is still valid: a lone
+src/<name>.css is taken as the whole thing.
 """
 
 import argparse
@@ -57,6 +61,11 @@ THEME_SELECTOR_PATTERNS = (
     r'\.theme-([\w-]+)',
     r':root\.([\w-]+)',
     r'@media\s*\(\s*prefers-color-scheme:\s*(dark|light)\s*\)',
+    # Print remaps tier 2 exactly the way a theme does, so it is a theme as
+    # far as this gate is concerned. generation.md gives it its own
+    # mandatory verification pass precisely because nothing about it is
+    # visible in the browser.
+    r'@media\s+(print)\b',
 )
 
 
@@ -108,14 +117,131 @@ def theme_scopes(css):
 
 
 # --------------------------------------------------------------------------
+# raw colour values
+# --------------------------------------------------------------------------
+# The line emit.py writes to mark where a literal colour stops being a
+# primitive and starts being a leak. Held as text rather than imported:
+# build.py verifies whatever stylesheet it is handed, including ones
+# emit.py never wrote.
+TIER_1_SENTINEL = "/* ---- end tier 1 · no raw values below this line ---- */"
+
+# 3-, 4-, 6- and 8-digit hex, plus functional notation. `transparent`,
+# `currentColor`, `inherit` and `none` are keywords and never match; the
+# inner alternation lets one level of nesting through so a call like
+# `rgb(var(--c) / 50%)` is matched whole and then exempted as an alias.
+RAW_COLOUR = re.compile(
+    r"#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b"
+    r"|\b(?:rgba?|hsla?)\([^()]*(?:\([^()]*\)[^()]*)*\)"
+)
+BANNER = re.compile(r"/\* ---- (.*?) ---- \*/")
+
+
+def blank_comments(css):
+    """The same text with comment bodies blanked to spaces, offsets intact.
+
+    A hex in a comment is a note, not a leak. Blanking rather than deleting
+    keeps every index and line number reported downstream honest.
+    """
+    return re.sub(r"/\*.*?\*/",
+                  lambda m: re.sub(r"[^\n]", " ", m.group(0)), css, flags=re.S)
+
+
+def enclosing_rule(css, index):
+    """The selectors open around `index`, outermost first."""
+    stack, start = [], 0
+    for i, ch in enumerate(css[:index]):
+        if ch == "{":
+            stack.append(css[start:i])
+            start = i + 1
+        elif ch == "}":
+            if stack:
+                stack.pop()
+            start = i + 1
+    return " › ".join(" ".join(s.split()) for s in stack if s.strip())
+
+
+def enclosing_prop(css, index):
+    """The property whose value `index` sits in, if it sits in one."""
+    start = max(css.rfind(ch, 0, index) for ch in "{};")
+    m = re.match(r"\s*([\w-]+)\s*:", css[start + 1:index])
+    return m.group(1) if m else ""
+
+
+def raw_colours_below_tier_1(css):
+    """Every raw colour value below the tier 1 boundary.
+
+    Returns a list of (line, layer, where, value), empty when the layers
+    below tier 1 are clean — or None when the boundary itself is nowhere in
+    the stylesheet, which leaves the question open rather than answering it
+    in either direction.
+
+    Ceiling: the *first* boundary is the one that counts. A system emitted
+    into several tokens files would carry one per file, and this reads the
+    primitives of the second and later ones as downstream — strict rather
+    than lax, which is the right way round for a gate to be wrong.
+    """
+    cut = css.find(TIER_1_SENTINEL)
+    if cut < 0:
+        return None
+    masked = blank_comments(css)
+    found = []
+    for m in RAW_COLOUR.finditer(masked, cut + len(TIER_1_SENTINEL)):
+        # A colour function reading a custom property is plumbing, not a raw
+        # value: the channels still come from tier 1.
+        if "var(" in m.group(0):
+            continue
+        # A colour is a value, so it lives in a declaration. Without one the
+        # match is something else wearing the same characters — an id
+        # selector such as `#faded` is spelled entirely in hex digits.
+        prop = enclosing_prop(masked, m.start())
+        if not prop:
+            continue
+        banners = [b.group(1) for b in BANNER.finditer(css, 0, m.start())]
+        rule = enclosing_rule(masked, m.start())
+        found.append((css.count("\n", 0, m.start()) + 1,
+                      banners[-1] if banners else "",
+                      f"{rule} · {prop}" if rule else prop, m.group(0)))
+    return found
+
+
+# --------------------------------------------------------------------------
 # build
 # --------------------------------------------------------------------------
+def stylesheet(src: pathlib.Path):
+    """The system stylesheet: emitted tokens first, hand-authored parts after.
+
+    Returns (name, css). The order is load-bearing — a custom property has
+    to be declared before the rules that consume it, and every gate below
+    reads tier 1 as the block standing ahead of everything downstream. The
+    parts layers are taken in sorted order so the same src/ always
+    concatenates to the same bytes.
+    """
+    sheets = sorted(src.glob("*.css"))
+    if not sheets:
+        sys.exit(f"no stylesheet found in {src}")
+
+    tokens = [f for f in sheets if f.name.endswith(".tokens.css")]
+    parts = [f for f in sheets if not f.name.endswith(".tokens.css")]
+    if not tokens:
+        # One stylesheet is a whole system on its own and needs no ordering.
+        # Several, with nothing named for the emitted layer, is a coin toss:
+        # picking one would silently drop the rest, which is the bug this
+        # function exists to remove.
+        if len(sheets) == 1:
+            return sheets[0].name, sheets[0].read_text()
+        sys.exit(f"cannot tell which stylesheet in {src} holds the tokens — "
+                 f"name the emitted layer <system>.tokens.css "
+                 f"({', '.join(f.name for f in sheets)})")
+
+    css = "\n".join(f"/* ---- {f.name} ---- */\n{f.read_text().rstrip()}\n"
+                    for f in tokens + parts)
+    # Name the built sheet for the system, not for one of its inputs.
+    return tokens[0].name.replace(".tokens.css", ".css"), css
+
+
 def build(system_dir: pathlib.Path, out_dir: pathlib.Path):
     src = system_dir / "src"
-    css_files = list(src.glob("*.css"))
-    if not css_files:
-        sys.exit(f"no stylesheet found in {src}")
-    css = css_files[0].read_text()
+    css_name, css = stylesheet(src)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     shells = sorted(src.glob("*.shell.html"))
@@ -133,8 +259,8 @@ def build(system_dir: pathlib.Path, out_dir: pathlib.Path):
         built.append(target)
         print(f"  built  {name:<32} {target.stat().st_size:>8,} bytes")
 
-    (out_dir / css_files[0].name).write_text(css)
-    print(f"  built  {css_files[0].name:<32} {len(css):>8,} bytes"
+    (out_dir / css_name).write_text(css)
+    print(f"  built  {css_name:<32} {len(css):>8,} bytes"
           f"   sha256:{hashlib.sha256(css.encode()).hexdigest()[:12]}")
     return built, css
 
@@ -168,12 +294,42 @@ def verify(built, css):
         if raw:
             failures.append(f"{f.name}: {len(raw)} raw colour values outside tier 1")
 
+    # Gate 2b — the same rule, turned on the stylesheet itself. Gate 2 reads
+    # every <style> block *after* the first, and gate 1 requires the inlined
+    # system CSS to be the first, so the whole stylesheet sits outside gate
+    # 2's window: it polices the shell's own chrome and nothing else. The
+    # layer likeliest to carry a stray hex — the hand-authored parts file —
+    # is exactly the one it cannot see. Tier 1 is the only layer allowed a
+    # literal, and emit.py marks where it ends, so everything past that line
+    # must reach its colour through a token.
+    leaks = raw_colours_below_tier_1(css)
+    if leaks is None:
+        # A stylesheet emit.py never wrote has no boundary to check against.
+        # Passing it would be a lie and failing it would punish a shape the
+        # rest of this script accepts, so say what is actually true.
+        print("  no raw colour values below tier 1: unverified — "
+              "no tier boundary in this stylesheet, check manually")
+    else:
+        print(f"  no raw colour values below tier 1: "
+              f"{'pass' if not leaks else f'FAIL ({len(leaks)})'}")
+        for line, layer, where, value in leaks:
+            print(f"      line {line:>4}  {layer:<20} {where:<36} {value}")
+        if leaks:
+            shown = ", ".join(value for *_, value in leaks[:4])
+            failures.append(f"{len(leaks)} raw colour values below the tier 1 "
+                            f"boundary: {shown}{' …' if len(leaks) > 4 else ''}")
+
     # Gate 3 — scale adherence (advisory): px values should come from a
     # declared scale or a tier-3 dimension token, not appear ad hoc.
-    declared = set(re.findall(r"--[\w-]+:\s*(\d+)px\s*;", css))
-    used = set(re.findall(r":\s*(\d+)px", css)) - declared - {"0", "1", "2"}
+    # Every px value in a declaration value counts, not just the first one
+    # after the colon: `padding: 4px 10px` hid its 10px, and a fractional
+    # `1.5px` was invisible entirely.
+    PX = r"(\d*\.?\d+)px"
+    declared = set(re.findall(rf"--[\w-]+:\s*{PX}\s*;", css))
+    used = {v for value in re.findall(r":\s*([^;{}]*)", css)
+            for v in re.findall(PX, value)} - declared - {"0", "1", "2"}
     print(f"  off-scale px literals (advisory): {len(used)}"
-          f"{' — ' + ', '.join(sorted(used, key=int)[:8]) if used else ''}")
+          f"{' — ' + ', '.join(sorted(used, key=float)[:8]) if used else ''}")
 
     # Gate 4 — contrast, for any semantic pairs resolvable to literal hexes,
     # checked once per theme so a dark-mode override can't silently mix
@@ -187,26 +343,54 @@ def verify(built, css):
         return dict(re.findall(TOKEN_RE, base_text) + re.findall(TOKEN_RE, theme_text))
 
     def layered_resolver(theme_text, prims):
+        # A layer's own declaration wins outright, alias or literal hex alike.
+        # Falling through to the base is only correct when the layer never
+        # mentions the token at all — searching the base whenever the *alias*
+        # search missed is what let a dark theme's literal hex go unread, so
+        # a broken dark palette got scored against the light primitives.
+        def own(text, token):
+            """(value, declared) for one layer. value is None if unresolvable."""
+            if not text or not re.search(rf"--{token}:", text):
+                return None, False
+            alias = re.search(rf"--{token}:\s*var\(--([\w-]+)\)", text)
+            if alias:
+                return prims.get(alias.group(1)), True
+            literal = re.search(rf"--{token}:\s*(#[0-9a-fA-F]{{3,8}})", text)
+            return (literal.group(1) if literal else None), True
+
         def resolve(token):
-            m = re.search(rf"--{token}:\s*var\(--([\w-]+)\)", theme_text) if theme_text else None
-            if not m:
-                m = re.search(rf"--{token}:\s*var\(--([\w-]+)\)", base_text)
-            return prims.get(m.group(1)) if m else prims.get(token)
+            value, declared = own(theme_text, token)
+            # `transparent`, `none` and colour functions land here as declared
+            # but unresolvable — right for print, where a background genuinely
+            # is nothing, and the pair is skipped rather than mis-scored.
+            return value if declared else own(base_text, token)[0]
         return resolve
 
     # Inverse text never sits on the surface — it sits on the solid action
     # fill. Checking it against surface would fail every well-built system,
     # and a gate that always fails is a gate everyone learns to ignore.
+    VALUE = r"(?:var\(--[\w-]+\)|#[0-9a-fA-F]{3,8})"
+    TEXT_PAT = rf"--(color-text-(?!inverse)[\w-]+):\s*{VALUE}"
+    # Backgrounds are discovered by name rather than listed, so canvas,
+    # sunken, elevated and any other surface variant a system invents all
+    # get checked. Anything that doesn't resolve to a hex is skipped.
+    BG_PAT = rf"--(color-(?:canvas|surface|elevated)[\w-]*):\s*{VALUE}"
+
     def contrast_checks(theme_text, resolve):
         checks = []
-        surface = resolve("color-surface")
-        if surface:
-            pat = r"--(color-text-(?!inverse)[\w-]+):\s*var\(--[\w-]+\)"
-            names = list(dict.fromkeys(re.findall(pat, base_text) + re.findall(pat, theme_text)))
-            for name in names:
-                fg = resolve(name)
-                if fg:
-                    checks.append((name, "color-surface", fg, surface))
+
+        def declared_names(pattern):
+            return list(dict.fromkeys(re.findall(pattern, base_text)
+                                      + re.findall(pattern, theme_text)))
+
+        backgrounds = [(n, resolve(n)) for n in declared_names(BG_PAT)]
+        backgrounds = [(n, bg) for n, bg in backgrounds if bg]
+        for name in declared_names(TEXT_PAT):
+            fg = resolve(name)
+            if not fg:
+                continue
+            for bg_name, bg in backgrounds:
+                checks.append((name, bg_name, fg, bg))
         action = resolve("color-action-solid")
         inverse = resolve("color-text-inverse")
         if action and inverse:
@@ -223,9 +407,15 @@ def verify(built, css):
                 ratio = contrast(fg, bg)
                 target = 3.0 if "tertiary" in name else 4.5
                 ok = ratio >= target
+                # Disabled text is the one place the 4.5:1 rule is formally
+                # exempt (assets/tokens.template.json says so), so asserting
+                # it here would fail every correctly built system. The ratio
+                # is still measured and printed — exempt, not hidden.
+                exempt = name == "color-text-disabled"
+                verdict = "exempt" if exempt else ("pass" if ok else "FAIL")
                 print(f"      {theme_name:<10} {name:<22} on {bg_name:<20} {ratio:>5.2f}:1"
-                      f"  target {target}  {'pass' if ok else 'FAIL'}")
-                if not ok:
+                      f"  target {target}  {verdict}")
+                if not ok and not exempt:
                     failures.append(f"[{theme_name}] {name} on {bg_name}: {ratio:.2f}:1, below {target}")
         else:
             print(f"      {theme_name:<10} no resolvable semantic pairs — check manually")

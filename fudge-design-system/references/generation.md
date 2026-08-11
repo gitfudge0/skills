@@ -29,7 +29,7 @@ Rules worth stating in the generated docs, because they are the ones teams get w
 - **Tier 3 is for dimensions, not colour.** Component-scoped colour tokens multiply endlessly without earning anything. Colour stops at tier 2 unless a component provably needs to diverge.
 - **New primitives need review; new semantics need a use case.** Adding `--ink-350` because a mock looked slightly off is how a system ends up with forty greys.
 - **Renaming a tier-2 token is a breaking change.** It ships with a codemod and a deprecation window.
-- **Nothing downstream is hand-edited.** `tokens.json` is the source; the CSS, the type definitions, and the design tool variables are all emitted.
+- **Only the token layers are emitted.** `scripts/emit.py` generates tier 1, tier 2, theme and print overrides, tier 3, and density overrides from `tokens.json`; none of it is hand-edited. The component layer — reset, base, type roles, component classes, utilities — is hand-authored and consumes those tokens, never a raw value: the discipline is that no value appears twice, not that no file is written by hand.
 
 Make the tiering *visible* in the documentation rather than merely described. A provenance trail — primitive → semantic → component → the rendered control — with live theme and density toggles proves the architecture in about four seconds. Description of tiering convinces nobody; watching one link in the chain change while the others hold convinces immediately.
 
@@ -40,28 +40,31 @@ Make the tiering *visible* in the documentation rather than merely described. A 
 ### tokens.json
 DTCG-shaped source of truth. Group by tier. Every token carries a `$value`, a `$type`, and a short `$description` saying what it is *for* — the description is what stops the set from drifting into synonyms.
 
-### `<system>.css`
-Emitted, in this order: tier 1 block, tier 2 block, theme overrides, print overrides, tier 3 block, density overrides, reset and base, type roles, component classes, minimal layout utilities. Print overrides sit beside theme overrides because both remap tier 2 only, and tier 3 needs the final values before it renders.
+### `src/<system-name>.tokens.css` + `src/<system-name>.parts.css`
+Two layers, never merged by hand — `scripts/build.py` concatenates them into `dist/<system-name>.css` in this order, and the order is load-bearing and does not change between them. **`<system-name>.tokens.css`** is emitted by `scripts/emit.py` from `tokens.json`, never hand-edited: tier 1 block, tier 2 block, theme overrides, print overrides, tier 3 block, density overrides. **`<system-name>.parts.css`** is hand-authored on those tokens, consuming tier 2 and tier 3 only: reset and base, type roles, component classes, minimal layout utilities. Print overrides sit beside theme overrides because both remap tier 2 only, and tier 3 needs the final values before it renders.
 
 Keep utilities deliberately few. A system that ships a hundred utilities has outsourced its decisions to whoever is writing markup.
 
-### docs.html
+### src/docs.shell.html
 Sections in this order: principles, token architecture with a live provenance demo, foundations, components with full state matrices, patterns, content, accessibility, governance. Every component gets its contract table. Theme and density toggles live in the header so every section can be checked in every mode.
 
-Documentation chrome must itself be built from the system's tokens. A docs site that uses raw values to describe a token system undermines its own argument, and it is an easy thing to check.
+Authored in `src/` carrying the `/*__SYSTEM_CSS__*/` marker; `build.py` fills the marker and writes the built file to `dist/docs.html`. Documentation chrome must itself be built from the system's tokens. A docs site that uses raw values to describe a token system undermines its own argument, and it is an easy thing to check.
 
-### demo-`<surface>`.html
+### src/demo-`<surface>`.shell.html
 One real product screen from the archetype's busiest surface — real content, real density, real edge cases. Include at least one empty or error state somewhere on the page.
 
-This file is the proof, and it earns its place by being where you discover what the token set is missing. If the demo needed a value the system does not have, the system was incomplete; add it and regenerate rather than patching the demo.
+Authored in `src/` carrying the same marker; `build.py` builds it to `dist/demo-<surface>.html`. This file is the proof, and it earns its place by being where you discover what the token set is missing. If the demo needed a value the system does not have, the system was incomplete; add it and regenerate rather than patching the demo.
 
 ### DECISIONS.md
 Short entries, each with: the decision, what was rejected, why, and what would make you revisit. Include every defaulted assumption from the interrogation, and every open question the user punted on.
 
 This is what makes the system arguable later. "Why is there no brand colour in the interface?" gets asked by every new team, and it should be answered once, in writing.
 
-### build.py
-Emits the CSS from tokens where applicable, inlines the stylesheet into each HTML consumer, and reports whether their token blocks match. Shipping the build step is what makes "the demo uses the same system" verifiable instead of asserted.
+### scripts/build.py
+Concatenates `src/<system-name>.tokens.css` with `src/<system-name>.parts.css` into `dist/<system-name>.css`, inlines that stylesheet into every `src/*.shell.html` consumer as its `dist/` counterpart, and reports whether their token blocks match. Shipping the build step is what makes "the demo uses the same system" verifiable instead of asserted.
+
+### scripts/emit.py
+Renders `tokens.json` into `src/<system-name>.tokens.css`: tier 1, tier 2, theme overrides, print overrides, tier 3, density overrides, in that fixed order. Never hand-edited downstream — regenerate rather than patch. Fails loudly rather than emitting silently wrong output: an alias resolving to no declared token, a `$value` still holding the template placeholder, or a group nested where a dotted override path was expected each stop the run before a single line is written.
 
 ---
 
@@ -134,6 +137,8 @@ Run all of these before presenting. Report the numbers rather than claiming comp
 
 **Keyboard pass.** Tab through the demo. Every interactive element reachable, focus visible on every one, order matching visual order, nothing trapped except deliberately in a modal.
 
+**Look at it.** Render `directions.html` from Phase 2 and the demo screen and docs page from Phase 5, and look at them before presenting anything — screenshot if the environment can, open them in a browser if a person is doing it. This is the one gate that cannot be automated away by the others: passing every textual gate above says nothing about whether the screen is right. Only rendering catches a broken or collapsed layout, overlap and clipping, a signature element that does not survive contact with real content, text that overflows or truncates at real string lengths, and the four states rendering as designed rather than merely existing in the stylesheet. `directions.html` is exempt from every other Phase 5 gate — it is a pre-generation artefact, not a token consumer — but not from this one: a tile-derivation claim ("three different radii across the three tiles") is checked only by looking, and a false one reads clean through every textual check that exists. If the environment genuinely cannot render, this gate is not silently skipped — say so to the user and name the result unverified.
+
 A quick script covers the first three and is worth writing once, since it reruns on every regeneration.
 
 ---
@@ -142,9 +147,17 @@ A quick script covers the first three and is worth writing once, since it reruns
 
 The architecture holds; the emission changes.
 
-**React or Vue** — emit tokens as a typed module plus CSS custom properties, and components with the same contracts. Props map to variants and sizes; state remains CSS-driven so it survives without JavaScript.
+**CSS custom properties are the portable substrate.** React, Angular and Svelte all consume them natively with no adapter at all — drop `dist/<system-name>.css` into the project and reference `var(--color-text-primary)` directly. It is the answer for most consuming projects and costs nothing beyond the file already being built — offer it before reaching for an adapter.
 
-**Tailwind** — emit the theme config from tier 1 and tier 2, with semantic names as the utility names. The tiering must survive; a Tailwind config full of primitives has thrown away the theming seam.
+**`scripts/emit.py --format ts`** emits a TypeScript module: a nested readonly object whose leaves are `var(--name)` reference strings, plus a flat path→property-name map. The leaves stay references rather than resolving to hex at build time — resolving would freeze the light theme into the JS bundle and take the theme toggle down with it. Framework-agnostic, no imports.
+
+**`scripts/emit.py --format tailwind`** emits two artefacts from the one source: a Tailwind v4 `@theme` block — v4 is CSS-first, so tokens map onto its `--color-*`, `--spacing-*` and `--radius-*` namespaces and Tailwind generates utilities from them directly — and a v3 `theme.extend` config fragment whose values are `var(--our-token)` references, for the v3 deployments still widely running. One source still drives both.
+
+**`scripts/emit.py --format shadcn`** emits an alias layer mapping shadcn/ui's fixed slot vocabulary — `--background`, `--foreground`, `--primary`, `--muted-foreground`, `--border`, `--ring`, `--radius` and the rest — onto our semantic tokens, themed on shadcn's `.dark` convention. It emits only the slots whose source token actually exists and reports the unmapped ones: a fabricated `--popover` is worse than an absent one, because the consuming project cannot tell it is wrong.
+
+**The rule governing all three:** adapters project the semantic tier outward; they never become a second source. A consuming project that hand-edits the Tailwind config or the shadcn alias layer has forked the system, and the fork is invisible because it still looks generated. Whatever the target, `tokens.json` stays the one place a value is decided, and every adapter is regenerated rather than maintained.
+
+This is also why the tier 2 seam is what makes any of this cheap: an adapter maps semantic names, never primitives. A consuming project that binds to `--neutral-700` has bound to a value rather than a meaning, and breaks on the next theme.
 
 **Native (iOS / Android)** — the source of truth emits platform formats. The component layer cannot assume the DOM, so contracts are specified in terms of behaviour and accessibility rather than markup.
 

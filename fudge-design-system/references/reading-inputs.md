@@ -4,7 +4,7 @@ Extract before you interpret. The output of this phase is a table of observation
 
 ## Contents
 
-- [The eight extraction axes](#the-eight-extraction-axes)
+- [The nine extraction axes](#the-nine-extraction-axes)
 - [What images cannot tell you](#what-images-cannot-tell-you)
 - [Reading a named reference](#reading-a-named-reference)
 - [Reading a written brief](#reading-a-written-brief)
@@ -13,9 +13,9 @@ Extract before you interpret. The output of this phase is a table of observation
 
 ---
 
-## The eight extraction axes
+## The nine extraction axes
 
-Work through all eight for every visual input. Record what you actually observe; mark the ones the input is silent on.
+Work through all nine for every visual input. Record what you actually observe; mark the ones the input is silent on.
 
 ### 1. Palette
 
@@ -79,6 +79,14 @@ The world the subject comes from — its instruments, materials, artefacts, and 
 
 A logistics tool's world contains manifests, seals, weights, and routes. A medical tool's contains charts, cuffs, and shift handovers. A music tool's contains meters, faders, and takes. Mine the vernacular for structural devices, naming, and the signature element. A system whose vocabulary comes from its subject will not look like anything else, and one whose vocabulary comes from other design systems will look like all of them.
 
+### 9. Archetype
+
+What kind of product this is: console, CRUD admin, editor, marketplace, communication, or content. The pattern sets in `coverage.md` are indexed by it.
+
+Visual input names it by what it shows rather than by label. Rows, timestamps and status chips read as a console; chrome wrapped around a large empty canvas reads as an editor; faceted cards carrying prices read as a marketplace. A written brief or a named reference usually settles it in one sentence about who uses it and what they are doing.
+
+Extract it here rather than later. The archetype fixes the pattern set and roughly half the component list, and it picks the busiest surface Phase 2 draws its three tiles on — derive it in Phase 3 and the tiles were already drawn on a surface guessed without it. Where the product is genuinely two things, name a primary and a secondary. Where the input will not support even a guess, record it blank and carry it into Phase 3 as blocking, not deferrable.
+
 ---
 
 ## What images cannot tell you
@@ -110,7 +118,7 @@ This single question routinely prevents a whole wrong direction. If several refe
 
 ## Reading a written brief
 
-Run the same eight axes and mark the silent ones. Adjectives need translating into decisions, and the translation should be shown rather than assumed, because most aesthetic adjectives are ambiguous in a way that matters:
+Run the same nine axes and mark the silent ones. Adjectives need translating into decisions, and the translation should be shown rather than assumed, because most aesthetic adjectives are ambiguous in a way that matters:
 
 | Brief says | Could mean | Resolve by |
 |---|---|---|
@@ -150,6 +158,7 @@ Separation      Rules, hairline                             High
 Icons           Not shown                                   —
 Motion          Not shown                                   —
 Vernacular      Field notebooks, survey markers, ledgers    Medium
+Archetype       Admin primary, console secondary            Low
 ```
 
 Low confidence and blank rows feed both Phase 2 and Phase 3 — a silent axis is where the three directions diverge, and a genuine blank is where gap diagnosis starts. Do not silently upgrade a guess to an observation — an assumption recorded as a fact is the thing that gets discovered three weeks later.

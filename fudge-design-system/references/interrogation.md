@@ -71,13 +71,21 @@ One team needs a component library. Five teams need a contribution model, versio
 **How should this sound when something breaks?**
 Voice is a system decision and the error state is where it is most visible and most often wrong. Options: *plain and factual / warm and reassuring / terse and technical*.
 
+**Does this ever leave the screen — printed, or exported to a PDF someone outside the tool will read?**
+Not "do you need print styles" — the real question is whether a regulator, an auditor, a client, or a lawyer ever holds this on paper. A yes forces an ink-safe remap of the semantic tier, gives the type scale a pt-based track, puts a floor under hairlines below which they vanish on press, stops backgrounds printing by default, and makes link URLs visible since paper cannot be clicked. A no is cheap to say now and expensive to retrofit once the tier is built without it. Options: *yes, someone outside the tool reads a printed or exported copy / no, and unlikely to change / not sure — ask what currently leaves as a PDF*.
+
+**Who is allowed to perform this product's most consequential action, and what does everyone else see?**
+Not "do you have roles" — most products have one action worth gating: delete, approve, publish, refund. A real answer puts a permission state on every row and control throughout, not just a login screen, and surfaces an audit trail for who did what. The default when nobody designs this is a control that looks available and fails on click. Options: *yes, meaningful tiers protecting a real action / a single admin flag only / no, every account can do everything*.
+
 ---
 
 ## Deferrables — never ask these
 
 Decide, state the assumption, move on. Every one of these has a defensible default derivable from the extraction, and asking about them signals that you cannot make a decision.
 
-Several are no longer defaults at all by the time you get here. Radius, stroke, elevation depth and motion temperament were settled the moment the user picked a tile in Phase 2 — read them off the winning direction rather than inventing them, and never put a question to the user about something they have already chosen by pointing at it.
+Several are no longer defaults at all by the time you get here. Radius, stroke, density position, type character and colour budget were settled the moment the user picked a tile in Phase 2 — read them off the winning direction rather than inventing them, and never put a question to the user about something they have already chosen by pointing at it.
+
+Elevation depth and motion temperament were not. A static tile renders no layer above the page and buys no motion opinion, so both stay ordinary defaults and both go in Assumptions. Spacing base unit and type scale ratio are the trap in between: the tile looks like it settled them, but paddings drawn by eye and a dozen ad-hoc font sizes read literally as a 1px grid. Regularise those into a base unit and a ratio, and record the regularisation rather than presenting it as something the user chose.
 
 Radius scale · spacing base unit · elevation depth · motion durations and easing · icon stroke weight · z-index layers · border widths · focus ring style · skeleton versus spinner · exact type scale ratio · component naming convention · file organisation.
 
@@ -95,6 +103,8 @@ If the user volunteers an opinion on one, take it. Do not solicit it.
 | What components do you need? | Walk me through your two busiest screens | Produces a real inventory instead of a wish list |
 | Do you like this direction? | Which of these three would you defend to someone who disagreed? | Forces a real preference rather than politeness |
 | How dense should it be? | Is someone in this all day, or dropping in occasionally? | Density is a consequence of use, not a taste |
+| Do you need print styles? | Does this ever get printed or exported and read by someone outside the tool? | Reframes a feature ask as a consequence with a real cost |
+| Do you have user roles? | What's the worst thing a wrong click could let someone do here? | Finds the action that needs gating, not the org chart |
 
 ## Reading non-answers
 
