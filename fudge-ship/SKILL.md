@@ -39,7 +39,7 @@ Users name a stage by either column — the stage (`design`) or the skill (`fudg
 
 Three skills are **support** — invoked *inside* a stage, never as a stage of their own:
 
-- **fudge:report-deck** — styles the HTML a stage emits.
+- **fudge:report-deck** — styles the HTML a stage emits, when the artifact is substantial enough to warrant it. An artifact under roughly one screen of content — a five-case test plan, say — is emitted as clean minimal HTML without invoking report-deck.
 - **fudge:mindmap** — offered during `understand` only, when the corpus is large enough to be worth mapping. A decline is not a gate answer.
 - **fudge:rust-arch** — see `implement`.
 
@@ -53,6 +53,8 @@ Three skills are **support** — invoked *inside* a stage, never as a stage of t
 
 **State the route and the reasoning before running any stage.** Print the chosen stages, and say what was dropped and why.
 
+**Fast path.** When the route — inferred or named — has three stages or fewer and contains none of `understand`, `decide`, `design`, collapse to a single gate: GATE 3, before `implement`. Gates for stages not in the route are recorded as answered-not-applicable. Say in the route message that the fast path is in effect, so the user knows two gates went away. The GATE 3 hard boundary is unchanged — nothing outside `.fudge-ship/` is written until it is answered.
+
 If fudge:decision-room's verdict is **don't build**, that is a full stop — not a gate. Report it and end the run. The user may override by saying so, and then the pipeline continues. On override, recompute the route from the current understanding and re-state it before continuing. fudge:ship does not argue the point twice.
 
 ## Workspace
@@ -60,6 +62,7 @@ If fudge:decision-room's verdict is **don't build**, that is a full stop — not
 ```
 .fudge-ship/<YYYY-MM-DD>-<slug>/
   run.json
+  0-recon.md
   1-decision.html
   2-mock.html
   3-test-plan.html
@@ -79,14 +82,18 @@ When `understand` runs, fudge:gap-analysis keeps writing its own `.gap-analysis/
   "request": "<the user's original ask, verbatim>",
   "route": ["decide", "design", "verify-plan", "implement", "review"],
   "route_reason": "<why these stages, why not the others>",
+  "run_status": "open",
+  "recon": "0-recon.md",
   "implement_baseline": {"head": "<git rev-parse HEAD>", "dirty": "<git status --porcelain>"},
   "stages": {
     "understand":  {"status": "skipped", "artifact": null,              "summary": null},
     "decide":      {"status": "done",    "artifact": "1-decision.html", "summary": "<one line>"},
     "design":      {"status": "gated",   "artifact": "2-mock.html",     "summary": "<one line>"},
     "verify-plan": {"status": "pending", "artifact": null,              "summary": null},
-    "implement":   {"status": "pending", "artifact": null,              "summary": null},
-    "review":      {"status": "pending", "artifact": null,              "summary": null}
+    "implement":   {"status": "pending", "artifact": null,              "summary": null,
+                    "tests": {"executed": null, "passed": null, "failed": null}},
+    "review":      {"status": "pending", "artifact": null,              "summary": null,
+                    "fix_iterations": 0}
   },
   "gates": {
     "1-decide":      {"answered": true,  "response": "<what the user actually said>", "at": "2026-07-28"},
@@ -97,6 +104,8 @@ When `understand` runs, fudge:gap-analysis keeps writing its own `.gap-analysis/
 ```
 
 `status` is one of `pending | running | gated | done | skipped | blocked`.
+
+`run_status` is one of `open | done | abandoned`. It is `open` from run creation until the run ends, and set to `done` the moment it does — after the review/fix loop finishes, or at a don't-build full stop the user does not override.
 
 `stages` carries an entry for all six stages. Ones not in `route` are `skipped` at run creation, so a resumed run can tell *dropped* from *not yet reached*.
 
@@ -110,7 +119,9 @@ Write `run.json` after **every** stage transition and **every** gate answer. Not
 
 Read-only exploration of the codebase before the first real stage. Use parallel read-only Explore agents: what exists today in this area, what the design system actually looks like, where the seams are, what the test setup is.
 
-Ungrounded personas give generic advice, and an ungrounded mock renders a UI that does not match the product. Recon is held as context and passed into stages — it is not written to a file and not shown as a deliverable.
+Ungrounded personas give generic advice, and an ungrounded mock renders a UI that does not match the product. Write the findings to `0-recon.md` in the run workspace and record it in `run.json` as the top-level `"recon"` key. Keep it short — paths, conventions, seams, test setup. It is a working note, not a deliverable: no styling, never presented as an artifact.
+
+Stages are seeded from it. `resume` reads `0-recon.md` rather than redoing recon.
 
 ### Seeding
 
@@ -121,9 +132,12 @@ Every stage receives the previous stage's output, not just the original request 
 Every stage below runs through the dispatch pattern above; `implement` is the one exception, where fudge:ship itself is the fudge:delegate orchestrator rather than a stage dispatched to a single worker.
 
 - **`decide`** — frame fudge:decision-room around the *real* decision, not the feature title. "Should we add session switching" is a title; "do we switch sessions in-place or spawn a second pane, given the existing single-buffer renderer" is the decision.
-- **`design`** — at GATE 2, loop on revisions as many times as the user wants. Each revision re-runs fudge:ui-mock and rewrites `2-mock.html`; the gate stays open until the user advances it.
-- **`implement`** — orchestrate via fudge:delegate. Load fudge:rust-arch first if the target is Rust. Record `git rev-parse HEAD` and `git status --porcelain` into `run.json` as `implement_baseline` before any worker runs. `review` diffs against that baseline and names any pre-existing modifications separately rather than reporting them as this run's work. When workers report done, **re-run the build, tests, and lint yourself and read the raw output**. A worker's claim of success is zero evidence.
+- **`design`** — at GATE 2, loop on revisions as many times as the user wants. Scope the revision to the feedback: when it names specific frames or elements ("change the button on frame 3"), fudge:ui-mock patches only those frames in `2-mock.html`. A full re-run is for feedback that changes direction — layout, flow, aesthetic. Either way the gate stays open until the user advances it.
+- **`implement`** — orchestrate via fudge:delegate. Load fudge:rust-arch first if the target is Rust. Record `git rev-parse HEAD` and `git status --porcelain` into `run.json` as `implement_baseline` before any worker runs. `review` diffs against that baseline and names any pre-existing modifications separately rather than reporting them as this run's work. When workers report done, **re-run the build, tests, and lint yourself and read the raw output**. A worker's claim of success is zero evidence. Then execute the plan: run the cases from `3-test-plan.html` through fudge:test-plan's execute mode — cases written, run, marked PASS/FAIL, the report updated in place — and record the result in `run.json` as `"tests": {"executed": true, "passed": <n>, "failed": <n>}` under `stages.implement`. If `verify-plan` was dropped from the route there is no plan to execute; skip it and say so in the final report.
+
+  **Implement failure.** If the build, tests, or lint still fail after fudge:delegate's failure protocol is exhausted (its corrective-brief cap), stop the stage: set `stages.implement` to `status: blocked` with the failing command and a one-line cause in `summary`, report the raw failure output to the user, and halt the run before `review`. `run_status` stays `open` so `resume` picks up here. Never revert to `implement_baseline` on your own — name it and let the user decide what happens to the partial work.
 - **`review`** — fudge:layered-review over the diff this run produced, written to `4-review.html`.
+- **`fix`** — not a stage, a behavior after `review`. If fudge:layered-review reports findings the user would call blocking — correctness, data loss, security, not style nits — dispatch fix workers via fudge:delegate, re-run the build, tests, and lint yourself, then re-run fudge:layered-review over the delta, rewriting `4-review.html`. Two fix iterations maximum. If findings remain after the second, report them plainly and end the run — never a third loop, and never a quiet omission of what is left. Record the count in `run.json` as `"fix_iterations": <n>` inside `stages.review`.
 
 ## The gates
 
@@ -162,6 +176,6 @@ Red flags — if you catch yourself writing any of these, you are mid-violation.
 
 ## Resume and identity
 
-`resume` or `continue` reads `run.json`, reports the route, the completed stages with their summaries, and the recorded gate responses, then picks up at the gated stage. If more than one open run exists under `.fudge-ship/`, list them with slug and date and ask which one — never guess.
+`resume` or `continue` reads `run.json`, reports the route, the completed stages with their summaries, and the recorded gate responses, then picks up at the gated stage. Only runs with `run_status: open` are on offer. If more than one open run exists under `.fudge-ship/`, list them with slug and date and ask which one — never guess — and call out any that have gone stale, offering to mark them `abandoned`.
 
 Derive the slug as 2-5 kebab-case words from the user's ask, and propose it in the route message so it can be corrected early. After that it is permanent — never rename it mid-run.
