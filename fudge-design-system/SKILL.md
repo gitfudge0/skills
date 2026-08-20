@@ -1,164 +1,98 @@
 ---
 name: fudge:design-system
-description: Build a complete, production-grade design system from a moodboard, screenshots, brand assets, or a written aesthetic brief. Use this whenever the user supplies visual references or describes a look and wants design tokens, a component library, UI patterns, documentation, or anything they call a "design system" — and also when they ask for a style guide, brand-to-UI translation, theming or dark-mode architecture, component library foundations, or say things like "make our product look like this" at more than one-screen scale. The skill interrogates the user to fill the semantic gaps a moodboard cannot answer, renders three structurally divergent directions as real screens for the user to pick from, locks the winner, then emits a three-tier token architecture, component contracts, an archetype-matched pattern library, a documentation site, and a working demo screen that provably consumes the same tokens — with adapters that let a React, Angular, Svelte, Tailwind or shadcn/ui project pick the tokens up directly.
+description: Use when the user supplies a moodboard, screenshots, brand assets, a UI mock or a written aesthetic brief and wants design tokens, a component library, theming or dark-mode architecture, a style guide, brand-to-UI translation, or anything they call a "design system" — including "make our product look like this" at more than one-screen scale, and including turning an existing low-fi wireframe board into hi-fi screens.
 ---
 
 # Design System Forge
 
-## The problem this solves
+Turn an inspiration input plus the project's wireframe into five reference documents that every later coding agent reads: `DESIGN.md`, `DESIGN.html`, `COMPONENTS.md`, `COMPONENTS.html`, `screens.html`, all at the project root.
 
-A moodboard tells you **aesthetics**. A design system needs **semantics**.
+Each phase ships an **MD + HTML pair**. The MD is the greppable copy — facts, tables, code strings. The HTML is the visual truth — it renders the thing, so it cannot lie about what a token looks like. Both are needed; neither replaces the other.
 
-Pinterest boards, brand decks, and "make it feel like Linear" briefs carry palette, typographic character, density temperament, and geometry. They carry almost nothing about what the product *means*: whether colour encodes state, what a disabled control communicates, which four states every surface needs, what density the user's actual job demands, whether dark mode is a preference or a requirement.
+## Cross-cutting rules
 
-Generating a design system from aesthetics alone produces a beautiful token file that collapses the first time someone builds a real screen with it. The gap between the two is what this skill exists to close — first by extracting everything extractable, then by diagnosing precisely what is still unknown, then by asking about only the unknowns that matter.
+1. **Phases run in order.** Phase N's output is Phase N+1's input.
+2. **Single token source.** `DESIGN.html`'s `:root` token block is authored once. `COMPONENTS.html` and `screens.html` copy it **verbatim**. Drift check = diff the blocks.
+3. **Both themes, always.** The primary theme (`:root`) matches the inspiration — dark-first if the mock is dark. The other theme is a `[data-theme="…"]` override plus a small JS toggle. Same toggle mechanism in all three HTML files.
+4. **Every non-extracted value is a recorded assumption.** A static image carries no opinion about motion, elevation, z-index or opacity. Defaulting is fine; defaulting silently is not. Every default and every regularisation goes in the Assumptions section, along with computed contrast notes for brand-on-background pairs.
+5. **Verification is re-run by the orchestrator, not trusted from a worker.** A worker's "done, gates pass" is zero evidence. Grep for hex leaks yourself, count frames yourself, check the token block is present yourself, and report the numbers.
+6. **Tokens carry their target-framework equivalent.** Not a separate mapping doc — the equivalent sits alongside the value in the same table.
 
-**Never generate before the semantic layer is settled.** A gorgeous palette attached to no decisions is the failure mode, and it is seductive because it looks like progress.
+## Phase 1 — Primitives → `DESIGN.md` + `DESIGN.html`
 
----
+Colors and typography first, everything else second. Two passes so the palette gets full attention before the long tail.
 
-## Workflow
+**Pass A — colors + typography only.**
+- Tier-1 primitives: brand ramp(s) + a neutral ramp, exact hexes. Eyeballing from an image is fine — say so in Assumptions.
+- Tier-2 semantic tokens with **light and dark values side by side**: bg, bg-subtle, surface, surface-raised, three text tiers (primary/secondary/muted), brand + brand-hover, accent, tertiary, on-brand, inverse-CTA bg/text, border.
+- Typography: display + body families (open substitutes named **as substitutes**), a rem scale with line-heights and weights, plus the weight tokens.
 
-Five phases. Skip neither phase 2 nor phase 4 — the picked look and the written lock are the last two cheap places to be wrong.
+**Pass B — extend.** Radius, spacing (4px-grid regularised), gaps (named aliases onto spacing), border widths, shadows (light + dark variants), motion (durations + cubic-bezier easings + reduced-motion rule), z-index layers, icon sizes, opacity, blur.
 
-### Phase 1 — Intake and extract
+Rule: extract what the input can actually answer (palette, type, radius, spacing, icon sizes); default the rest and record it.
 
-Inventory what you were given, then mine it. Read `references/reading-inputs.md` for the full extraction procedure.
+Deliverable contracts and the extract-vs-default table: `references/token-extraction.md`.
 
-| Input | Do this |
+## Phase 2 — Target-framework mapping
+
+Added **into the same two files**, not a third one.
+
+Detect the consuming stack from the project: `pubspec.yaml` → Flutter; `package.json` deps → React/Next/etc.; plain web → no mapping needed. Ambiguous? Ask the user **once**, then proceed.
+
+Every token gains its exact code equivalent in the same row. In `DESIGN.html`, generate the code strings from the **same JS data arrays** that render the swatches, so the two cannot drift. The MD tables are hand-copied and therefore the copy that can go stale — say so in the doc.
+
+Detection logic and the full Flutter profile: `references/framework-mappings.md`.
+
+## Phase 3 — Components → `COMPONENTS.md` + `COMPONENTS.html`
+
+Input: the project's low-fi wireframe board (Balsamiq-style `mock.html` or equivalent). Read **every** frame. Inventory each reusable component, grouped: Actions / Navigation & chrome / Containers & overlays / domain groups / Lists & rows / Inputs / Progress & data / feature-specific.
+
+**Hard gate: components consume only tokens.** The token block is copied verbatim from `DESIGN.html`; zero raw hex (or `rgb()`/`hsl()`) anywhere outside it. Verify by grep and report the count.
+
+Per component in the MD: one-line purpose, anatomy, variants, states, tokens consumed (names), wireframe frame refs, target-framework widget mapping. `COMPONENTS.html` renders live specimens of every variant and state with realistic product content.
+
+Mining procedure, doc contract and the hex gate: `references/component-inventory.md`.
+
+## Phase 4 — Hi-fi conversion → `screens.html`
+
+**Hi-fi always starts from a low-fi design.** Look for one first — a wireframe board (`mock.html` or similar), sketches, or screenshots in the project. If none exists, do not invent screens from the tokens alone: stop and ask the user to supply or approve a low-fi first (offer to produce one as a separate step).
+
+Reproduce the low-fi board **1:1** at high fidelity: same sections, frame IDs, frame names, captions, rows and row labels, connectors with their action labels, reference frames, sticky notes, pan/zoom chrome. Each screen is rendered with the Phase 1 tokens and the Phase 3 component patterns.
+
+Wireframe placeholders (hatching, "image here") become token-built stand-ins: gradient covers from the brand ramp, token-colored shapes. Never a raw hex, never an external asset.
+
+**Gates — the orchestrator runs these, not the worker:**
+- Frame count parity with the wireframe (`grep -c 'frame-id'` on both).
+- Zero raw hex outside the token block.
+
+Flag every invented stand-in to the user for a visual pass — you guessed at content the wireframe did not specify.
+
+Parity rules, stand-in guidance and board chrome: `references/hifi-conversion.md`.
+
+## Verification commands
+
+Run these yourself after each phase; paste the numbers into your report.
+
+```bash
+# hex leaks outside the token block (expect 0 after the :root block ends)
+grep -nE '#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(' COMPONENTS.html screens.html
+
+# token block identical across files
+sed -n '/^:root {/,/^}/p' DESIGN.html > /tmp/a; sed -n '/^:root {/,/^}/p' screens.html > /tmp/b; diff /tmp/a /tmp/b
+
+# frame parity
+grep -c 'frame-id' mock.html screens.html
+```
+
+A non-zero hex count outside the block, a non-empty diff, or unequal frame counts means the phase is not done. Fix, then re-run.
+
+## Common mistakes
+
+| Mistake | Fix |
 |---|---|
-| Images (moodboard, screenshots, brand deck) | View every one. Extract palette, type character, density, geometry, materiality, vernacular. Write down what you observed, not what you assume. |
-| A named reference ("like Stripe", "like Notion") | Name the two or three specific properties being pointed at. People rarely mean "clone it" — they mean one attribute. Confirm which. |
-| A written brief | Extract the same axes. Mark every axis the brief left silent. |
-| Existing product or repo | Audit first: count distinct colours, spacing values, button treatments, font sizes actually in use. The inventory is both scope document and funding argument. |
-| Nothing but a sentence | Say so plainly. Phase 2's three directions then spread wider, and Phase 4 carries a wider question set. |
-
-Produce an **extraction table**: each axis, what the input said, and your confidence. A low-confidence axis is a silent axis — it is where Phase 2 diverges and where Phase 3 looks for gaps — so record it rather than papering over it.
-
-Name the **archetype** in the same breath — console, CRUD admin, editor, marketplace, communication, or content, primary and secondary where the product is two things. It is an output of this phase, not something Phase 3 works out later: it fixes the pattern set and roughly half the component list, and it picks the busiest surface Phase 2 draws its tiles on. If the input will not support even a guess, record it blank and carry it into Phase 3 as blocking.
-
-### Phase 2 — Direction
-
-Nobody can tell from a description whether they will like a room. Agreement to a written direction is therefore worth very little, and the honest reaction turns up after generation, when it is expensive. So show three and lock the look here, on the extraction alone — every token downstream derives from the look, so it cannot sit behind a questionnaire.
-
-**Render three directions** into a single self-contained `directions.html` — three tiles side by side, each a real mini-screen from the archetype's busiest surface, with the *same content* in all three so the design is the only variable. They must diverge structurally on separation device, density, type character, and colour budget; three hues of one layout is one direction wearing three shirts. Each tile carries a name, a one-line thesis, and the axes it differs on. Screen all three against the anti-default guard in `references/generation.md` before showing them — three directions that trip the same default are one direction.
-
-**Diverge on the axes the input left silent, never on ones it settled.** If the moodboard landed a warm neutral ramp, all three keep it and fight elsewhere; three directions arguing with a decision the user already made read as not having looked at their moodboard. Draw the most plausible busiest surface the input implies and name that assumption in the tile label. If the input never says what the product even is, that one question — *what is this, in one line, and who uses it?* — rides along in the same message as the tiles. One question is not a round.
-
-**The user picks one, or mixes named attributes across tiles** ("tile 2's palette, tile 1's density"). Offer the mix explicitly; it is often where the real answer is, because it names the axis they actually care about. A mix gets checked for coherence before it locks. If they reject all three, that is a cheap success at this stage, not a failure.
-
-Thin input makes this phase more valuable, not less: the less the brief settled, the wider the three legitimately spread, and three wide guesses rendered is the cheapest way there is to learn what someone wants. Full procedure — derivation, tile and file contracts, mixes, rejection, and what happens when a later answer collides with the locked look — in `references/direction.md`.
-
-### Phase 3 — Gap diagnosis
-
-Run the coverage checklist in `references/coverage.md` against the extraction. Sort every unresolved decision into three buckets:
-
-- **Blocking** — generation is impossible or meaningless without it. *What is the product? Who uses it, in what conditions? What surfaces exist?* Rarely more than four.
-- **Consequential** — a default is possible, but a wrong default is expensive to unwind. *Does colour carry state meaning? Is dark mode required or nice-to-have? What density does the work demand? What accessibility target? Multi-brand or single?*
-- **Deferrable** — pick a sane default and state it. *Radius scale, motion durations, elevation depth, icon stroke weight.* These get recorded as assumptions, never as questions — and the locked look has already answered several of them. Separation device, radius, stroke, density position, type character, colour budget and signature are read off the winning tile rather than defaulted; a tile carrying no radius anywhere has decided radius, by absence. **Elevation depth and motion temperament are not settled by a static tile** — it never renders a layer above the page, and ten minutes of work buys no motion opinion — so both stay defaults and both go in Assumptions. And the tile settles character and position, never numbers: paddings drawn by eye and a dozen ad-hoc font sizes read literally as a 1px grid, which is not a design system. Regularise them into a spacing base unit and a type scale ratio, and record that regularisation in Assumptions too.
-
-The bucketing is the skill's core judgement. Getting it wrong in either direction is a failure: ask about deferrables and you burn the user's patience on trivia; assume a consequential and you rebuild later.
-
-### Phase 4 — Interrogation and direction lock
-
-Ask about blocking and consequential unknowns only. Question bank and phrasing in `references/interrogation.md`. The interrogation is narrower than it would have been, because the look is already settled — you are asking about semantics, not aesthetics, and nothing here is a taste question.
-
-Rules that keep this from becoming an interview:
-
-1. **Batch.** One round, everything at once. A second round only if answers opened a genuine fork. Never a third.
-2. **Cap at seven.** If you have more than seven, you have mis-bucketed — demote the weakest to assumptions.
-3. **Offer options, not open fields.** "Who uses this?" is work for the user. "Internal ops team all day / customers occasionally / developers integrating — which?" is a tap. Where the interface supports choice widgets, use them.
-4. **Never ask what the input already answered.** Re-reading is cheaper than the user's goodwill, and asking twice reads as not having looked.
-5. **Ask consequences, not preferences.** Not "do you want dark mode?" — everyone says yes. Ask "do people use this at night or on a factory floor, or is dark mode a nice-to-have?" The answer changes whether theming is architected in or bolted on.
-6. **Let them punt.** Offer "you decide" on every question. If they take it, decide, and record it in DECISIONS.md as an assumption rather than a fact.
-
-**Then fill the one-pager and confirm it.** The locked look supplies Palette, Type, Geometry and Signature directly — those rows are transcription, not invention. Product, Archetype, Principles and Assumptions come from the answers above, which is why this page could not be written in Phase 2.
-
-```
-## Direction — [system name]
-
-Product        [what it is, who uses it, under what conditions]
-Archetype      [console | admin | editor | marketplace | comms | content]
-Thesis         [one sentence: the organising idea]
-Principles     [3–4 trade statements, each naming what it costs]
-Palette        [4–6 named hexes with roles]
-Type           [display / body / data faces, and why these]
-Geometry       [radius, stroke, density, separation device]
-Signature      [the one element this system is remembered by]
-Assumptions    [every deferrable you defaulted, listed]
-Rejected       [what you considered and dropped, and why]
-```
-
-Two checks on the winning direction before showing the page:
-
-**The generic test.** Work through a plausible different brief and see whether you arrive somewhere similar. If you would, the direction is a default rather than a choice — revise it and say what changed. See the anti-default list in `references/generation.md`.
-
-**The principles test.** Each principle must name what it costs. "Clarity over cleverness" settles no argument. "Optimise for the daily user, not the first-time user — we give up onboarding hand-holding for density" settles many.
-
-### Phase 5 — Generate and verify
-
-Build the artefact set in `references/generation.md`, then run the verification gates. Do not present unverified output — an inconsistency the user finds first costs more trust than one you caught.
-
-Non-negotiable gates:
-
-- **Derivation.** Every token traces to an extracted signal or a listed assumption. No arbitrary values. If you cannot say where a number came from, it does not ship.
-- **Tier discipline.** Product and demo code reference tier 2 and tier 3 only. Grep the output for raw hex outside the primitive block; the count must be zero.
-- **Single source.** The demo screen consumes the same stylesheet as the docs — build it, do not hand-write parallel CSS. Verify programmatically that both contain identical token blocks.
-- **Contrast.** Assert every semantic foreground/background pair against its target ratio, in every theme shipped. Report the numbers; do not claim compliance you did not compute.
-- **State completeness.** Every interactive component ships default, hover, focus-visible, active, disabled, loading, and error where applicable. A component missing states gets forked downstream, and a fork is permanent.
-- **Four states.** Every data surface ships loading, empty, partial, and error. Empty distinguishes *nothing yet* from *nothing matched*.
-
----
-
-## Output
-
-```
-<system-name>/
-├── directions.html                Phase 2's three tiles. Throwaway, kept for the record; not part of the system.
-├── tokens.json                    Source of truth, DTCG-shaped. Nothing downstream is hand-edited.
-├── DECISIONS.md                   Assumptions, rejected alternatives, open questions.
-├── src/
-│   ├── <system-name>.tokens.css   Emitted from tokens.json by emit.py: tiers 1–3, theme, print and density overrides.
-│   ├── <system-name>.parts.css    Hand-authored on those tokens: reset, type roles, component classes, utilities.
-│   ├── docs.shell.html            The documentation site. Carries the /*__SYSTEM_CSS__*/ marker build.py fills.
-│   └── demo-<surface>.shell.html  A real product screen, built only from the system. Same marker.
-└── dist/                          build.py's output: the concatenated stylesheet, and each shell with it inlined.
-```
-
-**The system has to be pickable up by whatever the target project already is.** CSS custom properties are the portable substrate — React, Angular and Svelte consume them natively, so `dist/<system-name>.css` drops in and `var(--color-text-primary)` works with no adapter at all. Beyond that, `scripts/emit.py --format` projects the same tokens into a target's own idiom: `ts` for a typed module whose leaves are `var()` references rather than resolved literals, `tailwind` for a v4 `@theme` block and a v3 `theme.extend` fragment, `shadcn` for its fixed slot vocabulary on the `.dark` convention. A Figma-first team needs variable naming parity instead.
-
-Adapters project the semantic tier outward; they never become a second source. A consuming project that hand-edits the Tailwind config or the shadcn alias layer has forked the system, and that fork is invisible because it still looks generated. Adapters map semantic names only — bind to `--neutral-700` and you have bound to a value rather than a meaning, and the next theme breaks you. The *architecture* holds regardless: one source, semantic seam for theming, component seam for density.
-
-The demo screen matters more than it looks. It is the proof. A system that has never rendered a real screen with real content is a hypothesis, and the screen is where you discover the token set is missing something.
-
----
-
-## Scope control
-
-Systems fail from over-investment before adoption far more often than from under-scoping. Unless the user asks for the full build, generate **phase one**: tokens, the ten to fifteen components the archetype actually needs, accessibility baseline, and one demo surface. Name what phase two and three would add, and stop.
-
-Match pattern coverage to the archetype rather than emitting a universal list — a console needs tables, filtering, and severity routing; a content tool needs editor chrome, autosave, and revision states. `references/coverage.md` has the archetype map.
-
-If the user asks for everything up front, build it, but say once that shipping a narrower system into one real surface beats a complete one that arrives late.
-
----
-
-## Reference files
-
-Read these when you reach the relevant phase; do not preload all five.
-
-| File | When |
-|---|---|
-| `references/reading-inputs.md` | Phase 1. Extraction procedure per input type, and the explicit list of what images cannot tell you. |
-| `references/direction.md` | Phase 2. How to derive three genuinely divergent directions, the tile and `directions.html` contracts, and how to handle a mix or a total rejection. |
-| `references/coverage.md` | Phase 3 and 5. Everything a complete system contains; per-component contract; pattern sets by product archetype. |
-| `references/interrogation.md` | Phase 4. Question bank by bucket, with phrasings that get usable answers. |
-| `references/generation.md` | Phase 2 and 5. The anti-default guard alone in Phase 2; file contracts, token tiering rules, code conventions and verification scripts in Phase 5. |
-
-`scripts/emit.py` renders the token layers — tiers 1 to 3 plus the theme, print and density overrides — from `tokens.json` into `src/`. `scripts/build.py` concatenates that with the hand-authored parts stylesheet, inlines the result into every `src/*.shell.html` consumer, writes `dist/`, and reports whether their token blocks match. `assets/tokens.template.json` is the starting shape for the source of truth.
-
----
-
-## Working with an existing system
-
-If the user has one already, the job is extension rather than creation. Audit first and report the drift — count hardcoded colours, forked components, off-scale spacing values. Then propose the smallest change that fixes the class of problem, not just the instance. Renaming a semantic token is a breaking change and ships with a codemod and a deprecation window; say so rather than silently renaming.
+| Light theme authored first because it's easier | Primary theme matches the inspiration. A dark mock gets a dark `:root`. |
+| Motion/elevation "extracted" from a static image | It isn't there. Default it, record it in Assumptions. |
+| A third file for framework mappings | Mappings live beside the token, in `DESIGN.md`/`DESIGN.html`. |
+| Hand-writing the token block into `screens.html` | Copy verbatim, then diff. |
+| Relaying a worker's "gates pass" | Re-run the greps and report actual numbers. |
+| Hi-fi board drops "boring" frames | 1:1 means every frame, including duplicates and reference cards. |
