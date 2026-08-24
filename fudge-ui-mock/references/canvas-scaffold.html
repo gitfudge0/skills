@@ -288,10 +288,18 @@
   }
   vp.addEventListener('wheel', function (e) {
     e.preventDefault();
-    var nz = Math.min(MAX, Math.max(MIN, z * Math.exp(-e.deltaY * 0.0015)));
-    x = e.clientX - (e.clientX - x) * (nz / z);
-    y = e.clientY - (e.clientY - y) * (nz / z);
-    z = nz; apply();
+    if (e.ctrlKey) {
+      // Pinch gestures arrive as wheel events with ctrlKey set; ctrl+scroll zooms too
+      var nz = Math.min(MAX, Math.max(MIN, z * Math.exp(-e.deltaY * 0.01)));
+      x = e.clientX - (e.clientX - x) * (nz / z);
+      y = e.clientY - (e.clientY - y) * (nz / z);
+      z = nz;
+    } else {
+      // Two-finger swipe / plain scroll pans the canvas
+      x -= e.deltaX;
+      y -= e.deltaY;
+    }
+    apply();
   }, { passive: false });
   var panning = false, px = 0, py = 0;
   vp.addEventListener('pointerdown', function (e) {
