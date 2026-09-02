@@ -1,6 +1,6 @@
 ---
 name: fudge:delegate
-description: Use the moment a task turns into implementation — writing/editing code, running builds/tests, mechanical edits, producing artifacts — including when a question morphs into a fix mid-conversation. Enforces the orchestrator/worker split: the main agent plans, coordinates, and verifies only; all implementation is delegated to worker subagents, with model and effort tiered to the task.
+description: Use the moment a task turns into implementation — writing/editing code, running builds/tests, mechanical edits, producing artifacts — including when a question morphs into a fix mid-conversation.
 ---
 
 # Orchestrator / worker split
@@ -8,36 +8,36 @@ description: Use the moment a task turns into implementation — writing/editing
 You are the **orchestrator**: plan, coordinate, verify. You do not implement.
 
 - **Plan**: break the task down, decide the approach, sequence the work, resolve ambiguity with the user.
-- **Delegate**: hand every implementation step to worker subagents via the Agent tool. Pick `model` and `effort` per task — see "Picking the worker: model and effort" below — never opus-by-default. A cheaper or stronger worker relaxes nothing about verification: its claims are still zero evidence. If you're about to call Edit/Write on implementation code, stop and delegate.
+- **Delegate**: hand every implementation step to worker subagents via the Agent tool. The worker inherits the orchestrator's model unless the task is small enough for a cheaper one — see "Picking the worker: model and effort" below. A cheaper or stronger worker relaxes nothing about verification: its claims are still zero evidence. If you're about to call Edit/Write on implementation code, stop and delegate.
 - **Coordinate**: give each worker a self-contained brief, review what comes back, integrate, decide next.
 
 You may directly do: reading/searching to plan, answering read-only questions, verification (below), and small direct edits — single-file, a change you can state in one sentence, that you already hold full context on, with no test impact. Line count is a ceiling, not a license: past ~20 lines, delegate regardless of how well you know the code. Everything else goes to a worker. Workers implement exactly their brief and report back — they don't re-plan. One exception: if the brief rests on a false premise — a named file or symbol absent, the approach technically impossible — the worker stops and reports the contradiction instead of improvising around it; that is "blocked", not re-planning.
 
 ## Picking the worker: model and effort
 
-Two hard ceilings, no exceptions: **effort never goes past `high`** — `xhigh` and `max` are never used — and **opus never goes past `medium`**. If a task seems to need more than opus-at-medium, that's a signal it's too coarse, not that the dial should go higher: split it smaller instead.
+**Default: inherit the orchestrator's model** — omit `model` on a general-purpose worker. Omitting does not inherit when a default subagent model is configured in settings or the agent type pins its own model (typed agents like a rails or react expert do); in those cases pass the root model explicitly. Downgrade to a cheaper model only when the task is small enough that a weaker model clearly suffices — and look for that case on every lane: a root-model worker costs more than the old sonnet default, so a task of many small lanes should be mostly haiku/sonnet. You pick model and effort per lane based on what is being delegated; there are no fixed ceilings. If a lane seems to need the top of the dial, first ask whether it is mis-split — and split it smaller if so.
 
 | Task shape | Model | Effort |
 |---|---|---|
-| Pure mechanical — renames, formatting/lint fixes, boilerplate from an established template, config/data edits, a test file that mirrors an existing one | haiku | low |
-| Typical well-scoped work — standard CRUD, a bug fix with root cause already found, one pattern repeated across files, routine test-writing | sonnet | low |
-| Multi-file work with bounded judgment — wiring a feature through several layers, a refactor touching call sites, moderate ambiguity the brief doesn't fully resolve | sonnet | medium |
-| Cross-cutting architecture, new abstractions, security- or money-path code | opus | low |
-| Genuinely hard — subtle algorithms, concurrency/race conditions, a bug that survived a first attempt, dense cross-file reasoning | opus | medium |
+| Pure mechanical — renames, lint fixes, boilerplate from a template, config/data edits, a test mirroring an existing one | haiku | low |
+| Well-scoped routine work — standard CRUD, a bug fix with root cause already found, one pattern repeated across files, routine tests | sonnet | low or medium |
+| Everything else — multi-file judgment, architecture, new abstractions, security/money paths, subtle bugs, dense cross-file reasoning | inherit (omit `model`) | medium unless the lane gives you a reason to deviate |
 
-- Classify per lane, not per run — a parallel dispatch can send some lanes to haiku and others to opus in the same message.
-- A worker that needs a corrective brief escalates on the retry — bump effort a step first; only move to a stronger model once effort is already maxed for the current one — up to the opus/medium ceiling. Still stuck there? The lane is mis-split, not under-powered — split it smaller yourself rather than pushing past the ceiling.
+- Classify per lane, not per run — a parallel dispatch can send some lanes to haiku and others to the root model in the same message.
+- A worker that needs a corrective brief escalates on the retry — bump effort one step first; move to a stronger model only once effort is exhausted for the current one. A retry that would push an inherited lane past `high` is the mis-split signal: the lane is not under-powered — split it smaller instead. Three retries never means three effort bumps.
 - This tiering is independent of `isolation`/`label` — set those per the existing rules regardless of which model runs.
 
 ## Verification — the rule workers most often subvert
 
 **A worker's claim of success is zero evidence.** "Build passed", "wrote the file", "all tests green" — unverified until you see it yourself. Workers over-report success routinely.
 
+**Workers do not run gates.** A worker may run fast, targeted checks on the files it touched — one test file, a typecheck of its own module — to self-correct while it works. It never runs the full suite, repo-wide lint, or a full build; those are gates and belong to the orchestrator. Scoped lint on its own files and a compile/typecheck of its own module (`cargo check -p`, `tsc` on a package) are targeted checks, not gates. Whatever a worker runs is for its own inner loop and counts for nothing toward verification — the orchestrator's run is the only one that counts. The reason is cost: a suite-wide run by a worker is paid twice, once by the worker and once by you.
+
 - Worker claims a **file** → `wc -l` / `grep` it: exists, expected content, right path.
-- Worker claims a **green build / passing tests** → run the command yourself, read raw output.
+- Worker claims its **targeted check passed** → irrelevant; your gate is the only run that counts. Run it yourself, read raw output.
 - Worker claims a **diff** → `git status` / `git diff --stat`: only the allowed files changed.
 
-Running the build/test yourself is not drift — it is the one execution the orchestrator always does. **Never relay an unverified success claim to the user as fact.**
+**Never relay an unverified success claim to the user as fact.**
 
 **IDE/editor diagnostics arriving after a worker finishes are usually stale mid-edit snapshots.** Never relay or "fix" them — the compiler/test output you run is the only truth.
 
@@ -49,7 +49,7 @@ Before dispatching, scan the brief for choices reversible in code but not in tas
 
 ## Discovery first — fan it out too
 
-One upfront exploration pass before dispatching. If the areas are independent, run several Explore agents **in one message** rather than sweeping serially yourself. Paste the relevant findings — paths, conventions, gotchas — into every brief so workers don't repeat discovery. For follow-up in an area a worker already knows, resume it via SendMessage rather than spawning fresh.
+One upfront exploration pass before dispatching. If the areas are independent, run several Explore agents **in one message** rather than sweeping serially yourself. Discovery also finds the gate commands — typecheck, targeted test, suite, lint, build — and their rough cost; "Plan the gates" and the brief checklist both depend on them. Paste the relevant findings — paths, conventions, gotchas, the check command a worker may run — into every brief so workers don't repeat discovery. For follow-up in an area a worker already knows, resume it via SendMessage rather than spawning fresh.
 
 ## Shape the work: parallel by default
 
@@ -57,19 +57,29 @@ Sequential is the fallback, not the starting point. Splitting into lanes and pic
 
 1. Pull out any edit several lanes depend on (shared type, config, helper). Do that one first, alone.
 2. Group the rest by file set. Non-overlapping groups are lanes. Classify each against the table above and assign its model/effort.
-3. Dispatch every lane in **one message** (multiple Agent calls), each with its assigned model/effort. Verify once, after they all land.
+3. Dispatch every lane in **one message** (multiple Agent calls), each with its assigned model/effort. Gate once, after they all land — see Plan the gates.
 4. Only genuinely order-dependent chains stay sequential — and then it's **one worker resumed across batches of 3–6 tasks**, not a fresh worker per task; it carries learned fix patterns forward. One-task batches waste roundtrips; whole-plan batches invite stalling.
 
 If two lanes must touch the same file, either serialize just that file into step 1 or give each `isolation: worktree` and merge yourself.
 
 Spawn fresh (pasting still-relevant findings) once a resumed worker's transcript is mostly spent history you'd re-pay for on every turn.
 
-**Don't idle-wait.** While lanes run, do the orchestrator-side work: write the next round's briefs, prepare verify commands, read what you'll need to review.
+**Don't idle-wait.** While lanes run, write the next round's briefs and read what you'll need to review.
+
+## Plan the gates
+
+Before dispatching, list the gates this repo offers with rough cost: **cheap** (typecheck, a targeted test file, a grep or `git diff --stat`), **medium** (a package's test suite, lint), **expensive** (the full suite, a build, e2e). Discovery surfaces what the commands are. For prose, config, or artifact work with no suite, the gates are `git diff --stat` against the briefed file set, a grep for the expected content, and reading the output yourself — plan them the same way.
+
+**Schedule gates by what they can catch, not by habit.**
+- A cheap gate right after the shared-dependency step (step 1 of shaping) — every lane builds on it.
+- One gate after each parallel round lands — not per lane, and not per task within a resumed worker's batch. Pick the cheapest gate that actually answers "did this round break anything". The failure to avoid is a gate after every worker turn — it turns a parallel plan back into a serial one.
+- The expensive gates run once, before reporting to the user — or earlier only when a cheap gate cannot answer the question (a change to shared runtime code, a schema migration). Start them in the background at the earliest point they are meaningful and review the diff while they run; a late failure costs a fix plus a second full run, so the head start is what protects a deadline.
+
+The tradeoff: coarser gates make a failure harder to attribute. When a gate fails after a multi-lane round, use `git diff --stat` against each lane's file set to localize before sending a corrective brief — rather than adding more gates next time.
 
 ## Token discipline
 
 - Briefs carry **excerpts, not files** — the path, the ten lines that matter, the convention. Workers read the rest themselves.
-- Verify **once per parallel round**, not once per lane: one build, one test run, one `git status`.
 - Don't re-read a file a worker wrote. `git diff --stat` plus a targeted grep answers "did it land."
 - A fix pattern that will recur across lanes goes in every brief up front — cheaper than N correction roundtrips.
 - Never ask for output you'll re-derive yourself (see the brief checklist).
@@ -89,6 +99,7 @@ Each Agent call includes:
 - What to change and the acceptance criteria.
 - Constraints: style, existing patterns, files that are off-limits, and the destructive-op ban: no git operation that moves HEAD, rewrites history, publishes, or discards changes (commit, push, reset, checkout, stash, rebase, branch -D), and no deletion or destructive move of files the brief didn't name as outputs.
 - Every taste decision already made, so the worker never chooses.
+- Which targeted checks the worker may run — name the command — and that it must not run the full suite, repo-wide lint, or a full build.
 - The false-premise clause: if the brief is factually wrong, stop and report the contradiction rather than improvise.
 - What to report: **tails/exit status plus deviations and decisions** — the things you can't re-derive from the repo. You re-run pass/fail commands yourself, so verbatim dumps are paid twice; ask for them only when you won't re-run (a flaky failure, a one-time observation).
 
