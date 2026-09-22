@@ -1,181 +1,57 @@
 ---
 name: fudge:ship
-description: Use when the user wants to build a feature end to end rather than run one step — "build a feature", "take this from idea to implementation", "ship this", "run it through the skills", "full pipeline", "do the whole thing", or when they name several fudge skills in sequence for one piece of work. Also use on "resume" or "continue" when a previous run is open.
+description: Take an idea, issue, feature, story, or task through a complete software-factory run. Use for end-to-end building, "ship this," several fudge skills on one work item, or resuming a ship run.
 ---
 
 # fudge:ship
 
-Runs one feature from idea to reviewed implementation by sequencing the other fudge skills as stages, halting at three human gates.
+Build one work item to its chosen endpoint. A finished feature may be one part of a larger release. Finishing this run never implies that a release was cut.
 
-## The core principle: fudge:ship conducts, it does not produce
+The user owns expected behavior and scope. The repository's `AGENTS.md`, `CLAUDE.md`, project-level skills, and existing conventions own implementation details. Do not make architecture or code structure a user approval gate.
 
-Nothing here writes a decision, a mock, a test plan, or code. Each stage hands off to the skill that owns that output and holds the result.
+## Choose the run
 
-Stopping is the load-bearing half — the gates make a wrong route cost one stage instead of five.
+Name the work item and its boundary. Choose an endpoint before implementation: **verified locally** by default, **PR opened**, **PR integrated**, or **release/deploy** only when explicitly selected. An analysis-only route ends with its requested artifact or decision instead. Issue tracking is a separate opt-in. A linked issue does not by itself authorize updates. State the choices and exclusions to the user; ask only about a choice that would materially change the outcome.
 
-## What this skill will not do
+For a new run, create a unique `.fudge-ship/<YYYY-MM-DD>-<slug>[-N]/` directory and a durable `run.json`. Keep run artifacts there. Read [run state and recovery](references/run-state.md) when creating or resuming a run, and again before implementation touches a worktree. If the endpoint includes a PR or issue updates, read [external workflows](references/external-workflows.md) before the first external write. Do not create a branch, commit, push, issue, PR, merge, release, or deployment outside the selected mode.
 
-- **No parallelism between stages.** Each stage's output is the next stage's input. Running two at once means one is working from stale context.
-- **No branch, commit, PR, or push** unless the user asks for it in so many words.
-- **No scope expansion.** The request scoped at the start is the request at review. A stage that surfaces adjacent work reports it; it does not absorb it.
-- **No substituting for a missing skill.** If a stage's skill is not installed, halt, name it, and say how to install it. Never hand-roll an ad-hoc equivalent. A missing fudge:layered-review is a full stop, not a drop — record `status: blocked`.
+Confirm that an implementation target is a Git repository. Analysis-only work may proceed outside Git. Preserve the original request, chosen endpoint, optional modes, approved behavior, artifact paths, gate response, verification evidence, and blockers in `run.json`.
 
-## The stages
+## Route
 
-Six skills are stages. Fixed order. Stages may be **dropped**, never **reordered**.
+Use only stages that serve this work item, in this order:
 
-| Stage | Skill | Runs when |
+| Stage | Owning skill | When it earns its place |
 |---|---|---|
-| `understand` | fudge:gap-analysis | A document corpus exists *and* the ask is vague |
-| `decide` | fudge:decision-room | The call is contested or not yet made |
-| `design` | fudge:ui-mock | A user-visible surface changes |
-| `verify-plan` | fudge:test-plan | Almost always |
-| `implement` | fudge:delegate | Code is being written |
-| `review` | fudge:layered-review | **Always, if `implement` ran** — see below |
+| Understand | `fudge:gap-analysis` | A document corpus or conflicting requirements need reconciliation. |
+| Decide | `fudge:decision-room` | A consequential product choice remains unsettled. |
+| Design | `fudge:ui-mock` | A requested mock or consequential UI direction needs to be seen. |
+| Test cases | `fudge:test-plan` in `plan-only` mode | **Every implementation run.** |
+| Implement | `fudge:delegate` | Product or test files will change. |
+| Review | `fudge:layered-review` | Every implementation run, unless the user explicitly waives review and accepts the reduced assurance. |
 
-Users name a stage by either column — the stage (`design`) or the skill (`fudge:ui-mock`). Both map to the same row. If a name matches neither, ask rather than guess.
+Read each selected skill and honor its output contract. Give `understand` the run-local output root; `decide` and `design` an exact run-local HTML path, with `design` in artifact-only mode; `test-plan` a versioned run-local HTML path. The owning skill renders its own artifact. Do not call `fudge:report-deck` to reformat it. A named stage selects membership, not order. Route a standalone code review directly to `fudge:layered-review`, not through ship. Unknown stage names require clarification. If a required skill is unavailable, record a blocker and stop instead of replacing it silently.
 
-**`review` is not droppable.** If code was written, fudge:layered-review runs. Omission does not drop it. Only an explicit exclusion ("skip the review", "no review") drops it, and then say so in `route_reason`. Do not ask permission to run it; run it and report.
+Use read-only recon to find the relevant behavior, dependencies, test setup, and project instructions. Put only what later stages need in a short run-local recon note. Ask for a decision or mock review only when the choice cannot be made from the user's brief and repository context. Feedback on either returns to that stage; do not treat the original request as approval of an unseen artifact. A confirmed "do not build" decision ends the run without implementation.
 
-Three skills are **support** — invoked *inside* a stage, never as a stage of their own:
+## The test-case gate
 
-- **fudge:report-deck** — styles the HTML a stage emits, when the artifact is substantial enough to warrant it. An artifact under roughly one screen of content — a five-case test plan, say — is emitted as clean minimal HTML without invoking report-deck.
-- **fudge:mindmap** — offered during `understand` only, when the corpus is large enough to be worth mapping. A decline is not a gate answer.
-- **fudge:rust-arch** — see `implement`.
+Before generating **any product or test code**, have `fudge:test-plan` produce a comprehensive, risk-based matrix in `plan-only` mode. This step may write only its run-local report. It may inspect the repository but may not run project commands or edit product or test files. The matrix must make each distinct case reviewable: case ID, concrete setup and action, observable expected result, risk/priority, test type, and what will remain untested with a reason. Cover relevant normal, boundary, failure, permission, integration, lifecycle, and regression behavior without padding the count. Include meaningful manual or environment-dependent cases even if they may later be `NOT RUN`.
 
-**fudge:delegate is a behavioral contract, not a producer, and it governs every stage, not just `implement`.** Producing an artifact is implementation under CLAUDE.md's own definition, so fudge:ship never runs a stage's skill inline. `understand`, `decide`, `design`, `verify-plan`, and `review` are each dispatched to a single worker subagent (`Agent` tool, model and effort tiered to the task per fudge:delegate) that invokes the stage's skill and hands back its artifact — fudge:ship reads that artifact back to verify and report, it does not author one. `implement` is the exception: there is no single document to dispatch for. fudge:ship itself applies fudge:delegate directly — splitting the work, dispatching its own fleet of workers, and verifying their output — rather than handing the whole stage to one intermediary worker.
+Present the matrix as a distinct, prominent artifact and summarize the highest-risk cases and coverage gaps in the message. Ask the user to approve the **expected behavior and test cases**, not the implementation approach. Stop here. Only a later, explicit response to this version approves it. Questions, partial feedback, and conditional answers request a revision; show the revised matrix and ask again. Preserve each version, the exact approval response, and its time in run state.
 
-## Routing
+No implementation worker receives a code-writing brief until that approval is recorded. If implementation or review reveals a new case or changes an approved expected result, revise the matrix, return to this gate, and await approval **before** related product or test code changes. This includes a code fix that would alter agreed behavior. New implementation detail that leaves behavior and coverage unchanged does not reopen the gate.
 
-**If the user's prompt names stages, that is the route.** "Run fudge:decision-room, then fudge:ui-mock, then fudge:test-plan" means exactly those three, in that order. Obey literally: no inferred additions, no "they probably also want".
+## Build, verify, review
 
-**Only when no stages are named** does fudge:ship infer a route, from the *Runs when* column. It is judgement, not a rule table — weigh how expensive the work is to unwind.
+After approval, establish the worktree baseline and planned ownership before dispatch. Protect dirty or untracked user files as [run state and recovery](references/run-state.md) specifies. Apply `fudge:delegate`: workers own non-overlapping files and follow repository/project instructions for architecture. One worker may invoke `fudge:test-plan` in `execute` mode to write the approved tests. It reports commands but runs no test, build, or lint gate under this skill.
 
-**State the route and the reasoning before running any stage.** Print the chosen stages, and say what was dropped and why.
+The root orchestrator runs the targeted cases and the relevant full test, build, and lint gates, reads their raw output, and stores commands and output under the run. Give the observed results to the test-plan worker to mark every approved case `PASS`, `FAIL`, or `NOT RUN` with evidence or a reason in a separate results report; keep the approved matrix immutable. Never infer a pass from code inspection. Fix failures in scope, rerun affected and full gates, and update the results report. A failing or high-risk unrun case is not a clean completion; surface the blocker or obtain an explicit user decision about the remaining risk.
 
-**Fast path.** When the route — inferred or named — has three stages or fewer and contains none of `understand`, `decide`, `design`, collapse to a single gate: GATE 3, before `implement`. Gates for stages not in the route are recorded as answered-not-applicable. Say in the route message that the fast path is in effect, so the user knows two gates went away. The GATE 3 hard boundary is unchanged — nothing outside `.fudge-ship/` is written until it is answered.
+Review the full run diff against its protected baseline with `fudge:layered-review` in orchestrated two-pass mode. Supply fresh raw gate output. The review worker returns candidates; the root checks each against source, diff, approved behavior, and evidence; the worker then renders only the approved findings at the run-local review path. Delegate deterministic fixes that preserve approved behavior, rerun verification, update case results, and re-review. Escalate product judgment, inseparable external edits, or a blocker still present after two automatic fix rounds. Never silently accept a finding or change the approved behavior to make a test pass.
 
-If fudge:decision-room's verdict is **don't build**, that is a full stop — not a gate. Report it and end the run. The user may override by saying so, and then the pipeline continues. On override, recompute the route from the current understanding and re-state it before continuing. fudge:ship does not argue the point twice.
+## Finish or resume
 
-## Workspace
+Finish only when the implementation, approved cases, root-run gates, and review meet the selected endpoint. Local completion means a verified work item, not a release. For selected issue or PR work, follow [external workflows](references/external-workflows.md) and record links, checks, feedback, and final state. Report any unrun case, accepted risk, skipped review, or incomplete external step plainly. Do not label an opened PR as integrated or a merged PR as deployed.
 
-```
-.fudge-ship/<YYYY-MM-DD>-<slug>/
-  run.json
-  0-recon.md
-  1-decision.html
-  2-mock.html
-  3-test-plan.html
-  4-review.html
-```
-
-When `understand` runs, fudge:gap-analysis keeps writing its own `.gap-analysis/`. Reference that path from `run.json`; do not move or copy it.
-
-**Ignore the workspace at run creation.** Before writing `run.json`: if this is a git repo, append `.fudge-ship/` to the `.gitignore` at the repo root (`git rev-parse --show-toplevel`), creating it if absent and skipping if already ignored. If it is not a git repo, create the workspace and skip this step. Do it at run start, not the end, and mention it in the same message as the route — a silent write to a tracked file is a surprise in someone else's commit.
-
-`run.json` is the source of truth. Exact keys:
-
-```json
-{
-  "slug": "terminal-session-switching",
-  "created": "2026-07-28",
-  "request": "<the user's original ask, verbatim>",
-  "route": ["decide", "design", "verify-plan", "implement", "review"],
-  "route_reason": "<why these stages, why not the others>",
-  "run_status": "open",
-  "recon": "0-recon.md",
-  "implement_baseline": {"head": "<git rev-parse HEAD>", "dirty": "<git status --porcelain>"},
-  "stages": {
-    "understand":  {"status": "skipped", "artifact": null,              "summary": null},
-    "decide":      {"status": "done",    "artifact": "1-decision.html", "summary": "<one line>"},
-    "design":      {"status": "gated",   "artifact": "2-mock.html",     "summary": "<one line>"},
-    "verify-plan": {"status": "pending", "artifact": null,              "summary": null},
-    "implement":   {"status": "pending", "artifact": null,              "summary": null,
-                    "tests": {"executed": null, "passed": null, "failed": null}},
-    "review":      {"status": "pending", "artifact": null,              "summary": null,
-                    "fix_iterations": 0}
-  },
-  "gates": {
-    "1-decide":      {"answered": true,  "response": "<what the user actually said>", "at": "2026-07-28"},
-    "2-design":      {"answered": false, "response": null, "at": null},
-    "3-verify-plan": {"answered": false, "response": null, "at": null}
-  }
-}
-```
-
-`status` is one of `pending | running | gated | done | skipped | blocked`.
-
-`run_status` is one of `open | done | abandoned`. It is `open` from run creation until the run ends, and set to `done` the moment it does — after the review/fix loop finishes, or at a don't-build full stop the user does not override.
-
-`stages` carries an entry for all six stages. Ones not in `route` are `skipped` at run creation, so a resumed run can tell *dropped* from *not yet reached*.
-
-**`gates.*.response` is not optional and not a boolean in disguise.** Record what the user actually said — "yes but drop the sidebar variant", not "approved". Disk recovers *which* stage; only this recovers *what was approved*.
-
-Write `run.json` after **every** stage transition and **every** gate answer. Not at the end.
-
-## Running a route
-
-### Stage 0 — Recon (always, before `decide`)
-
-Read-only exploration of the codebase before the first real stage. Use parallel read-only Explore agents: what exists today in this area, what the design system actually looks like, where the seams are, what the test setup is.
-
-Ungrounded personas give generic advice, and an ungrounded mock renders a UI that does not match the product. Write the findings to `0-recon.md` in the run workspace and record it in `run.json` as the top-level `"recon"` key. Keep it short — paths, conventions, seams, test setup. It is a working note, not a deliverable: no styling, never presented as an artifact.
-
-Stages are seeded from it. `resume` reads `0-recon.md` rather than redoing recon.
-
-### Seeding
-
-Every stage receives the previous stage's output, not just the original request — `design` gets the decision's recommendation, risks, and out-of-scope list.
-
-### Stage notes
-
-Every stage below runs through the dispatch pattern above; `implement` is the one exception, where fudge:ship itself is the fudge:delegate orchestrator rather than a stage dispatched to a single worker.
-
-- **`decide`** — frame fudge:decision-room around the *real* decision, not the feature title. "Should we add session switching" is a title; "do we switch sessions in-place or spawn a second pane, given the existing single-buffer renderer" is the decision.
-- **`design`** — at GATE 2, loop on revisions as many times as the user wants. Scope the revision to the feedback: when it names specific frames or elements ("change the button on frame 3"), fudge:ui-mock patches only those frames in `2-mock.html`. A full re-run is for feedback that changes direction — layout, flow, aesthetic. Either way the gate stays open until the user advances it.
-- **`implement`** — orchestrate via fudge:delegate. Load fudge:rust-arch first if the target is Rust. Record `git rev-parse HEAD` and `git status --porcelain` into `run.json` as `implement_baseline` before any worker runs. `review` diffs against that baseline and names any pre-existing modifications separately rather than reporting them as this run's work. When workers report done, **re-run the build, tests, and lint yourself and read the raw output**. A worker's claim of success is zero evidence. Then execute the plan: run the cases from `3-test-plan.html` through fudge:test-plan's execute mode — cases written, run, marked PASS/FAIL, the report updated in place — and record the result in `run.json` as `"tests": {"executed": true, "passed": <n>, "failed": <n>}` under `stages.implement`. If `verify-plan` was dropped from the route there is no plan to execute; skip it and say so in the final report.
-
-  **Implement failure.** If the build, tests, or lint still fail after fudge:delegate's failure protocol is exhausted (its corrective-brief cap), stop the stage: set `stages.implement` to `status: blocked` with the failing command and a one-line cause in `summary`, report the raw failure output to the user, and halt the run before `review`. `run_status` stays `open` so `resume` picks up here. Never revert to `implement_baseline` on your own — name it and let the user decide what happens to the partial work.
-- **`review`** — fudge:layered-review over the diff this run produced, written to `4-review.html`.
-- **`fix`** — not a stage, a behavior after `review`. If fudge:layered-review reports findings the user would call blocking — correctness, data loss, security, not style nits — dispatch fix workers via fudge:delegate, re-run the build, tests, and lint yourself, then re-run fudge:layered-review over the delta, rewriting `4-review.html`. Two fix iterations maximum. If findings remain after the second, report them plainly and end the run — never a third loop, and never a quiet omission of what is left. Record the count in `run.json` as `"fix_iterations": <n>` inside `stages.review`.
-
-## The gates
-
-Three hard stops. At each one: halt, report the verdict or outcome in chat, give the artifact path, and **wait for the user**. Nothing downstream runs. Set the stage to `gated`, write `run.json`, and stop producing output.
-
-- **GATE 1** — after `decide`
-- **GATE 2** — after `design`
-- **GATE 3** — after `verify-plan`, before `implement`
-
-**The boundary is mechanical, not a matter of intent.** Until `gates.3-verify-plan.answered` is `true` in `run.json`: no Edit or Write to any file outside `.fudge-ship/`, no Bash command that mutates the working tree, and no Agent invocation whose prompt contains implementation instructions. Recon agents are read-only. These are forbidden regardless of what the agent believes it is doing — "I was only planning" is not an exemption.
-
-**A gate advances only on an unambiguous instruction to proceed.** Anything conditional, partial, or a question is not an advance: answer it, keep `status: gated`, and re-present. If the response would change the artifact, re-run the stage rather than carrying the change as an unwritten amendment.
-
-**One answer advances one gate.** A response that pre-approves later gates ("yes, and go ahead through the mock and plan too") advances only the current one. Never write a `response` into a gate that was not individually answered.
-
-A stage runs once per run **after its gate is answered**. While a stage is `gated`, it may be re-run on feedback any number of times — that is a revision, not a re-run, and it applies at every gate.
-
-A user who wrote "…and then proceed to implementation" in their opening prompt has authorized the *stage*, not the skipping of the *gate*. Pre-authorizing a sequence up front is not gate consent. Consent is a response to the artifact, given after seeing it — which is the entire point, since the plan the user is consenting to did not exist when they wrote the prompt.
-
-| Rationalization | Counter |
-|---|---|
-| "They already said proceed to implementation." | That authorized the stage, not the gate. They approved a plan they hadn't read. |
-| "It's just a short pause — I'll present the plan and start." | Presenting while starting is not a gate. A gate has no output after the report. |
-| "Objecting is cheap; I'll begin and they can stop me." | By then the workers have written code. The gate is cheap *because* it precedes that. |
-| "The plan is uncontroversial." | You wrote the plan. You are the last party qualified to judge it uncontroversial. |
-| "Stopping here is annoying for a pipeline skill." | Three stops in a five-stage run is the design, not friction to optimize away. |
-
-Red flags — if you catch yourself writing any of these, you are mid-violation. Stop and gate:
-
-- "unless the user objects"
-- "not a hard gate" / "soft gate" / "brief pause"
-- "since they already said…"
-- "I'll start on the first task while they look"
-- reading a file with intent to edit it, with no gate answer recorded in `run.json`
-- spawning a worker "just to plan the implementation" before GATE 3 is answered
-
-## Resume and identity
-
-`resume` or `continue` reads `run.json`, reports the route, the completed stages with their summaries, and the recorded gate responses, then picks up at the gated stage. Only runs with `run_status: open` are on offer. If more than one open run exists under `.fudge-ship/`, list them with slug and date and ask which one — never guess — and call out any that have gone stale, offering to mark them `abandoned`.
-
-Derive the slug as 2-5 kebab-case words from the user's ask, and propose it in the route message so it can be corrected early. After that it is permanent — never rename it mid-run.
+On `resume`, inspect open runs and their saved state. If several match, let the user choose. Re-present an awaiting matrix or other consequential decision; do not infer approval from an old request. An interrupted implementation or review needs a fresh baseline/recovery check before retrying. A plain resume reports a recorded blocker; retry only on an explicit corrective instruction. Preserve prior approval history and verification evidence.

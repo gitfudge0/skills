@@ -7,12 +7,21 @@ description: Use when reviewing a PR, reviewing code changes, reporting review f
 
 Two jobs, in sequence: conduct the code review, then render the findings in layers so a reader gets the high-level picture immediately and drills into detail only as needed. The whole point is the reader should never face a wall of text.
 
+## Modes
+
+| Mode | Use when | Verification owner |
+|---|---|---|
+| `standalone` | The user asks this skill to conduct the review directly. This is the default. | The reviewer is the top-level orchestrator. It runs fresh build, test, and lint commands and revalidates every finding before reporting it. |
+| `orchestrated` | A top-level caller such as `fudge:ship` delegates review work. | Two passes. In the candidate pass, the root supplies the full diff and source scope plus fresh raw build, test, and lint output. The worker runs no gates, inspects all supplied material, returns structured candidate findings, and writes no final review output. The root revalidates every candidate and returns the approved finding set. In the render pass, the worker writes only that approved set to the requested medium and path. The root verifies the rendered review matches the approved set before reporting or publishing it. |
+
+Non-delegable verification belongs to the top-level orchestrator. A review worker's findings and success claims are inputs, not evidence on their own.
+
 ## Part 1 — Conducting the review
 
 - **Establish context first**: read the ticket/issue if referenced, and the PR description, before reading code.
-- **Fan out for anything beyond a trivial diff**: dispatch read-only reviewer subagents over disjoint scopes (by layer or by repo) rather than reading everything serially. Give each a self-contained brief.
-- **Verification is mandatory and non-delegable**: a subagent's claim of success is zero evidence. Re-run builds/tests/lint yourself and read the raw output. Re-read the specific lines behind any claimed finding before it is reported.
-- **Establish a baseline before blaming a PR for a failure**: if the repo already fails typecheck/lint/tests on the base branch, compare against that baseline and report only the delta.
+- **Fan out for anything beyond a trivial diff in standalone mode**: dispatch read-only reviewer subagents over disjoint scopes (by layer or by repo) rather than reading everything serially. Give each a self-contained brief. In orchestrated mode, the assigned review worker inspects every file in the supplied diff and source scope itself rather than delegating its review again.
+- **Verification is mandatory and non-delegable at the top level**: in standalone mode, run builds/tests/lint yourself and read the raw output. In the orchestrated candidate pass, consume the root's fresh raw output without rerunning gates, inspect the full supplied diff and source scope, and return structured candidate findings without rendering a final review. The root re-reads the specific lines, revalidates every candidate, and sends back the approved set. In the render pass, render only that set to the requested medium and path. The root compares the rendered result with the approved set before it is reported or published. No success claim may rely only on worker output.
+- **Establish a baseline before blaming a PR for a failure**: in standalone mode, compare current output against the base branch and report only the delta. In orchestrated mode, use the current and baseline raw outputs supplied by the root. If the needed baseline was not supplied, do not attribute that failure to the change.
 - **Verify cross-repo contracts explicitly**: identifier strings, column names/types/nullability, config key paths, payload field names. Determine the required deploy order and what breaks in the wrong order.
 - **Check external documentation when an assumption can't be checked from the repo alone** (e.g. a third-party webhook payload shape). If it still can't be settled, the finding is SUSPECTED, not a fact.
 
@@ -64,13 +73,13 @@ These two knobs are independent — shape doesn't dictate depth. Example: a 40-f
 
 ## Part 4 — The three renderers
 
-The review is produced once as a structured finding list, then projected into the chosen medium. This single-source rule is what stops the artifacts drifting when a review is updated after a re-review pass.
+The review is produced once as a structured finding list, then projected into the chosen medium. This single-source rule is what stops the artifacts drifting when a review is updated after a re-review pass. In orchestrated mode, the root-approved finding set is the sole render source; the render pass must not add, remove, merge, split, or reclassify findings.
 
 **Slack** — layers 1 and 2 in the message, hard stop. Layer 3 goes into thread replies: one reply per blocker, all should-fixes batched into one further reply. Slack has no collapse, so the thread IS the collapse mechanism. In layer 2, drop file paths and show only the area — paths are noise in a chat client.
 
 **GitHub** — layers 1 and 2 as a table in a single summary comment; layer 3 in `<details><summary>` blocks below it. Additionally post each blocker as an inline review comment anchored to its line, containing one sentence and a pointer up to its details block. Never duplicate full finding text inline — that is what makes PR reviews unreadable.
 
-**HTML** — all layers, filterable by severity/repo/status, written into the project's existing `.reports/` directory. Best for cross-repo reviews or 15+ findings, and it doubles as a durable artifact for things like a deploy-ordering constraint that a chat message would bury.
+**HTML** — all layers, filterable by severity/repo/status. The default location is the project's existing `.reports/` directory. An explicit caller-supplied output path overrides that default; write the report exactly there and create only its parent directory as needed. Best for cross-repo reviews or 15+ findings, and it doubles as a durable artifact for things like a deploy-ordering constraint that a chat message would bury.
 
 Use the **indigo editorial design language**, bundled with this skill so it never depends on files in other projects. The spec is `assets/design-system.md` and a complete, copyable reference page is `assets/example-review.html` — HTML output from this skill MUST follow the design system doc, and SHOULD be built by copying `example-review.html` and replacing its content rather than inventing new markup or CSS. This is not optional: if the target repo already has an existing report or template sitting in its own `.reports/` directory, do not copy that report's style instead of the skill's bundled one — the bundled assets are authoritative regardless of what else is lying around in the repo being reviewed.
 
@@ -80,7 +89,7 @@ Severity still uses the standard vocabulary; in this design it renders as pills,
 
 *Optional, secondary reference only, and only if the bundled assets are ever unavailable*: the design language originated in `/Users/digvijaymahapatra/globus/.gapworkshop/questions.html` (fuller component set) and a review-shaped example at `careconvoy-ai-core/.reports/ava-191-review.html`. Both live outside this skill in unrelated projects that may move or change — treat `assets/design-system.md` and `assets/example-review.html` as authoritative if the two ever disagree.
 
-**Choosing the medium**: it is an argument at invocation — `slack`, `pr`, or `html`. If not supplied, ask the user rather than guessing, and volunteer a suggestion based on finding count and whether the change is cross-repo.
+**Choosing the medium**: it is an argument at invocation — `slack`, `pr`, or `html`. If the caller passes `html`, use the HTML renderer without asking which medium to use. If no medium is supplied, ask the user rather than guessing, and volunteer a suggestion based on finding count and whether the change is cross-repo.
 
 ## Part 5 — Worked example
 
@@ -190,6 +199,9 @@ The expanded statement is set larger than the body text and carries no label —
 - Where goes last, always.
 - No code identifiers in "What's happening".
 - Never report an unverified claim as fact; tag it SUSPECTED or leave it out.
+- In the orchestrated candidate pass, return structured candidate findings and write no final review output.
+- In the orchestrated render pass, render only the root-approved finding set to the requested medium and path.
+- The root verifies the rendered review matches the approved set before reporting or publishing it.
 - Compare against the base-branch baseline before attributing a failure to the PR.
 - Separate pre-existing issues from introduced ones, and say which is which.
 - Credit correct patterns the author already used elsewhere in the same PR when pointing at a fix.

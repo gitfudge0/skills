@@ -44,10 +44,10 @@ Pick based on what the user asked for. When unclear, run `map` first — it is c
 
 ## Workspace
 
-All artifacts live in `.gap-analysis/` at the project root. Create it if absent.
+All artifacts live beneath one output root. The default is `.gap-analysis/` at the project root. A caller may supply another output root; use it for the whole run and create it if absent. Resolve every artifact path below against that root, including `map` and thin-corpus outputs. Do not also write to the default directory when an override is present.
 
 ```
-.gap-analysis/
+<output-root>/
   corpus-map.md          stage 0 — inventory + coverage
   extracts/<doc-id>.yaml stage 1 — per-document structured extraction
   glossary.yaml          stage 2 — terms, and where they conflict
@@ -145,7 +145,7 @@ Write `questions.yaml`.
 
 ### Stage 8 — Render
 
-Populate `assets/report-template.html` and write `.gap-analysis/report.html`. The template is self-contained — no network dependencies, works offline, prints sensibly.
+Populate `assets/report-template.html` and write `<output-root>/report.html`. The template is self-contained — no network dependencies, works offline, prints sensibly.
 
 Substitute the JSON payload into the `__GAP_ANALYSIS_DATA__` placeholder. Do not hand-write HTML; the template exists so output is consistent across runs and diffable between them. See `references/report.md` for the payload schema.
 

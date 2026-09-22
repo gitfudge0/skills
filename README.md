@@ -1,10 +1,10 @@
 # Skills
 
-A personal collection of Claude Code skills, one directory each, each with a `SKILL.md` that Claude reads on demand.
+A personal collection of agent skills, one directory each, each with a `SKILL.md` loaded on demand by Codex or Claude Code.
 
 | Skill | What it does | Reach for it when |
 |---|---|---|
-| fudge:ship | Conducts a feature from idea to reviewed implementation, sequencing the other fudge skills as stages and halting at three human gates. | "take this from idea to implementation" |
+| fudge:ship | Takes one idea, issue, or story to a verified feature. You approve the test case matrix before code; issue updates and the PR cycle are optional, and a release is not required. | "take this feature from idea to completion" |
 | fudge:delegate | Enforces the orchestrator/worker split — the main agent plans, delegates, and verifies; workers implement. | "this task turned into implementation" |
 | fudge:report-deck | Design system for standalone HTML report decks — the format to reach for instead of a markdown file. | "need a shareable report, not markdown" |
 | fudge:gap-analysis | Reconstructs end-to-end flows from a pile of project docs, then reports the gaps and routes the open questions to whoever can answer them. | "what are we missing in these specs" |
@@ -14,18 +14,18 @@ A personal collection of Claude Code skills, one directory each, each with a `SK
 | fudge:decision-room | Cross-functional personas pressure-test a decision independently, then synthesize into one recommendation. | "should we build this" |
 | fudge:rust-arch | Idiomatic Rust architecture — project layout, workspaces, error handling, config, tracing, iced GUIs. | "structure my rust project" |
 | fudge:design-system | Turns a moodboard, screenshots, or aesthetic brief into a full design system — tokens, component contracts, patterns, docs, demo screen. | "make our product look like this" |
-| fudge:test-plan | Right-sized, risk-prioritized test plan — then runs the cases and marks PASS/FAIL in an HTML report. | "what should I test here" |
+| fudge:test-plan | Builds a risk-based test case matrix for review, then optionally executes the approved cases and records observed results in HTML. | "what should I test here" |
 | fudge:conventions | Interviews you across structure, architecture, testing, tooling, workflow, docs and security, then emits a project-specific skill encoding the rules agents follow when writing code there. | "what patterns should we use in this project" |
 
 ## Install
 
-These live in `~/.claude/skills/`; symlink or copy a skill directory there:
+Symlink or copy a skill directory into the skills directory for your agent (`~/.codex/skills/` or `~/.claude/skills/`):
 
 ```bash
-ln -s "$PWD/fudge-test-plan" ~/.claude/skills/fudge-test-plan
+ln -s "$PWD/fudge-test-plan" ~/.codex/skills/fudge-test-plan
 ```
 
-Claude picks them up by the `name`/`description` in each `SKILL.md`'s frontmatter.
+The agent picks them up by the `name` and `description` in each `SKILL.md`'s frontmatter.
 
 ## Layout
 

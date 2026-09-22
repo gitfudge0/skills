@@ -62,6 +62,7 @@ Always produce both:
 **1. Chat summary** (concise, in the response itself) — lead with the Recommendation, then Risks to Watch, then Conditions and Out of Scope. This is what the user is actually here for; don't bury it under a restatement of every persona's input.
 
 **2. HTML artifact.** This is the visual version of the same thing — not a meeting recreation, a decision brief:
+- If the caller supplies an exact HTML output path, write the artifact exactly there, create only its parent directory as needed, and do not also write a default artifact. Without an override, use the normal artifact destination for the environment.
 - Use the default visual identity in `references/design-system.md` (cream background, navy tree/org-chart structure, elbow connectors, node chains, annotation panels, pill badges) — this is a locked-in design system, not a fresh brief each time. Read it before building. Only depart from it if the user explicitly asks for a different look for that run; don't re-run frontend-design brainstorming by default the way a one-off page normally would.
 - The decision (recommendation, risks, conditions, out of scope) should be the first substantive thing on the page and the easiest thing to find — not something the reader scrolls past persona detail to reach.
 - Show each persona's input as its own row/node in the tree structure (role, priority, stance, take, flagged risk) — not chat bubbles, not a transcript, no implication they're responding to each other.

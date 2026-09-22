@@ -11,13 +11,18 @@ The user's preferred output for any mock request: a **single self-contained HTML
 
 Any request to "do a mock", "make a mockup", "mock this up", "show me the flows/states", "mock.html", or to visualize UI before implementing. Also proactively when a UI feature is being brainstormed and the user needs to verify flows.
 
+## Modes
+
+- **Standard** is the standalone default. Build and open the mock. In variants mode, ask the user to choose, then wire the chosen design into the real components.
+- **Artifact-only** is for callers such as `fudge:ship` that need a design artifact before implementation approval. Build, open, and revise the mock as requested, but keep every write inside the mock file. A caller may supply an exact output path; it overrides the default location. Return the mock path and any selected variant or unresolved decision to the caller, then stop. Never edit real components, wire a variant into production, or run implementation build and test commands in this mode.
+
 ## The output contract (non-negotiable)
 
-1. **One file**, default name `mock.html` (or as the user specifies), written to the working directory or repo root unless told otherwise.
+1. **One file**, default name `mock.html` (or as the user specifies), written to the working directory or repo root unless told otherwise. If the caller supplies an output path, write the mock exactly there and create only its parent directory as needed.
 2. **Fully self-contained**: plain HTML + inline `<style>` + minimal inline vanilla JS (pan/zoom, theme toggle, per-state demos only). **No external URLs** — no CDN, web fonts, or remote images. Inline SVGs for icons. System font stack. It must render the instant it's opened.
 3. **Pan/zoom infinite canvas, true-to-size frames**: a fixed full-screen `#viewport` (`overflow: hidden` both axes, no page scrolling) containing an absolutely-positioned `#canvas` with `transform: translate(x,y) scale(z); transform-origin: 0 0`. Two-finger swipe / plain scroll pans the canvas, pinch (wheel events with `ctrlKey`, i.e. trackpad pinch or ctrl+scroll) zooms toward the cursor (clamp ~0.1–2.5), drag-on-background also pans (grab/grabbing cursors), fit-to-content on load, and a small fixed HUD bottom-right with zoom % and −/+/Fit buttons. Because the canvas zooms, frames are **actual size** at whatever dimensions fit the thing being mocked — size each frame to its real platform instead of forcing one canvas size: **mobile** screens use a phone viewport (~390×844, or the project's target device), **desktop/web** screens use a desktop viewport (~1280×800, up to 1440×900 for wide layouts), **tablet** ~834×1112, and **components** (pills, modals, sidebars, cards) stay natural size with no fixed frame. Full-page frames flex-column fill their height and inner panes clip with `overflow: hidden` rather than stretching the frame taller — never shrink content with per-frame `transform: scale()` or fake a narrowed page; pick the right true size instead. The scaffold ships `.mobile`/`.tablet`/`.desktop` presets (combine with `.screen`, e.g. `frame-card screen desktop`); set any other width/height inline.
 4. **Light/dark toggle** when the project's design system has dark tokens: a fixed top-right pill button toggling `.dark` on `<html>`; everything restyles through the CSS variables.
-5. **Open it when done** (`open mock.html`) — per the user's global "open reports/mocks when done" rule. Don't just leave it on disk.
+5. **Open it when done** (`open <resolved-output-path>`) — per the user's global "open reports/mocks when done" rule. Don't just leave it on disk.
 
 ## Do design discovery FIRST
 
@@ -60,9 +65,11 @@ Sometimes the direction is still open and the user wants to *compare and pick* b
 - Give each variant a **one-line tradeoff note** (sticky-note or `frame-desc`): when to use it and its cost ("smallest change" / "most to build" / "best for first-timers"). The user is picking a tradeoff, not just a look.
 - Default 3-4; honor a count the user gives. Scale: "a couple options" → 2-3; "explore this / not sure" → 4 spanning minimal → bold. A single named element (one CTA, one card) → tighter variants of just that element in context, not a whole-screen redesign.
 
-Then, unlike a plain review mock, **close the loop**:
+Then, in standard mode, **close the loop**:
 1. Open the file, then **AskUserQuestion** with one option per variant — don't pre-decide.
 2. Wire the chosen variant into the real component(s) using the project's actual token classes / CSS modules / Tailwind — not the mock's inline styles. Preserve behavior and accessibility (roles, aria-*, focus states, contrast in both themes) and conditional logic; then typecheck/build. Leave `mock.html` in place unless the user asks to remove it.
+
+In artifact-only mode, the loop ends at the mock. The caller owns the implementation gate and any later production wiring.
 
 If a variant's action targets something that doesn't exist yet (routes, features), don't silently invent it — note it and ask how the action should behave.
 

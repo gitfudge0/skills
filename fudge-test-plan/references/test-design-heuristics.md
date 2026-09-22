@@ -1,10 +1,10 @@
 # Test design heuristics
 
-Reference material for step 4 of the workflow. Use these as prompts to generate candidate cases, not as a checklist to mechanically exhaust — the filtering step in SKILL.md is what keeps the output right-sized.
+Reference material for step 4 of the workflow. Use these prompts to find distinct risks. The coverage audit in SKILL.md decides which ones belong in the matrix.
 
 ## Edge-case checklist
 
-Run the changed behavior through whichever of these actually apply. Most changes only trigger 3-5 of these, not all of them — that's expected.
+Run the changed behavior through whichever of these actually apply. Name meaningful exclusions in the report.
 
 - **Zero, one, many.** Anywhere something is counted (results, items, retries, characters): does it work at zero, exactly one, and a large number? Watch for off-by-one, divide-by-zero, and pluralization/grammar bugs at the boundaries.
 - **Boundary values.** For any range (age 18-65, file size limits, timeouts, pagination): test the min, the max, and one step outside each. Defects cluster at edges far more than in the middle of a range.
@@ -43,12 +43,16 @@ Score each candidate case on two axes, then combine:
 - Cosmetic: visual/UX issue, no functional or data consequence
 
 Combine into a priority:
-- **Critical** — Critical impact regardless of likelihood, or Common × Functional
-- **High** — Occasional × Critical, or Common × Functional (borderline), or anything touching auth/payments/data integrity
-- **Medium** — Occasional × Functional, or Rare × Critical
-- **Low** — Cosmetic impact, or Rare × Functional
 
-Use this to decide depth (step 4 in SKILL.md), not just to label cases after the fact — if something scores Low, that's a signal to write one case and move on, not three.
+| Impact | Common | Occasional | Rare |
+|---|---|---|---|
+| Critical | Critical | Critical | Critical |
+| Functional | High | Medium | Low |
+| Cosmetic | Medium | Low | Low |
+
+Impact comes first. A possible data loss, privacy leak, or incorrect payment is Critical even when the trigger is rare. Work touching auth, payments, or data integrity is not automatically Critical: score the specific failure the case would catch.
+
+Use this to decide depth (step 4 in SKILL.md), not just to label cases after the fact. Low priority usually needs one representative case or a documented exclusion. High and Critical risks need every independently failing condition covered.
 
 ## Oracle questions (how would you actually know it's wrong?)
 
