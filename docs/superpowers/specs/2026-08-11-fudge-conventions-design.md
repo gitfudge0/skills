@@ -1,8 +1,10 @@
 # fudge:conventions — design spec
 
-**Status:** Design settled, ready for implementation
+**Status:** Historical design. The current workflow is defined in [`fudge-conventions/SKILL.md`](../../../fudge-conventions/SKILL.md); it now supports setup, audit, and amend modes.
 **Date:** 2026-08-11
 **Skill:** `fudge:conventions` (directory: `fudge-conventions/`)
+
+The text below records the original proposal, including decisions that have since changed. Use the current skill for operational guidance.
 
 ---
 
@@ -19,7 +21,7 @@ Two names are in play and the skill must never let them blur:
 
 ### Closest neighbors
 
-- **`fudge:rust-arch`** — static and language-specific. It ships one language's opinions, pre-written, to every Rust project that loads it.
+- **`fudge:rust-arch`** — the now-retired, static Rust-specific skill used as a comparison when this spec was written.
 - **`fudge:design-system`** — interrogates the user, locks a direction, emits artifacts.
 
 `fudge:conventions` is the generative counterpart of `fudge:rust-arch`: instead of shipping one language's fixed opinions, it interviews the user and emits *that project's own* rules — for any language, any archetype.

@@ -1,17 +1,25 @@
 ---
 name: fudge:conventions
-description: Use when setting up the coding rules, conventions, architecture, or best practices a project should follow — "what design patterns should we use here", "set up conventions for this repo", "how should code be structured in this project", "establish best practices", "what should our error handling / testing / project structure look like", or wanting agents to follow a consistent process every time they write code in a codebase. Interviews the user across structure, architecture, testing, tooling, workflow, docs and security, then emits a project-specific `<project>-conventions` skill encoding the agreed rules.
+description: Set up project coding conventions, audit a change for convention drift and gaps, or amend approved rules. Use for "set up conventions," "check this change against our conventions," and "update our project rules." Setup interviews the user and emits a project-specific conventions skill; audit is read-only; amendment requires approval of the exact rule change.
 ---
 
 # fudge:conventions
 
-An interview that ends in a committed project skill encoding the rules an agent obeys when writing code in that project. Any language, any archetype — the opinions come from the user, not from this file. It is the generative counterpart of `fudge:rust-arch`: where that ships one language's fixed opinions to every project that loads it, this one interviews and emits *that project's own* rules.
+The steward for a project's coding conventions. It can set up a project-specific contract, audit a change against that contract, or propose a targeted amendment. Any language, any archetype. The opinions come from the user, not this file.
 
-**Two names are in play and they must never blur.** `fudge:conventions` is the generator — this skill, invoked to produce something. `<project>-conventions` is the artifact — the project skill written into the target repo, named after that project. Every time either is mentioned in chat or on disk, say which one is meant.
+**Two names are in play and they must never blur.** `fudge:conventions` is this skill. `<project>-conventions` is the project-specific skill it can create or amend. Name the one you mean. The existing project rules are authoritative; never create a second conventions source to work around them.
 
-## The core principle: this skill produces a contract, never code
+## Choose the mode
 
-Nothing here writes or refactors source. The output is a document of rules and the rationale behind them; making existing code conform is separate work the user asks for separately, if at all.
+- **Setup:** No actionable project conventions exist, or the user explicitly wants to replace them. Follow the interview below. If rules already exist, read them first and resolve whether to amend or replace; do not overwrite them just because setup was invoked.
+- **Audit:** The user or another skill supplies a change, diff, or bounded file set to check against existing project rules. Read `references/audit-amend.md`. Return findings, not code or changed rules.
+- **Amend:** The user wants a specific project rule changed, or approves a proposal from an audit. Read `references/audit-amend.md`. Show the exact change before writing it.
+
+Locate the authoritative source before any mode: inspect project instructions, their pointers, and project skills. Follow an existing `.claude/skills/` or `.codex/skills/` location or a caller-supplied path. If sources conflict or authority is unclear, identify the conflict and ask; ordinary code patterns do not become rules by inference. Keep setup, audit, and amendment distinct so a ship run can check conventions without rerunning the interview.
+
+## The core principle: rules and findings, never source code
+
+Nothing here writes or refactors source. Setup and amendment produce approved rules and rationale; audit produces findings. Making code conform is separate work, owned by the caller when this skill runs inside `fudge:ship`.
 
 The second half of the principle is the one that gets violated: **never ask an open-ended question where a draft can be shown instead.** Read the repo, take a stance, propose it, let the user push back. "What are your preferences for error handling?" is a failure. A described situation with two named options and a recommendation is the job.
 
@@ -21,15 +29,16 @@ The second half of the principle is the one that gets violated: **never ask an o
 - **No replacing a linter.** If a formatter or linter can enforce it mechanically, it is a config line, not a prose rule. Tooling produces configuration, not prose.
 - **No touching the project's `CLAUDE.md` without asking.** The pointer that guarantees the emitted skill loads is offered at the end of a run and added only on a yes. Never by default.
 - **No open-ended questions where a draft would do.** See above.
-- **No drift-check mode and no amend mode.** A re-run redoes the interview from scratch against current code and overwrites what is there. It does not diff, reconcile, or merge.
+- **No implicit side effects.** Creating or amending a project skill does not authorize a git commit, push, config change, or instruction-file pointer. Each needs its own authorization. A local-only `fudge:ship` run stays local.
 
 ## References
 
 - `references/dimension-bank.md` — the full dimension bank, the D / A / ◇ markers, and the archetype gating table. Open it at Phase 0 to prune, and again at the head of each round.
 - `references/writing-rules.md` — question style (plain language, situation-first, the worked example) and the rule admissibility bar. Open it before drafting any question or any rule.
 - `references/emitting.md` — the shape of the emitted `<project>-conventions` artifact, including the template for its `SKILL.md`. Open it at Phase 3.
+- `references/audit-amend.md` — evidence and approval rules for audit and targeted amendment. Open it for either mode; the setup interview does not need it.
 
-## The flow
+## Setup interview
 
 ### Phase 0 — Ground it
 
@@ -76,11 +85,11 @@ The shape of a real one: one round declared everything past the controller to be
 
 **Past 60 accumulated rules, offer a re-filter** at a harder admissibility bar — keep what is both violable today *and* costly when broken, challenge what is true but rarely load-bearing. Offer it; never apply it automatically. The user may ship the full set. 60 is a tunable starting threshold, not a law. Start-clean runs are the ones that hit it: every round proposes a full default set and accepting them all compounds, where build-on-what's-here is bounded by the habits actually in the code.
 
-Then present the full rule set as a **compact table**. Everything upstream of that table is drafting. Everything downstream is committing.
+Then present the full rule set as a **compact table**. Everything upstream of that table is drafting. Everything downstream is emission after approval, not a git commit.
 
 ### Phase 3 — Emit
 
-Write `<project>-conventions` into `.claude/skills/<project>-conventions/` per `references/emitting.md`.
+Write `<project>-conventions` into the existing project-skill location, the caller-supplied project-skill path, or `.claude/skills/<project>-conventions/` if neither exists. Follow `references/emitting.md`. Do not duplicate an existing authority at a new path.
 
 `rationale.md` ships alongside the rules and is not a transcript of the interview. It is a register: every contested call, the alternatives that were on the table, why the chosen one won, and the named dependency links from Phase 2. Its job is to stop a future agent from reopening a settled argument, and to make reversing an upstream rule surface what depended on it instead of quietly invalidating it.
 
@@ -108,9 +117,9 @@ The rest of **tooling** is resolved in Phase 0.5 by detection and never reaches 
 
 **Security is never defaulted away silently.** Even when the user says "keep it light," the security round is asked in full.
 
-## Phase 2 is the gate
+## Phase 2 is the setup gate
 
-This is the one place the skill stops. **Nothing is written to disk before the user approves the rule table** — not the artifact, not a reference file, not a tooling config, not a scratch draft in the target repo. The gate is mechanical, not a matter of intent.
+**In setup mode, nothing is written to disk before the user approves the rule table** — not the artifact, not a reference file, not a tooling config, not a scratch draft in the target repo. Audit may write only a run-local report when the user requests it or an authorized calling workflow supplies its path; a `fudge:ship` run needs no second approval for that report. Amendment has its own exact-change approval gate in `references/audit-amend.md`.
 
 An approval covers the table that was shown. If the user's response would change a rule, change it and re-present; do not carry it as an unwritten amendment into Phase 3.
 
@@ -128,7 +137,8 @@ If you catch yourself doing any of these, you are mid-violation. Stop.
 - About to ask "what are your preferences for X" — you owe a draft, not a question.
 - Writing a rule containing "write clean code", "keep it simple", "follow SOLID", or "use meaningful names". Not admissible, full stop.
 - Restating in prose something the linter already enforces.
-- Writing any file before the Phase 2 gate is answered.
+- In setup, writing any file before the Phase 2 gate is answered.
+- Treating one observed pattern as an approved rule or a reason to change one.
 - Editing source code to conform to a rule you just wrote.
 - Recording a contested call in the rules without recording the rejected alternative in `rationale.md`.
 
@@ -137,5 +147,5 @@ If you catch yourself doing any of these, you are mid-violation. Stop.
 This repo's `CLAUDE.md` splits orchestration from implementation, and it applies here.
 
 - **Phase 0's codebase read fans out** to parallel read-only Explore agents, one per question above.
-- **Phase 3's emit is delegated** to a worker. Verify what comes back by reading the written files, not by trusting the report.
+- **Phase 3's emit and approved amendments are delegated** to a worker. Verify what comes back by reading the written files, not by trusting the report.
 - **The interview is never delegated.** The answers belong to the user and the questions must be asked directly, in this conversation.

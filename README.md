@@ -12,10 +12,10 @@ A personal collection of agent skills, one directory each, each with a `SKILL.md
 | fudge:ui-mock | Lays out every state and flow of a feature as labeled frames on a Figma-like HTML canvas, before you build it. | "mock this up before building" |
 | fudge:layered-review | Reviews a PR or diff, then layers the findings — verdict, one-line list, drill-down detail — for Slack, GitHub, or an HTML report. | "review this and don't bury me in text" |
 | fudge:decision-room | Cross-functional personas pressure-test a decision independently, then synthesize into one recommendation. | "should we build this" |
-| fudge:rust-arch | Idiomatic Rust architecture — project layout, workspaces, error handling, config, tracing, iced GUIs. | "structure my rust project" |
 | fudge:design-system | Turns a moodboard, screenshots, or aesthetic brief into a full design system — tokens, component contracts, patterns, docs, demo screen. | "make our product look like this" |
 | fudge:test-plan | Builds a risk-based test case matrix for review, then optionally executes the approved cases and records observed results in HTML. | "what should I test here" |
-| fudge:conventions | Interviews you across structure, architecture, testing, tooling, workflow, docs and security, then emits a project-specific skill encoding the rules agents follow when writing code there. | "what patterns should we use in this project" |
+| fudge:conventions | Sets up project-specific coding rules, audits a change for convention drift or gaps, and amends approved rules without repeating the full interview. | "check this change against our conventions" |
+| fudge-unslop | Edits prose to cut generic AI phrasing and make it more direct and specific. | any writing task |
 
 ## Install
 

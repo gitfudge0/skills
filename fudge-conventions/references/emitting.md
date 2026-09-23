@@ -6,6 +6,8 @@ What Phase 3 writes, where it goes, and what it is never allowed to do on the wa
 
 ## Directory layout
 
+Use the existing project-skill location if the repo already has one, or the caller-supplied project-skill path. The layout below uses `.claude/skills/` as the default when neither exists. Do not create a second `<project>-conventions` skill in another host directory.
+
 ```
 .claude/skills/<project>-conventions/
   SKILL.md          # ~80 lines: the hard rules that apply to every file, plus when to consult which reference
@@ -121,7 +123,7 @@ The description slot is the load-bearing one. Write it to fire on code-writing a
 
 **Tooling configs are shown before they are written.** Where Phase 0.5 found a gap, show the exact config and exactly what it would enforce, then write it **only on the user's approval**. Each config needs its own yes. A yes to the formatter is not a yes to the pre-commit hook.
 
-**Source code is never written or refactored.** This skill produces documentation of rules, not code that follows them. That holds even when a violation is one line away from fixed and even when the user would obviously want it fixed — fixing it is a separate request.
+**Source code is never written or refactored.** This skill produces documentation of rules, not code that follows them. That holds even when a violation is one line away from fixed and even when the user would obviously want it fixed — fixing it is a separate request. Emission does not include a git commit or push unless separately authorized.
 
 **Start-clean runs get a conformance report.** Option B promised the user they'd be told where existing code doesn't match the new rules, and this is where that promise is paid. The report describes; it changes nothing. It names the rule, the places that violate it, and nothing else.
 
