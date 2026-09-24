@@ -5,10 +5,10 @@ Match the output to the decision. A single screen may need one reviewable mock a
 ## Visual draft
 
 1. Read the project's existing design source and inspect the relevant UI. Identify the person's task, content, actions, and states that could change the design choice. Use `fudge-design-for-recognition`. Route a specific unknown to `fudge:ux-research`, `fudge:content-architecture`, `fudge:interaction-design`, or `fudge:accessible-ui` when it matters; mark untested assumptions. Do not run specialists as a sequence.
-2. Use `fudge:ui-mock` in **artifact-only** mode at an exact output path. Show the requested screen, flow, or variants in the project's visual language. Include context and consequential states needed to judge the choice; do not add every theoretical state to a narrow draft. Inspect the rendered artifact at relevant sizes and revise unclear labels, grouping, affordances, or feedback.
+2. Use `fudge:ui-mock` in **artifact-only** mode at an exact output path — its own default is `.fudge/<branch>/ui-mock/` unless `fudge:ship` supplies a run-local path. Show the requested screen, flow, or variants in the project's visual language. Include context and consequential states needed to judge the choice; do not add every theoretical state to a narrow draft. Inspect the rendered artifact at relevant sizes and revise unclear labels, grouping, affordances, or feedback.
 3. Let the user decide consequential naming, tone, visual direction, and interaction tradeoffs when the brief or project does not settle them. Record a selected direction and its evidence in the draft or response. Keep open choices visible. A mock selection does not authorize production wiring.
 
-When a static frame cannot answer a consequential interaction question, use `fudge:ui-prototype` for a bounded runnable task at an exact unused path. Inspect its branches and recovery, label it exploratory, and use participant research only when observation is needed. Neither draft route implies a production build or project-wide documentation.
+When a static frame cannot answer a consequential interaction question, use `fudge:ui-prototype` for a bounded runnable task at an exact unused path — its own default is `.fudge/<branch>/ui-prototype/` unless `fudge:ship` supplies a run-local path. Inspect its branches and recovery, label it exploratory, and use participant research only when observation is needed. Neither draft route implies a production build or project-wide documentation.
 
 ## Durable project rules
 

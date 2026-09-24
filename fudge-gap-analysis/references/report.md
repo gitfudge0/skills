@@ -26,7 +26,7 @@ The table sorts important-and-unevidenced to the top. That block is the output t
 
 ## Report payload
 
-Stage 8 builds one JSON object and substitutes it for the literal string `__GAP_ANALYSIS_DATA__` in `assets/report-template.html`, writing the result to `.gap-analysis/report.html`.
+Stage 8 builds one JSON object and substitutes it for the literal string `__GAP_ANALYSIS_DATA__` in `assets/report-template.html`, writing the result to `<output root>/report.html`.
 
 ```json
 {
@@ -97,9 +97,9 @@ Do not hand-write HTML. The template exists so runs are consistent, comparable a
 python - <<'PY'
 import json, pathlib
 tpl = pathlib.Path("<skill>/assets/report-template.html").read_text()
-data = json.loads(pathlib.Path(".gap-analysis/payload.json").read_text())
+data = json.loads(pathlib.Path("<output root>/payload.json").read_text())
 out = tpl.replace("__GAP_ANALYSIS_DATA__", json.dumps(data, ensure_ascii=False))
-pathlib.Path(".gap-analysis/report.html").write_text(out)
+pathlib.Path("<output root>/report.html").write_text(out)
 PY
 ```
 

@@ -12,7 +12,7 @@ Use this reference only for audit or targeted amendment. The authoritative proje
    - **Improvement proposal:** evidence suggests a rule may need changing. Describe repeated examples or a concrete failure, the benefit, cost, and dependencies. One new code pattern is not evidence that the convention should change.
 4. State which applicable rules were checked without findings. Mark any rules you could not assess and why. A clean audit means no observed violation within the stated scope, not a claim that the whole repository conforms.
 
-The audit changes neither code nor conventions nor tooling. Return it in chat. Write a report only when the user requests one or an authorized calling workflow supplies a run-local path; `fudge:ship` may supply that path without a second user approval. Keep the same read-only result and do not touch project rule files. When called by `fudge:ship`, send violations to its implementation/review loop and proposals to the user. Do not silently waive a violation, patch code, or amend a rule to make the change pass.
+The audit changes neither code nor conventions nor tooling. Return it in chat. Write a report only when the user requests one or an authorized calling workflow supplies a run-local path; default to `fudge:conventions`'s Output location (`.fudge/<branch>/conventions/`) unless the user or a calling workflow names another path. `fudge:ship` may supply that path without a second user approval. Keep the same read-only result and do not touch project rule files. When called by `fudge:ship`, send violations to its implementation/review loop and proposals to the user. Do not silently waive a violation, patch code, or amend a rule to make the change pass.
 
 ## Make a targeted amendment
 

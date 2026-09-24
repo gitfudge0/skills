@@ -18,13 +18,17 @@ A personal collection of agent skills, one directory each, each with a `SKILL.md
 | fudge:mindmap | Turns a document, transcript, or pile of notes into an interactive animated HTML mindmap. | "mindmap this document" |
 | fudge:ui-mock | Shows the requested UI decision and consequential states in a self-contained HTML mock with task-relevant frames. | "mock this up before building" |
 | fudge:ui-prototype | Builds a bounded runnable UI draft to test branching, navigation, persistence, or recovery before production. | "let me try this flow" or "prototype how save and resume should work" |
-| fudge:layered-review | Reviews a PR or diff, then layers the findings — verdict, one-line list, drill-down detail — for Slack, GitHub, or an HTML report. | "review this and don't bury me in text" |
+| fudge:review | Reviews a PR or diff and reports findings as symptom, cause, and fix — verdict, one-line list, detail — in chat, Slack, GitHub, or HTML. Re-reviews after new commits. | "review this and don't bury me in text" |
 | fudge:decision-room | Cross-functional personas pressure-test a decision independently, then synthesize into one recommendation. | "should we build this" |
 | fudge:design-system | Derives the requested tokens, style rules, component contracts, or visual specimens from a moodboard, screenshots, wireframe, or brief. Reuses the project's design source. | "define these tokens" or "make our product look like this" |
 | fudge-design-for-recognition | Shapes UI information and interaction so people can find, understand, decide, and act, then checks the rendered result. | "make this interface easier to use" |
 | fudge:test-plan | Builds a risk-based test case matrix for review, then optionally executes the approved cases and records observed results in HTML. | "what should I test here" |
 | fudge:conventions | Sets up project-specific coding rules, audits a change for convention drift or gaps, and amends approved rules without repeating the full interview. | "check this change against our conventions" |
 | fudge-unslop | Edits prose to cut generic AI phrasing and make it more direct and specific. | any writing task |
+
+## Output location
+
+Skills write their run artifacts — reports, registers, run state, and other generated files — to `.fudge/<branch>/<skill>/` at the root of the current working tree, one directory per skill per branch. That directory is hidden from Git via `.git/info/exclude`, not `.gitignore`. Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
 
 ## Install
 

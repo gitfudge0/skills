@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>code review — payments-retry-queue</title>
+<style>
+:root{
+--indigo:#2D2DD6; --indigo-d:#1C1C8F; --indigo-l:#8A8AEA;
+--canvas:#E9ECF4; --panel:#FBFCFE; --panel-2:#F3F5FA;
+--ink:#232848; --ink-2:#5D6484; --ink-3:#9AA0B8; --ghost:#C3C8DA;
+--line:#D8DCE9; --hair:#E5E8F1;
+--red:#E0402A; --red-t:#FCF0EE;
+--amber:#8a6d1f; --amber-t:#FBF3DE;
+--teal:#1a7a5c; --teal-t:#EDF6F2;
+}
+@media (prefers-color-scheme:dark){
+:root:not([data-theme]){
+--indigo:#6a6af0; --indigo-d:#4a4ad0; --indigo-l:#9a9af8;
+--canvas:#05060a; --panel:#0f121b; --panel-2:#161a26;
+--ink:#e6e8f0; --ink-2:#9199a6; --ink-3:#7b81a6; --ghost:#3a4258;
+--line:#2a3040; --hair:#1c2130;
+--red:#f0665a; --red-t:#2a1a1c;
+--amber:#e0ab4a; --amber-t:#2e2717;
+--teal:#3fbf94; --teal-t:#12241d;
+}
+}
+html[data-theme="dark"]{
+--indigo:#6a6af0; --indigo-d:#4a4ad0; --indigo-l:#9a9af8;
+--canvas:#05060a; --panel:#0f121b; --panel-2:#161a26;
+--ink:#e6e8f0; --ink-2:#9199a6; --ink-3:#7b81a6; --ghost:#3a4258;
+--line:#2a3040; --hair:#1c2130;
+--red:#f0665a; --red-t:#2a1a1c;
+--amber:#e0ab4a; --amber-t:#2e2717;
+--teal:#3fbf94; --teal-t:#12241d;
+}
+html[data-theme="light"]{
+--indigo:#2D2DD6; --indigo-d:#1C1C8F; --indigo-l:#8A8AEA;
+--canvas:#E9ECF4; --panel:#FBFCFE; --panel-2:#F3F5FA;
+--ink:#232848; --ink-2:#5D6484; --ink-3:#9AA0B8; --ghost:#C3C8DA;
+--line:#D8DCE9; --hair:#E5E8F1;
+--red:#E0402A; --red-t:#FCF0EE;
+--amber:#8a6d1f; --amber-t:#FBF3DE;
+--teal:#1a7a5c; --teal-t:#EDF6F2;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--indigo);color:var(--ink);
+font:14px/1.6 "Helvetica Neue",Inter,ui-sans-serif,-apple-system,"Segoe UI",Arial,sans-serif;
+-webkit-font-smoothing:antialiased;letter-spacing:-.005em;padding:18px}
+
+.page{background:var(--panel);border-radius:2px;min-height:calc(100vh - 36px);
+padding:64px 24px 40px;position:relative;overflow-x:hidden}
+.col{max-width:960px;margin:0 auto}
+
+.eyebrow{text-align:center;font-size:11px;letter-spacing:.24em;text-transform:uppercase;
+color:var(--ink-3);font-weight:700;margin-bottom:22px}
+
+h1.headline{text-align:center;font-size:clamp(26px,4vw,42px);line-height:1.28;font-weight:600;
+letter-spacing:-.02em;color:var(--indigo);max-width:780px;margin:0 auto 8px;padding:0 8px}
+
+.datemeta{text-align:center;font-size:11.5px;color:var(--ink-3);margin-bottom:48px}
+.datemeta code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px}
+.datemeta a{color:var(--indigo)}
+
+.stats-row{display:flex;justify-content:center;gap:56px;flex-wrap:wrap;margin-bottom:64px}
+.stat-item{text-align:center;max-width:150px}
+.stat-item svg{display:block;margin:0 auto 12px}
+.stat-item b{display:block;font-size:30px;font-weight:600;color:var(--indigo);letter-spacing:-.03em;line-height:1}
+.stat-item span{display:block;margin-top:8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+color:var(--ink-3);font-weight:600}
+
+.erow{display:flex;gap:44px;padding:34px 0;border-top:1px solid var(--line)}
+.erow-label{flex:0 0 27%;max-width:27%}
+.erow-label .lbl{font-weight:700;color:var(--indigo);font-size:15.5px;line-height:1.4;letter-spacing:-.01em}
+.erow-label .lblmeta{margin-top:8px;font-size:11px;color:var(--ink-3);letter-spacing:.02em}
+.erow-content{flex:1 1 73%;min-width:0}
+
+.item{display:flex;gap:14px;margin-bottom:26px;scroll-margin-top:28px}
+.item:last-child{margin-bottom:0}
+.numc{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--indigo);
+display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;
+color:var(--indigo);margin-top:1px}
+.item-body{flex:1 1 auto;min-width:0}
+.item-primary{font-weight:600;font-size:14.5px;color:var(--ink);line-height:1.55}
+.subk{margin-top:12px;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+color:var(--ink-3);font-weight:700}
+.subv{margin-top:3px;font-size:12.5px;color:var(--ink-2);line-height:1.55}
+.subv code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11.5px;
+background:var(--panel-2);padding:1px 5px;border-radius:3px}
+
+.pillrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.pill{display:inline-flex;align-items:center;border:1.3px solid var(--indigo-l);color:var(--indigo);
+border-radius:999px;padding:3px 12px;font-size:10.5px;letter-spacing:.02em;font-weight:600;
+text-decoration:none;background:transparent;white-space:nowrap}
+.pill.amber{border-color:var(--amber);color:var(--amber)}
+.pill.red{border-color:var(--red);color:var(--red);background:var(--red-t)}
+.pill.teal{border-color:var(--teal);color:var(--teal);background:var(--teal-t)}
+.pill.muted{border-color:var(--ghost);color:var(--ink-3)}
+
+.filters{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:-28px 0 48px}
+.filters button.pill{font-family:inherit;cursor:pointer}
+.filters button.pill[aria-pressed="false"]{border-color:var(--ghost);color:var(--ink-3)}
+.item[hidden],.erow[hidden]{display:none}
+
+details.method summary{cursor:pointer;font-size:12.5px;color:var(--ink-2);font-weight:600}
+details.method summary::marker{color:var(--indigo)}
+details.method ul.clean{margin-top:12px}
+
+.divider-wrap{display:flex;justify-content:center;padding:56px 0 44px}
+.divider-pill{border:2px solid var(--indigo);border-radius:999px;padding:15px 38px;
+font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:12.5px;color:var(--indigo)}
+
+ul.clean{margin:0;padding-left:18px;color:var(--ink-2);font-size:12.5px;line-height:1.7}
+ul.clean li{margin-bottom:6px}
+ul.clean code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11.5px;
+background:var(--panel-2);padding:1px 5px;border-radius:3px}
+
+.theme-toggle{position:fixed;top:20px;right:20px;z-index:20;display:inline-flex;align-items:center;
+gap:7px;border:1.3px solid var(--indigo-l);color:var(--indigo);background:var(--panel);
+border-radius:999px;padding:6px 14px;font:inherit;font-size:11.5px;font-weight:600;
+letter-spacing:.02em;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.theme-toggle:hover{background:rgba(45,45,214,.07)}
+
+@media (max-width:720px){
+.erow{flex-direction:column;gap:16px}
+.erow-label{flex:none;max-width:none}
+}
+@media print{
+html, html[data-theme="dark"], html[data-theme="light"]{
+--indigo:#2D2DD6; --indigo-d:#1C1C8F; --indigo-l:#8A8AEA;
+--canvas:#E9ECF4; --panel:#FBFCFE; --panel-2:#F3F5FA;
+--ink:#232848; --ink-2:#5D6484; --ink-3:#9AA0B8; --ghost:#C3C8DA;
+--line:#D8DCE9; --hair:#E5E8F1;
+--red:#E0402A; --red-t:#FCF0EE;
+--amber:#8a6d1f; --amber-t:#FBF3DE;
+--teal:#1a7a5c; --teal-t:#EDF6F2;
+}
+body{background:#fff;padding:0}
+.page{background:#fff;padding:24px 8px;min-height:0}
+.item{break-inside:avoid}
+.erow{break-inside:avoid-page}
+.theme-toggle,.filters{display:none}
+.item[hidden],.erow[hidden]{display:flex}
+}
+</style>
+<script>
+(function(){
+  try{
+    var t = localStorage.getItem("rfd-theme");
+    if(t==="light"||t==="dark") document.documentElement.setAttribute("data-theme", t);
+  }catch(e){}
+})();
+</script>
+</head>
+<body>
+<button class="theme-toggle" id="themeToggle" type="button">theme</button>
+<div class="page"><div class="col">
+
+<div class="eyebrow">code review — payments-retry-queue · round 2</div>
+<h1 class="headline">Needs changes — a slow charge can still bill a customer twice.</h1>
+<div class="datemeta">branch <code>feature/retry-backoff-v2</code> · commit <code>9c1a4e2</code> vs <code>main</code> · <a href="https://github.com/example-org/payments-retry-queue/pull/142">PR&nbsp;#142</a> · 28 July 2026 · CI passed</div>
+
+<div class="stats-row">
+  <div class="stat-item">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="14.5" stroke="var(--red)" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-size="15" font-weight="600" fill="var(--red)" font-family="inherit">!</text></svg>
+    <b>1</b><span>blocker</span>
+  </div>
+  <div class="stat-item">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="14.5" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4.5 4.5"/></svg>
+    <b>1</b><span>should-fix</span>
+  </div>
+  <div class="stat-item">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="14.5" stroke="var(--ghost)" stroke-width="1.5" stroke-dasharray="2 4"/></svg>
+    <b>1</b><span>nit</span>
+  </div>
+  <div class="stat-item">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="14.5" stroke="var(--teal)" stroke-width="1.5"/><path d="M11 17.5l4 4 8-9" stroke="var(--teal)" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>1</b><span>fixed since round 1</span>
+  </div>
+</div>
+
+<div class="filters" id="filters">
+  <button class="pill" type="button" data-key="sev" data-val="blocker" aria-pressed="true">blocker</button>
+  <button class="pill" type="button" data-key="sev" data-val="should-fix" aria-pressed="true">should-fix</button>
+  <button class="pill" type="button" data-key="sev" data-val="nit" aria-pressed="true">nit</button>
+  <button class="pill" type="button" data-key="status" data-val="open" aria-pressed="true">open</button>
+  <button class="pill" type="button" data-key="status" data-val="fixed" aria-pressed="true">fixed</button>
+</div>
+
+<div class="erow">
+  <div class="erow-label">
+    <div class="lbl">Fixed since round 1</div>
+    <div class="lblmeta">Resolved on the branch after the last review. Nothing here needs action.</div>
+  </div>
+  <div class="erow-content">
+
+    <div class="item" id="R1" data-sev="blocker" data-status="fixed">
+      <div class="numc">R1</div>
+      <div class="item-body">
+        <div class="item-primary">Any retry attempt → card expiry and last four land in shared logs</div>
+        <div class="subk">cause</div>
+        <div class="subv">A debug statement printed the full retry payload on every attempt.</div>
+        <div class="subk">impact</div>
+        <div class="subv">Put card data in a log store with broad read access, outside its compliance boundary.</div>
+        <div class="subk">fix</div>
+        <div class="subv">Log only the retry ID and attempt count, as the rest of the queue does. Done in <code>4b7e0d1</code>.</div>
+        <div class="subk">where</div>
+        <div class="subv"><code>retry-worker/src/processor.ts:88</code></div>
+        <div class="pillrow"><span class="pill red">blocker</span><span class="pill teal">fixed</span><span class="pill muted">logging</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="erow">
+  <div class="erow-label">
+    <div class="lbl">Open</div>
+    <div class="lblmeta">Still on the branch. The blocker holds the merge.</div>
+  </div>
+  <div class="erow-content">
+
+    <div class="item" id="R2" data-sev="blocker" data-status="open">
+      <div class="numc">R2</div>
+      <div class="item-body">
+        <div class="item-primary">Slow charge outlasts the job timeout → customer is charged twice</div>
+        <div class="subk">cause</div>
+        <div class="subv">The job is marked claimed only after the charge succeeds, so a second worker picks it up mid-charge.</div>
+        <div class="subk">fix</div>
+        <div class="subv">Claim the job with a conditional update before charging, as the settlement worker does for ledger writes.</div>
+        <div class="subk">where</div>
+        <div class="subv"><code>retry-worker/src/queue-consumer.ts:41-63</code></div>
+        <div class="pillrow"><span class="pill red">blocker</span><span class="pill muted">concurrency</span></div>
+      </div>
+    </div>
+
+    <div class="item" id="R3" data-sev="should-fix" data-status="open">
+      <div class="numc">R3</div>
+      <div class="item-body">
+        <div class="item-primary">Worker restarts mid-backoff → failed payments retry in a tight loop</div>
+        <div class="subk">cause</div>
+        <div class="subv">The backoff delay comes from in-memory state that resets to zero on restart.</div>
+        <div class="subk">fix</div>
+        <div class="subv">Store the next-eligible time on the job record and read it back on restart.</div>
+        <div class="subk">where</div>
+        <div class="subv"><code>retry-worker/src/backoff.ts:19-35</code></div>
+        <div class="pillrow"><span class="pill amber">should-fix</span><span class="pill muted">suspected</span><span class="pill muted">reliability</span></div>
+      </div>
+    </div>
+
+    <div class="item" id="R4" data-sev="nit" data-status="open">
+      <div class="numc">R4</div>
+      <div class="item-body">
+        <div class="item-primary">Querying retry counts → metric name breaks the pattern its siblings use</div>
+        <div class="subk">cause</div>
+        <div class="subv">The new counter reverses the <code>queue.&lt;noun&gt;.&lt;verb&gt;</code> order every other counter follows.</div>
+        <div class="subk">fix</div>
+        <div class="subv">Rename it to match before a dashboard depends on the current name.</div>
+        <div class="subk">rule</div>
+        <div class="subv">Metric names follow <code>queue.&lt;noun&gt;.&lt;verb&gt;</code> (<code>AGENTS.md</code>)</div>
+        <div class="subk">where</div>
+        <div class="subv"><code>retry-worker/src/metrics.ts:14</code></div>
+        <div class="pillrow"><span class="pill muted">nit</span><span class="pill muted">conventions</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="erow">
+  <div class="erow-label">
+    <div class="lbl">For the team</div>
+    <div class="lblmeta">Decisions, not fixes for this PR.</div>
+  </div>
+  <div class="erow-content">
+    <ul class="clean">
+      <li>Retry jobs have no owner for their schedule. Decide whether the job record or the worker owns it, and add the answer to <code>AGENTS.md</code>.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="divider-wrap"><div class="divider-pill">Method</div></div>
+
+<div class="erow" style="border-top:none;padding-top:0">
+  <div class="erow-label">
+    <div class="lbl">How this was checked</div>
+    <div class="lblmeta">From <code>method.md</code>. Open it to see what was and wasn't read.</div>
+  </div>
+  <div class="erow-content">
+    <details class="method">
+      <summary>CI passed · 11 files read fully, 4 skimmed, 1 not read</summary>
+      <ul class="clean">
+        <li>CI: 5 checks passed at <code>9c1a4e2</code>.</li>
+        <li>Read fully: <code>retry-worker/src/*</code>. Skimmed: <code>retry-worker/test/*</code>. Not read: <code>retry-worker/src/generated/schema.ts</code> (generated).</li>
+        <li>Prior comments: reviewer on idempotency keys, agree. Author on backoff, rebuttal-checked; the restart path still resets the delay.</li>
+        <li>Not checked: the payment provider's timeout under load. R3 stays suspected until someone measures it.</li>
+      </ul>
+    </details>
+  </div>
+</div>
+
+</div></div>
+<script>
+(function(){
+  var b = document.getElementById("themeToggle");
+  function cur(){ return document.documentElement.getAttribute("data-theme") ||
+    (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light"); }
+  function label(){ b.textContent = cur()==="dark" ? "☀ light" : "☾ dark"; }
+  b.addEventListener("click", function(){
+    var next = cur()==="dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try{ localStorage.setItem("rfd-theme", next); }catch(e){}
+    label();
+  });
+  label();
+})();
+(function(){
+  var btns = document.querySelectorAll("#filters button");
+  function on(key){ var s = {}; btns.forEach(function(x){
+    if(x.dataset.key===key && x.getAttribute("aria-pressed")==="true") s[x.dataset.val]=1; }); return s; }
+  function apply(){
+    var sev = on("sev"), st = on("status");
+    document.querySelectorAll(".item[data-sev]").forEach(function(it){
+      it.hidden = !(sev[it.dataset.sev] && st[it.dataset.status]); });
+    document.querySelectorAll(".erow").forEach(function(row){
+      var items = row.querySelectorAll(".item[data-sev]");
+      if(items.length) row.hidden = !row.querySelector(".item[data-sev]:not([hidden])"); });
+  }
+  btns.forEach(function(x){ x.addEventListener("click", function(){
+    x.setAttribute("aria-pressed", x.getAttribute("aria-pressed")==="true" ? "false" : "true"); apply(); }); });
+})();
+</script>
+</body>
+</html>

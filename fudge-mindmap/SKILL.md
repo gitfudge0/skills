@@ -19,6 +19,17 @@ wins. The map is a faithful, navigable summary, not a highlight reel — and
 "faithful" here means *complete*. Getting the tree right *is* the job; the
 rendering is mechanical.
 
+## Output location
+
+Write this skill's files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix.
+
+- `<branch>` is `git branch --show-current` with every `/` replaced by `-`. On a detached HEAD, use `git rev-parse --short HEAD`. Outside a git repository, use `.fudge/<skill>/` in the current directory.
+- Before the first write, add `.fudge/` to the file named by `git rev-parse --git-path info/exclude` unless it is already listed. Never edit `.gitignore` for this.
+- A path supplied by a calling skill overrides this default.
+- Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
+
+For this skill, `<skill>` is `mindmap`. In a local working tree, write the coverage file, `map.json`, and the rendered `<name>-mindmap.html` to `.fudge/<branch>/mindmap/`. Fall back to `/mnt/user-data/outputs/` only when running in the claude.ai sandbox with no local working tree.
+
 ## Workflow
 
 Three phases: **ingest → curate → render.**
@@ -49,8 +60,10 @@ method is a build-then-verify loop:
 3. **Verify coverage** and make it pass before rendering:
 
    ```bash
-   python3 scripts/check_coverage.py --coverage cov.txt --data map.json
+   python3 scripts/check_coverage.py --coverage .fudge/<branch>/mindmap/cov.txt --data .fudge/<branch>/mindmap/map.json
    ```
+
+   (See Output location above; in the claude.ai sandbox with no local working tree, use `/mnt/user-data/outputs/` instead.)
 
    This fails loudly on any source unit that isn't either mapped to a real node
    or explicitly marked `[OMIT: reason]` (reserved for non-substance chrome like
@@ -85,12 +98,14 @@ it — this is deterministic, so don't hand-edit HTML:
 
 ```bash
 python3 scripts/build.py \
-  --data /path/to/map.json \
-  --out /mnt/user-data/outputs/<name>-mindmap.html \
+  --data .fudge/<branch>/mindmap/map.json \
+  --out .fudge/<branch>/mindmap/<name>-mindmap.html \
   --title "Human-readable title" \
   --subtitle "optional subtitle" \
   --glyph "✦"
 ```
+
+In the claude.ai sandbox with no local working tree, use `/mnt/user-data/outputs/<name>-mindmap.html` instead (see Output location above).
 
 `--title` defaults to the root label; `--subtitle` to a node/branch count;
 `--glyph` is the brand-mark character (pick something evocative of the subject).

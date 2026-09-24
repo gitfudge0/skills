@@ -125,7 +125,7 @@ The description slot is the load-bearing one. Write it to fire on code-writing a
 
 **Source code is never written or refactored.** This skill produces documentation of rules, not code that follows them. That holds even when a violation is one line away from fixed and even when the user would obviously want it fixed — fixing it is a separate request. Emission does not include a git commit or push unless separately authorized.
 
-**Start-clean runs get a conformance report.** Option B promised the user they'd be told where existing code doesn't match the new rules, and this is where that promise is paid. The report describes; it changes nothing. It names the rule, the places that violate it, and nothing else.
+**Start-clean runs get a conformance report.** Option B promised the user they'd be told where existing code doesn't match the new rules, and this is where that promise is paid. The report describes; it changes nothing. It names the rule, the places that violate it, and nothing else. Write it to `fudge:conventions`'s Output location (`.fudge/<branch>/conventions/`) unless the user or a calling workflow names another path — the report is not part of the emitted `<project>-conventions` artifact and does not move with it.
 
 Keep two things apart in that report. A **style gap** is code that predates the rule and is now non-conforming — that is the expected output of a start-clean run and it is not urgent. A **defect** is code that is wrong on its own terms, which the sweep happened to surface. Flag defects separately, as bugs, and do not bury them in a conformance list — they are the most valuable thing the pass produced and the list is the one place nobody reads twice.
 

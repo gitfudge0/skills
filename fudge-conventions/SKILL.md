@@ -38,6 +38,17 @@ The second half of the principle is the one that gets violated: **never ask an o
 - `references/emitting.md` — the shape of the emitted `<project>-conventions` artifact, including the template for its `SKILL.md`. Open it at Phase 3.
 - `references/audit-amend.md` — evidence and approval rules for audit and targeted amendment. Open it for either mode; the setup interview does not need it.
 
+## Output location
+
+Write this skill's files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix.
+
+- `<branch>` is `git branch --show-current` with every `/` replaced by `-`. On a detached HEAD, use `git rev-parse --short HEAD`. Outside a git repository, use `.fudge/<skill>/` in the current directory.
+- Before the first write, add `.fudge/` to the file named by `git rev-parse --git-path info/exclude` unless it is already listed. Never edit `.gitignore` for this.
+- A path supplied by a calling skill overrides this default.
+- Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
+
+For this skill, `<skill>` is `conventions`. The start-clean conformance report and any requested audit report default to `.fudge/<branch>/conventions/`. The emitted `<project>-conventions` skill, `rationale.md`, tooling configs, and the `CLAUDE.md` pointer stay product and keep their existing project locations — none of them move under `.fudge/`.
+
 ## Setup interview
 
 ### Phase 0 — Ground it
@@ -95,7 +106,7 @@ Write `<project>-conventions` into the existing project-skill location, the call
 
 Where Phase 0.5 found tooling gaps, show the exact config that would be added and what it would enforce, and write it **only on an explicit yes for that config**. A blanket approval of the rule table is not approval of a config file.
 
-On a **start-clean** run, finish with a conformance report: where existing code does not match the rules just agreed. That was promised in the Phase 0 question and it is a report, not a work order — no file is edited to close a gap.
+On a **start-clean** run, finish with a conformance report: where existing code does not match the rules just agreed. That was promised in the Phase 0 question and it is a report, not a work order — no file is edited to close a gap. Write it to this skill's Output location below unless the user or a calling workflow names another path.
 
 Last, offer the one-line pointer in the project's `CLAUDE.md`. Description-based triggering is probable; the pointer is what makes loading certain. Offer it, name the tradeoff, add it only on a yes.
 
@@ -119,7 +130,7 @@ The rest of **tooling** is resolved in Phase 0.5 by detection and never reaches 
 
 ## Phase 2 is the setup gate
 
-**In setup mode, nothing is written to disk before the user approves the rule table** — not the artifact, not a reference file, not a tooling config, not a scratch draft in the target repo. Audit may write only a run-local report when the user requests it or an authorized calling workflow supplies its path; a `fudge:ship` run needs no second approval for that report. Amendment has its own exact-change approval gate in `references/audit-amend.md`.
+**In setup mode, nothing is written to disk before the user approves the rule table** — not the artifact, not a reference file, not a tooling config, not a scratch draft in the target repo. Audit may write only a run-local report, defaulting to this skill's Output location below, when the user requests it or an authorized calling workflow supplies its path; a `fudge:ship` run needs no second approval for that report. Amendment has its own exact-change approval gate in `references/audit-amend.md`.
 
 An approval covers the table that was shown. If the user's response would change a rule, change it and re-present; do not carry it as an unwritten amendment into Phase 3.
 

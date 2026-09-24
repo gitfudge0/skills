@@ -29,6 +29,17 @@ When fixing, brief the worker with the selected design source, exact affected fi
 
 Return a compact coverage summary, prioritized findings with evidence, unresolved source conflicts, fixes and retest results if requested, and the remaining untested scope. Do not claim overall design approval while a task-blocking failure or consequential source conflict remains.
 
+## Output location
+
+Write this skill's files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix.
+
+- `<branch>` is `git branch --show-current` with every `/` replaced by `-`. On a detached HEAD, use `git rev-parse --short HEAD`. Outside a git repository, use `.fudge/<skill>/` in the current directory.
+- Before the first write, add `.fudge/` to the file named by `git rev-parse --git-path info/exclude` unless it is already listed. Never edit `.gitignore` for this.
+- A path supplied by a calling skill overrides this default.
+- Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
+
+For this skill, `<skill>` is `design-qa`. Save screenshots and any QA report to `.fudge/<branch>/design-qa/`. Fixes to `DESIGN.md`, `COMPONENTS.md`, or product source stay product and keep the project's established locations.
+
 ## Boundaries
 
 Use `fudge:accessible-ui` for criterion-level accessibility guidance or audit, including assistive technology results. This QA pass can flag an observed keyboard or focus problem and route it there; it does not make a WCAG conformance claim. Use `fudge:ux-research` when the question is whether real people can understand or complete the task. Expert inspection is not participant evidence. If called from `fudge:design` or `fudge:ship`, return findings to that run and preserve its implementation and delivery gates.

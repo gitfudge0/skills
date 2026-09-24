@@ -1,6 +1,6 @@
 /* ================================================================
    Report deck runtime — zero deps. Copy verbatim into
-   .reports/assets/deck.js and load with <script src="assets/deck.js">.
+   .fudge/<branch>/report-deck/assets/deck.js and load with <script src="assets/deck.js">.
 
    Provides:
    - Theme toggle (persisted to localStorage; falls back to OS preference)

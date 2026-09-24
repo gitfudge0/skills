@@ -44,7 +44,9 @@ Pick based on what the user asked for. When unclear, run `map` first — it is c
 
 ## Workspace
 
-All artifacts live beneath one output root. The default is `.gap-analysis/` at the project root. A caller may supply another output root; use it for the whole run and create it if absent. Resolve every artifact path below against that root, including `map` and thin-corpus outputs. Do not also write to the default directory when an override is present.
+All artifacts live beneath one output root. The default is `.fudge/<branch>/gap-analysis/`. A caller may supply another output root; use it for the whole run and create it if absent. Resolve every artifact path below against that root, including `map` and thin-corpus outputs. Do not also write to the default directory when an override is present.
+
+State persists per branch: `refresh` diffs `register.yaml` and reads `answers.yaml` from that same branch's directory. Nothing is shared across branches.
 
 ```
 <output-root>/
@@ -58,9 +60,19 @@ All artifacts live beneath one output root. The default is `.gap-analysis/` at t
   questions.yaml         stage 7 — routed questions
   answers.yaml           ← humans write here; read on refresh
   report.html            stage 8 — rendered output
+  payload.json           stage 8 — JSON payload rendered into report.html
 ```
 
 `register.yaml` is canonical. Everything else is either an input to it or a rendering of it. `report.html` is disposable and regenerated every run.
+
+## Output location
+
+Write this skill's files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix.
+
+- `<branch>` is `git branch --show-current` with every `/` replaced by `-`. On a detached HEAD, use `git rev-parse --short HEAD`. Outside a git repository, use `.fudge/<skill>/` in the current directory.
+- Before the first write, add `.fudge/` to the file named by `git rev-parse --git-path info/exclude` unless it is already listed. Never edit `.gitignore` for this.
+- A path supplied by a calling skill overrides this default.
+- Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
 
 ## Pipeline
 

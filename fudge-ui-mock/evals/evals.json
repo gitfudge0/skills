@@ -4,19 +4,19 @@
     {
       "id": 0,
       "prompt": "The settings page in this app is pretty plain. Show me a few different ways the 'Data' section (import / export / clear all) could look — I want to pick one before you change anything.",
-      "expected_output": "A single self-contained mock.html with a few distinct variants of the Data section, rendered in the app's real design language with short tradeoff notes. Opens it and asks the user to choose. Selection does not edit production components.",
+      "expected_output": "A single self-contained mock.html at .fudge/<branch>/ui-mock/mock.html with a few distinct variants of the Data section, rendered in the app's real design language with short tradeoff notes. Opens it and asks the user to choose. Selection does not edit production components.",
       "files": []
     },
     {
       "id": 1,
       "prompt": "I don't love how the 'due for review' list items look on the home dashboard. Mock up a couple of options for the row design (name, ECO code, status badge, review button).",
-      "expected_output": "mock.html with a couple of distinct due-list row variants using the app's real design language and enough dashboard context to judge them. Opens it and asks the user to pick. No live component is edited as part of the mock task.",
+      "expected_output": "mock.html at .fudge/<branch>/ui-mock/mock.html with a couple of distinct due-list row variants using the app's real design language and enough dashboard context to judge them. Opens it and asks the user to pick. No live component is edited as part of the mock task.",
       "files": []
     },
     {
       "id": 2,
       "prompt": "We need an empty state for the new Repertoire page for users who haven't added any openings yet. Give me some design directions to choose from.",
-      "expected_output": "mock.html with distinct empty-state approaches in the app's design language, short tradeoff notes, and relevant theme coverage. Opens it and asks the user to choose; product implementation remains a separate task.",
+      "expected_output": "mock.html at .fudge/<branch>/ui-mock/mock.html with distinct empty-state approaches in the app's design language, short tradeoff notes, and relevant theme coverage. Opens it and asks the user to choose; product implementation remains a separate task.",
       "files": []
     }
   ]

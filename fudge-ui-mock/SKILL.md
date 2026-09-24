@@ -16,10 +16,21 @@ Make a reviewable visual answer to the user's design question. The output is one
 ## Output and review
 
 - Write one HTML file with inline CSS and only the small amount of inline JavaScript needed to inspect the static design, such as pan, zoom, or a theme toggle. Include assets inline or use CSS; the mock must render without network access or a build step. It does not implement product behavior. For behavior that must be tried, use `fudge:ui-prototype`.
-- Use the user's exact output path when provided. A caller such as `fudge:design` or `fudge:ship` may supply one; create its parent directory if needed. Otherwise use `mock.html` in the working directory or repo root. Keep artifact-only callers' writes inside that file and its required parent directory.
+- Use the user's exact output path when provided. A caller such as `fudge:design` or `fudge:ship` may supply one; create its parent directory if needed. Otherwise use the default in Output location below. Keep artifact-only callers' writes inside that file and its required parent directory.
 - Size frames to the real target viewport or component where scale affects the decision. Use a simple document for one or a few frames. Use a pan and zoom board when many or large frames need spatial comparison. Labels, connectors, callouts, and sections should clarify an actual relationship; omit chrome that adds no information. `references/canvas-scaffold.html` is an optional starting point for a board, not a required structure.
 - Show each relevant project theme when the choice depends on it or the user requests it. A theme toggle is useful when both themes need review; do not add one solely because the scaffold contains it.
 - Check that the file exists, renders locally, and shows the intended frames at readable scale. Inspect the result and fix unclear copy, misleading context, or missing consequential states. Open the resolved output path for the user when done, then give that path and any decision still needed. If a caller owns the later implementation handoff, return the path and selection or open decision to it.
+
+## Output location
+
+Write this skill's files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix.
+
+- `<branch>` is `git branch --show-current` with every `/` replaced by `-`. On a detached HEAD, use `git rev-parse --short HEAD`. Outside a git repository, use `.fudge/<skill>/` in the current directory.
+- Before the first write, add `.fudge/` to the file named by `git rev-parse --git-path info/exclude` unless it is already listed. Never edit `.gitignore` for this.
+- A path supplied by a calling skill overrides this default.
+- Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
+
+For this skill, `<skill>` is `ui-mock`, so the default mock path is `.fudge/<branch>/ui-mock/mock.html`.
 
 ## Boundaries
 

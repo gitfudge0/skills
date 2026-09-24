@@ -36,7 +36,7 @@ The shipped `report.css` carries **7 selectable visual styles** layered over the
 ```
 
 **Choosing a style — do this BEFORE writing the report file:**
-1. Point the user at the demo gallery so they can see all 7 in both light and dark — suggest they run `open <abs path to skill>/assets/style-gallery.html` (or open the copy you place in `.reports/assets/`).
+1. Point the user at the demo gallery so they can see all 7 in both light and dark — suggest they run `open <abs path to skill>/assets/style-gallery.html` (or open the copy you place in `.fudge/<branch>/report-deck/assets/`).
 2. Use the **AskUserQuestion** tool to ask which of the 7 styles they want (options: marginalia, verdant, blueprint, editorial, terminal, brutalist, glass).
 3. Generate the report with `data-style="<choice>"` on `<html>`.
 
@@ -55,12 +55,21 @@ Composition rules:
 
 ## Files & location
 
-Write to `.reports/<descriptive-kebab-name>.html` at the project root (create the dir; add `.reports/` to `.gitignore` if the project has one). Copy **both** `assets/report.css` and `assets/deck.js` into `.reports/assets/` and link them (the multi-style `report.css` carries all 7 styles — no extra files). Copying `assets/style-gallery.html` alongside them is handy for the style-picker step above:
+Write to `.fudge/<branch>/report-deck/<descriptive-kebab-name>.html` (create the dir). Copy **both** `assets/report.css` and `assets/deck.js` into `.fudge/<branch>/report-deck/assets/` and link them with the relative `assets/` references below (the multi-style `report.css` carries all 7 styles — no extra files). Copying `assets/style-gallery.html` alongside them is handy for the style-picker step above:
 
 ```html
 <link rel="stylesheet" href="assets/report.css">
 <script src="assets/deck.js"></script>   <!-- at end of <body> -->
 ```
+
+## Output location
+
+Write this skill's files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix.
+
+- `<branch>` is `git branch --show-current` with every `/` replaced by `-`. On a detached HEAD, use `git rev-parse --short HEAD`. Outside a git repository, use `.fudge/<skill>/` in the current directory.
+- Before the first write, add `.fudge/` to the file named by `git rev-parse --git-path info/exclude` unless it is already listed. Never edit `.gitignore` for this.
+- A path supplied by a calling skill overrides this default.
+- Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
 
 ## Required shell
 
@@ -252,8 +261,8 @@ Only when asked — the HTML is the primary deliverable.
 **Before exporting, ask which style to render the PDF in.** The reader can flip styles live with **T**, but a PDF is frozen — use the **AskUserQuestion** tool to ask which of the 7 styles to bake in (options: marginalia, verdant, blueprint, editorial, terminal, brutalist, glass). Pass the answer via the `STYLE` env var. If the user has no preference, omit `STYLE` and the PDF keeps whatever `data-style` the HTML already carries.
 
 ```bash
-STYLE=blueprint scripts/html-to-pdf.sh .reports/your-report.html   # → .reports/your-report.pdf
-scripts/html-to-pdf.sh .reports/your-report.html                   # keep the HTML's own style
+STYLE=blueprint scripts/html-to-pdf.sh .fudge/<branch>/report-deck/your-report.html   # → .fudge/<branch>/report-deck/your-report.pdf
+scripts/html-to-pdf.sh .fudge/<branch>/report-deck/your-report.html                   # keep the HTML's own style
 ```
 
 One landscape page per slide, always rendered in **light mode** (PDFs are light regardless of the on-screen theme). It drives a **headless Chromium-family browser** — the only reliable way to execute Mermaid JS and honour `@media print`; a plain HTML→PDF library drops both.

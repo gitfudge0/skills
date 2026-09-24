@@ -18,7 +18,18 @@ Choose the mode before starting the workflow.
 | `plan-only` | The user asks for cases, edge cases, or testing advice, or an implementation request has no approved case matrix yet. This is the standalone default and the mandatory pre-code mode under `fudge:ship`. | Complete steps 1–6 and 8. Write only the HTML plan. Create no source or test code and run no test, build, lint, or other project commands. Mark every case `NOT RUN` with the reason `PLANNED — awaiting approved execution`. |
 | `execute` | The user explicitly approves a specific plan version and asks to write or run its cases, or a caller supplies that approval. | Consume that version, perform step 7, then update the HTML report with observed outcomes. A completed plan or a request to implement unseen cases is not approval. First produce the plan in `plan-only` mode and present it for review. |
 
-A caller may supply the exact output path for the HTML report in either mode. When supplied, write the report exactly there, create only its parent directory as needed, and do not also write a default report.
+A caller may supply the exact output path for the HTML report in either mode. When supplied, write the report exactly there, create only its parent directory as needed, and do not also write a default report. Otherwise use the default in Output location below.
+
+## Output location
+
+Write this skill's files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix.
+
+- `<branch>` is `git branch --show-current` with every `/` replaced by `-`. On a detached HEAD, use `git rev-parse --short HEAD`. Outside a git repository, use `.fudge/<skill>/` in the current directory.
+- Before the first write, add `.fudge/` to the file named by `git rev-parse --git-path info/exclude` unless it is already listed. Never edit `.gitignore` for this.
+- A path supplied by a calling skill overrides this default.
+- Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
+
+For this skill, `<skill>` is `test-plan`. The default HTML report path is `.fudge/<branch>/test-plan/test-plan-<feature-slug>.html`. In standalone `execute` mode, update that same file with observed outcomes rather than writing a separate results file. Test files written in `execute` mode are product code and go where the project keeps its tests, not under `.fudge/`.
 
 Under `fudge:ship`, split execution responsibility at the command boundary. The worker writes the approved test files and reports the exact targeted commands that should run, but runs no test, build, or lint command. The root orchestrator runs those targeted commands and every full gate, reads the raw output, and supplies the observed outcomes. The worker records the supplied outcomes at a separate caller-supplied results path, leaving the approved matrix file unchanged. A worker must not infer a result.
 
@@ -134,4 +145,4 @@ Read `assets/example.html` for the exact structure, tone, and information densit
 - Write real content, not placeholder-style text — the strategy paragraphs and case descriptions should read like a person who actually looked at this change wrote them, not like generic boilerplate ("This feature is important and should be tested thoroughly").
 - Keep it visually restrained per the design system — the point is fast scanning (ID, priority, and case title visible per row), not a dense wall of prose.
 
-Do **not** publish the report as an artifact. If no output-path override was supplied, save the standalone HTML file locally with a name like `test-plan-<feature-slug>.html`. Open the resolved path in the browser with `open <path>` (macOS) once it's written, and present that path to the user in your final message — don't paste the full HTML into the chat.
+Do **not** publish the report as an artifact. If no output-path override was supplied, save the standalone HTML file locally at the default in Output location above (`.fudge/<branch>/test-plan/test-plan-<feature-slug>.html`). Open the resolved path in the browser with `open <path>` (macOS) once it's written, and present that path to the user in your final message — don't paste the full HTML into the chat.

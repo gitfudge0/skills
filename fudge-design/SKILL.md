@@ -31,7 +31,7 @@ Choose enough output to let the user review or act on the requested decision. In
 | Routes, navigation, labels, forms, error language, or content hierarchy are unclear | `fudge:content-architecture`. |
 | Roles, multi-step transitions, async results, persistence, or recovery are unclear | `fudge:interaction-design`. |
 | Accessibility guidance or criterion-level assessment is needed for the target UI | `fudge:accessible-ui`; scope the check and its evidence, and make no blanket conformance claim. |
-| A static frame cannot answer a consequential interaction question | `fudge:ui-prototype` for a bounded runnable task at an exact unused path in the design artifact area. |
+| A static frame cannot answer a consequential interaction question | `fudge:ui-prototype` for a bounded runnable task at an exact unused path under its own output location (`.fudge/<branch>/ui-prototype/`) unless `fudge:ship` supplies a run-local path. |
 | Built UI needs comparison with its selected design, or a UI fix needs retesting | `fudge:design-qa`. |
 | A launched UI needs outcome definitions, event checks, or an evidence-based iteration decision | `fudge:experience-measurement`. |
 
@@ -41,6 +41,6 @@ Read the relevant parts of existing `DESIGN.md` and `COMPONENTS.md` or the proje
 
 ## Adjacent skills
 
-- `fudge:ui-mock` owns a self-contained visual artifact with the frames the task needs. Call it in **artifact-only** mode for a visual draft, with the intended output path. A static mock is not a working UI.
+- `fudge:ui-mock` owns a self-contained visual artifact with the frames the task needs. Call it in **artifact-only** mode for a visual draft, with the intended output path — its own default is `.fudge/<branch>/ui-mock/` unless `fudge:ship` supplies a run-local path. A static mock is not a working UI.
 - `fudge:design-system` owns token and style rules, component contracts, and specimens when the user requests them. Its outputs follow the requested scope and reuse the project's existing source of truth. Read its contract rather than creating competing rules or a fixed set of files.
 - Use `fudge:ui-mock` directly when visual states or options are the only deliverable and content and behavior rules are settled. Use `fudge:design` when the work also needs to resolve content, interaction, evidence, project rules, or implementation guidance. Route a standalone design system request directly to `fudge:design-system`.

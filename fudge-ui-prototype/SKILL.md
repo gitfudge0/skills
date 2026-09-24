@@ -11,7 +11,18 @@ Make a taskable, nonproduction draft that answers **one named interaction questi
 
 1. State the person's task, the interaction question, and what observation would change the design. Identify the starting state, relevant branches, success condition, and failure or recovery path.
 2. Check the project's design source, existing tokens, components, content, and platform constraints. Choose realistic sample content and only enough visual fidelity to make the task credible. Keep fabricated data safe and visibly synthetic where it could be mistaken for real records.
-3. Choose an **exact unused output path** in the project's design artifact area. Keep prototype files and any run instructions there. Edit production components only when the user separately requests a component or product build.
+3. Choose an **exact unused output path** under this skill's Output location below. Keep prototype files and any run instructions there. Edit production components only when the user separately requests a component or product build.
+
+## Output location
+
+Write this skill's files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix.
+
+- `<branch>` is `git branch --show-current` with every `/` replaced by `-`. On a detached HEAD, use `git rev-parse --short HEAD`. Outside a git repository, use `.fudge/<skill>/` in the current directory.
+- Before the first write, add `.fudge/` to the file named by `git rev-parse --git-path info/exclude` unless it is already listed. Never edit `.gitignore` for this.
+- A path supplied by a calling skill overrides this default.
+- Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
+
+For this skill, `<skill>` is `ui-prototype`, so the default is an exact unused path under `.fudge/<branch>/ui-prototype/<slug>/`.
 
 ## Build a runnable task
 

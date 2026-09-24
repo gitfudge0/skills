@@ -17,7 +17,18 @@ Turn source material into the design rules and specimens the requested work need
 | Full design system | A coherent token/rule source, component contracts, and visual specimens covering the agreed product scope. `DESIGN.md`, `DESIGN.html`, `COMPONENTS.md`, and `COMPONENTS.html` are one useful form, not a mandatory file set. |
 | High-fidelity screens from a wireframe | The requested screens or board, using the applicable tokens and component rules. A full design system is not a prerequisite. |
 
-Use the project's established artifact names and locations when present. For a design-only request, inspect and reference the app's theme as needed; change production theme or code only when the user requests application or implementation. A new design token artifact can hold proposed values without changing the app. Do not create a second source of truth merely to fill a template. For a full system, inventory the product surfaces and reusable patterns before deciding coverage; for a narrow request, inspect only the source needed to avoid inconsistency.
+Use the project's established artifact names and locations when present for product deliverables — `DESIGN.md`, `DESIGN.html`, `COMPONENTS.md`, `COMPONENTS.html`, and applied tokens. Review-only artifacts (style specimens, style galleries, and hi-fi screen boards) are not project deliverables; see Output location below for where they go. For a design-only request, inspect and reference the app's theme as needed; change production theme or code only when the user requests application or implementation. A new design token artifact can hold proposed values without changing the app. Do not create a second source of truth merely to fill a template. For a full system, inventory the product surfaces and reusable patterns before deciding coverage; for a narrow request, inspect only the source needed to avoid inconsistency.
+
+## Output location
+
+Write this skill's files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix.
+
+- `<branch>` is `git branch --show-current` with every `/` replaced by `-`. On a detached HEAD, use `git rev-parse --short HEAD`. Outside a git repository, use `.fudge/<skill>/` in the current directory.
+- Before the first write, add `.fudge/` to the file named by `git rev-parse --git-path info/exclude` unless it is already listed. Never edit `.gitignore` for this.
+- A path supplied by a calling skill overrides this default.
+- Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
+
+For this skill, `<skill>` is `design-system`. Review-only artifacts — style specimens, style galleries, and hi-fi screen boards produced under [high-fidelity conversion](references/hifi-conversion.md) — default to `.fudge/<branch>/design-system/`. `DESIGN.md`, `DESIGN.html`, `COMPONENTS.md`, `COMPONENTS.html`, and applied tokens stay product and keep the project's established locations.
 
 ## Rules that apply at every size
 
