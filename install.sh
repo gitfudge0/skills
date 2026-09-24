@@ -1,361 +1,323 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
-# macOS ships bash 3.2, which lacks namerefs (`local -n`) and fractional
-# `read -t` timeouts used by the arrow-key picker. Re-exec under a newer bash
-# if one is available (e.g. Homebrew); otherwise fall back to the plain picker.
-_need_newer_bash() {
-  [ "${BASH_VERSINFO[0]}" -lt 4 ] || { [ "${BASH_VERSINFO[0]}" -eq 4 ] && [ "${BASH_VERSINFO[1]}" -lt 3 ]; }
-}
-if [ -z "${SKILLS_INSTALL_REEXEC:-}" ] && _need_newer_bash; then
-  for _b in /opt/homebrew/bin/bash /usr/local/bin/bash; do
-    [ -x "$_b" ] || continue
-    if "$_b" -c '[ "${BASH_VERSINFO[0]}" -gt 4 ] || { [ "${BASH_VERSINFO[0]}" -eq 4 ] && [ "${BASH_VERSINFO[1]}" -ge 3 ]; }' 2>/dev/null; then
-      export SKILLS_INSTALL_REEXEC=1
-      exec "$_b" "$0" "$@"
-    fi
-  done
-fi
-FANCY_OK=1
-_need_newer_bash && FANCY_OK=0
+set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-COLOR=1
-[ -n "${NO_COLOR:-}" ] && COLOR=0
-[ -t 1 ] || COLOR=0
-if [ "$COLOR" -eq 1 ]; then
-  C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'; C_RED=$'\033[31m'; C_DIM=$'\033[2m'; C_RESET=$'\033[0m'
-else
-  C_GREEN=""; C_YELLOW=""; C_RED=""; C_DIM=""; C_RESET=""
-fi
-ok()   { echo "${C_GREEN}✓ $*${C_RESET}"; }
-warn() { echo "${C_YELLOW}$*${C_RESET}"; }
-err()  { echo "${C_RED}$*${C_RESET}" >&2; }
+BUILD_DIR="$SCRIPT_DIR/.fudge-build"
+ROOTS=(design ship)
+AGENT_NAMES=(claude codex cursor opencode)
+OPTIONAL=()
+for skill_dir in "$SCRIPT_DIR"/*/; do
+  [ -f "$skill_dir/SKILL.md" ] || continue
+  skill_name="$(basename "$skill_dir")"
+  case "$skill_name" in fudge-design|fudge-ship) ;; *) OPTIONAL+=("${skill_name#fudge-}") ;; esac
+done
 
 usage() {
-  cat <<EOF
+  cat <<HELP
 Usage: $0 [install|list|remove] [options]
 
-Subcommands:
-  install   Install skills into agent skill dirs (default)
-  list      List installed skills per agent
-  remove    Remove previously installed skills
+Install defaults to the design and ship root skills. Individual skills are optional.
 
 Options:
-  --all         select all skills, non-interactive
-  --copy        copy instead of symlink (install only)
-  -a <agent>    target agent, repeatable: claude|codex|cursor|opencode
-  -y            skip confirmations / auto-overwrite
-  -h, --help    show this help
+  -a <agent>         target agent, repeatable: claude|codex|cursor|opencode
+  --root <name>      root skill, repeatable: design|ship
+  --skill <name>     individual skill, repeatable (see below)
+  --no-roots         install only explicitly selected individual skills
+  --all              select both roots and every individual skill
+  --copy             copy instead of symlink (install only)
+  -y                 skip confirmation; update installer-owned installs
+  -h, --help         show this help
 
-Agent target dirs:
-  claude   -> ~/.claude/skills
-  codex    -> ~/.codex/skills
-  cursor   -> ~/.cursor/skills
-  opencode -> ~/.config/opencode/skills
-EOF
+Subcommands:
+  install            install selected skills (default)
+  list               show agent skill directories
+  remove             remove installer-owned skills (use --all -y for all)
+
+Individual skills: ${OPTIONAL[*]}
+HELP
+}
+fail() { printf 'Error: %s\n' "$*" >&2; exit 1; }
+note() { printf '%s\n' "$*"; }
+contains() { local wanted="$1" item; shift; for item in "$@"; do [ "$item" = "$wanted" ] && return 0; done; return 1; }
+append_unique() {
+  local name="$1" value="$2" item
+  eval "local existing=(\"\${${name}[@]}\")"
+  contains "$value" "${existing[@]}" || eval "$name+=(\"\$value\")"
 }
 
-SUBCMD="install"; ALL=0; COPY=0; YES=0; AGENTS=()
-if [ $# -gt 0 ]; then
+SUBCMD=install ALL=0 COPY=0 YES=0 NO_ROOTS=0 EXPLICIT_SELECTION=0
+AGENTS=() SELECTED_ROOTS=() SELECTED_OPTIONAL=()
+if [ "$#" -gt 0 ]; then
   case "$1" in install|list|remove) SUBCMD="$1"; shift ;; esac
 fi
-while [ $# -gt 0 ]; do
+while [ "$#" -gt 0 ]; do
   case "$1" in
-    --all) ALL=1 ;;
-    --copy) COPY=1 ;;
-    -a) shift; AGENTS+=("${1:-}") ;;
-    -y) YES=1 ;;
+    -a)
+      [ "$#" -ge 2 ] || fail '-a needs an agent'
+      contains "$2" "${AGENT_NAMES[@]}" || fail "unknown agent: $2"
+      append_unique AGENTS "$2"; shift 2 ;;
+    --root)
+      [ "$#" -ge 2 ] || fail '--root needs a name'
+      contains "$2" "${ROOTS[@]}" || fail "unknown root skill: $2"
+      append_unique SELECTED_ROOTS "$2"; EXPLICIT_SELECTION=1; shift 2 ;;
+    --skill)
+      [ "$#" -ge 2 ] || fail '--skill needs a name'
+      requested="${2#fudge-}"
+      contains "$requested" "${OPTIONAL[@]}" || fail "unknown individual skill: $2"
+      append_unique SELECTED_OPTIONAL "$requested"; EXPLICIT_SELECTION=1; shift 2 ;;
+    --no-roots) NO_ROOTS=1; EXPLICIT_SELECTION=1; shift ;;
+    --all) ALL=1; EXPLICIT_SELECTION=1; shift ;;
+    --copy) COPY=1; shift ;;
+    -y) YES=1; shift ;;
     -h|--help) usage; exit 0 ;;
-    *) err "unknown option: $1"; usage; exit 1 ;;
+    *) fail "unknown option: $1" ;;
   esac
-  shift
 done
-[ "${#AGENTS[@]}" -eq 0 ] && AGENTS=(claude codex cursor opencode)
+[ "$NO_ROOTS" -eq 0 ] || [ "${#SELECTED_ROOTS[@]}" -eq 0 ] || fail '--no-roots cannot be combined with --root'
+if [ "$ALL" -eq 1 ] && { [ "$NO_ROOTS" -eq 1 ] || [ "${#SELECTED_ROOTS[@]}" -gt 0 ] || [ "${#SELECTED_OPTIONAL[@]}" -gt 0 ]; }; then
+  fail '--all cannot be combined with skill selections'
+fi
 
 agent_dir() {
   case "$1" in
-    claude) echo "$HOME/.claude/skills" ;;
-    codex) echo "$HOME/.codex/skills" ;;
-    cursor) echo "$HOME/.cursor/skills" ;;
-    opencode) echo "$HOME/.config/opencode/skills" ;;
-    *) err "unknown agent: $1"; exit 1 ;;
+    claude) printf '%s\n' "$HOME/.claude/skills" ;;
+    codex) printf '%s\n' "$HOME/.codex/skills" ;;
+    cursor) printf '%s\n' "$HOME/.cursor/skills" ;;
+    opencode) printf '%s\n' "$HOME/.config/opencode/skills" ;;
   esac
 }
-CLAUDE_DIR="$HOME/.claude/skills"
-
-skills=()
-for d in "$SCRIPT_DIR"/*/; do
-  [ -f "$d/SKILL.md" ] || continue
-  skills+=("$(basename "$d")")
-done
-
-is_repo_skill() {
-  local n s
-  n="$1"
-  for s in "${skills[@]}"; do [ "$s" = "$n" ] && return 0; done
-  return 1
+source_for() {
+  case "$1" in
+    fudge-design|fudge-ship) printf '%s/%s\n' "$BUILD_DIR" "$1" ;;
+    *) printf '%s/%s\n' "$SCRIPT_DIR" "$1" ;;
+  esac
 }
-
-desc_of() {
-  local f="$SCRIPT_DIR/$1/SKILL.md" d
-  d="$(grep -m1 '^description:' "$f" 2>/dev/null | sed 's/^description:[[:space:]]*//')"
-  [ -z "$d" ] && d="(no description)"
-  echo "${d:0:80}"
+is_known_name() {
+  case "$1" in fudge-design|fudge-ship) return 0 ;; esac
+  local short="${1#fudge-}"
+  [ "$1" = "fudge-$short" ] && contains "$short" "${OPTIONAL[@]}"
 }
-
-term_width() {
-  local w
-  w="$(tput cols 2>/dev/null || true)"
-  [ -z "$w" ] && w="${COLUMNS:-80}"
-  [ -z "$w" ] && w=80
-  echo "$w"
+owned_copy() {
+  [ -d "$1" ] && [ ! -L "$1" ] && [ -f "$1/.fudge-installer" ] &&
+    [ "$(cat "$1/.fudge-installer")" = "$SCRIPT_DIR" ] && is_known_name "$(basename "$1")"
 }
-
-# Interactive arrow-key checkbox picker. Args: title, items-array-name, checked-array-name (0/1, in/out).
-checkbox_picker() {
-  local title="$1"
-  local -n items_ref="$2"
-  local -n checked_ref="$3"
-  local n="${#items_ref[@]}" cursor=0 width first_draw=1
-  width="$(term_width)"
-
-  trap 'tput cnorm 2>/dev/null || true' EXIT INT TERM
-  tput civis 2>/dev/null || true
-
-  draw() {
-    [ "$first_draw" -eq 0 ] && tput cuu "$((n + 2))" 2>/dev/null || true
-    first_draw=0
-    echo "$title"
-    local i box ptr label maxlen
-    for ((i = 0; i < n; i++)); do
-      tput el 2>/dev/null || true
-      box="◯"; [ "${checked_ref[$i]}" -eq 1 ] && box="◉"
-      ptr="  "; [ "$i" -eq "$cursor" ] && ptr="${C_GREEN}❯${C_RESET} "
-      label="${items_ref[$i]}"
-      maxlen=$((width - 6)); [ "$maxlen" -lt 10 ] && maxlen=10
-      printf "%s%s %s\n" "$ptr" "$box" "${label:0:$maxlen}"
-    done
-    tput el 2>/dev/null || true
-    echo "(Up/Down move, Space toggle, a=all, Enter confirm)"
-  }
-
-  draw
-  while true; do
-    IFS= read -rsn1 key
-    if [ "$key" = $'\x1b' ]; then
-      read -rsn2 -t 0.01 rest || true
-      key+="$rest"
-    fi
-    case "$key" in
-      $'\x1b[A') cursor=$(((cursor - 1 + n) % n)) ;;
-      $'\x1b[B') cursor=$(((cursor + 1) % n)) ;;
-      ' ') [ "${checked_ref[$cursor]}" -eq 1 ] && checked_ref[$cursor]=0 || checked_ref[$cursor]=1 ;;
-      a|A)
-        local i allon=1
-        for ((i = 0; i < n; i++)); do [ "${checked_ref[$i]}" -eq 0 ] && allon=0 && break; done
-        for ((i = 0; i < n; i++)); do checked_ref[$i]=$((1 - allon)); done
-        ;;
-      "") break ;;
-    esac
-    draw
-  done
-  tput cnorm 2>/dev/null || true
-  trap - EXIT INT TERM
+owned_link() {
+  [ -L "$1" ] || return 1
+  local name="$(basename "$1")" expected
+  is_known_name "$name" || return 1
+  expected="$(source_for "$name")"
+  [ "$(readlink "$1")" = "$expected" ] && return 0
+  # Earlier installer versions linked root skills directly to their source folders.
+  case "$name" in
+    fudge-design|fudge-ship) [ "$(readlink "$1")" = "$SCRIPT_DIR/$name" ] ;;
+    *) return 1 ;;
+  esac
 }
-
-# Non-interactive / old-bash fallback: numbered list, read a=all or numbers.
-# Uses eval-based indirection instead of namerefs so it runs on bash 3.2.
-plain_picker() {
-  local title="$1" items_name="$2" checked_name="$3"
-  local n i sel label
-  eval "n=\${#$items_name[@]}"
-  echo "$title"
-  for ((i = 0; i < n; i++)); do
-    eval "label=\${$items_name[\$i]}"
-    printf "  %d) %s\n" "$((i + 1))" "$label"
-  done
-  read -rp "Select (a=all, or numbers space/comma separated): " sel || sel=""
-  sel="${sel//,/ }"
-  for ((i = 0; i < n; i++)); do eval "$checked_name[\$i]=0"; done
-  if [ "$sel" = "a" ] || [ "$sel" = "A" ]; then
-    for ((i = 0; i < n; i++)); do eval "$checked_name[\$i]=1"; done
-  else
-    local tok idx
-    for tok in $sel; do
-      [[ "$tok" =~ ^[0-9]+$ ]] || continue
-      idx=$((tok - 1))
-      [ "$idx" -ge 0 ] && [ "$idx" -lt "$n" ] && eval "$checked_name[\$idx]=1"
-    done
+install_state() {
+  local dest="$1" src="$2"
+  if [ ! -e "$dest" ] && [ ! -L "$dest" ]; then note new
+  elif [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
+    if [ "$COPY" -eq 0 ]; then note current; else note update; fi
+  elif owned_link "$dest" || owned_copy "$dest"; then note update
+  else note foreign
   fi
 }
 
-is_tty_interactive() { [ -t 0 ] && [ "$ALL" -eq 0 ]; }
-
-# Dispatch to the fancy widget on a capable tty, plain numbered list otherwise.
+# Numbered picker works with macOS Bash 3.2 and keeps defaults on Enter.
 pick() {
-  if is_tty_interactive && [ "$FANCY_OK" -eq 1 ]; then checkbox_picker "$@"; else plain_picker "$@"; fi
+  local title="$1" choices_name="$2" defaults_name="$3" result_name="$4"
+  local -a pick_choices pick_defaults pick_result
+  eval "pick_choices=(\"\${${choices_name}[@]}\")"
+  eval "pick_defaults=(\"\${${defaults_name}[@]}\")"
+  local i choice answer token
+  note "$title"
+  for ((i=0; i<${#pick_choices[@]}; i++)); do
+    choice="${pick_choices[$i]}"
+    if contains "$choice" "${pick_defaults[@]}"; then printf '  [x] %2d  %s\n' "$((i+1))" "$choice"
+    else printf '  [ ] %2d  %s\n' "$((i+1))" "$choice"; fi
+  done
+  read -rp 'Enter to keep defaults, numbers to select, a for all, or n for none: ' answer || answer=""
+  case "$answer" in
+    '') pick_result=("${pick_defaults[@]}") ;;
+    a|A) pick_result=("${pick_choices[@]}") ;;
+    n|N) pick_result=() ;;
+    *)
+      answer="${answer//,/ }"; pick_result=()
+      for token in $answer; do
+        [[ "$token" =~ ^[0-9]+$ ]] || fail "invalid selection: $token"
+        [ "$token" -ge 1 ] && [ "$token" -le "${#pick_choices[@]}" ] || fail "selection out of range: $token"
+        append_unique pick_result "${pick_choices[$((token-1))]}"
+      done ;;
+  esac
+  eval "$result_name=(\"\${pick_result[@]}\")"
+}
+interactive() { [ -t 0 ] && [ "$YES" -eq 0 ] && [ "$ALL" -eq 0 ]; }
+select_install() {
+  local -a defaults filtered
+  local search_term normalized skill
+  if [ "${#AGENTS[@]}" -eq 0 ]; then
+    if interactive; then
+      defaults=(codex)
+      pick 'Choose target agents:' AGENT_NAMES defaults AGENTS
+    else
+      fail 'specify at least one target agent with -a for a non-interactive install'
+    fi
+  fi
+  [ "${#AGENTS[@]}" -gt 0 ] || fail 'no agents selected'
+  if [ "$ALL" -eq 1 ]; then
+    SELECTED_ROOTS=("${ROOTS[@]}"); SELECTED_OPTIONAL=("${OPTIONAL[@]}")
+  elif [ "$EXPLICIT_SELECTION" -eq 0 ]; then
+    if interactive; then
+      defaults=("${ROOTS[@]}")
+      pick 'Root skills (installed by default):' ROOTS defaults SELECTED_ROOTS
+      read -rp 'Browse optional individual skills? [y/N] ' browse_answer || browse_answer=""
+      if [ "$browse_answer" = y ] || [ "$browse_answer" = Y ]; then
+        while true; do
+          read -rp 'Search optional skills (blank for all): ' search_term || search_term=""
+          normalized="$(printf '%s' "$search_term" | tr '[:upper:]' '[:lower:]')"
+          filtered=()
+          for skill in "${OPTIONAL[@]}"; do
+            case "$skill" in *"$normalized"*) filtered+=("$skill") ;; esac
+          done
+          [ "${#filtered[@]}" -gt 0 ] && break
+          note "No optional skills match: $search_term"
+        done
+        defaults=()
+        pick 'Optional individual skills (none selected by default):' filtered defaults SELECTED_OPTIONAL
+      fi
+    else
+      SELECTED_ROOTS=("${ROOTS[@]}")
+    fi
+  elif [ "$NO_ROOTS" -eq 0 ] && [ "${#SELECTED_ROOTS[@]}" -eq 0 ]; then
+    SELECTED_ROOTS=("${ROOTS[@]}")
+  fi
+  [ "${#SELECTED_ROOTS[@]}" -gt 0 ] || [ "${#SELECTED_OPTIONAL[@]}" -gt 0 ] || fail 'no skills selected'
+  if interactive && [ "$COPY" -eq 0 ]; then
+    read -rp 'Install method: (s)ymlink [default] or (c)opy: ' method_answer || method_answer=""
+    [ "$method_answer" != c ] && [ "$method_answer" != C ] || COPY=1
+  fi
 }
 
 do_install() {
-  if [ "${#skills[@]}" -eq 0 ]; then
-    err "no skills found in $SCRIPT_DIR"; exit 1
-  fi
-
-  local sel_skills=() i
-  if [ "$ALL" -eq 1 ]; then
-    sel_skills=("${skills[@]}")
-  else
-    local labels=() checked=() s installed
-    for s in "${skills[@]}"; do
-      installed=""
-      { [ -e "$CLAUDE_DIR/$s" ] || [ -L "$CLAUDE_DIR/$s" ]; } && installed=" ${C_DIM}(installed)${C_RESET}"
-      labels+=("$(printf "%-24s ${C_DIM}%s${C_RESET}%s" "$s" "$(desc_of "$s")" "$installed")")
-    done
-    for ((i = 0; i < ${#skills[@]}; i++)); do checked[$i]=0; done
-    pick "Select skills to install:" labels checked
-    for ((i = 0; i < ${#skills[@]}; i++)); do
-      [ "${checked[$i]}" -eq 1 ] && sel_skills+=("${skills[$i]}")
-    done
-  fi
-  [ "${#sel_skills[@]}" -eq 0 ] && { err "no skills selected"; exit 1; }
-
-  local sel_agents=("${AGENTS[@]}") method="symlink"
-  [ "$COPY" -eq 1 ] && method="copy"
-
-  if [ "$ALL" -eq 0 ] && is_tty_interactive; then
-    local all_agents=(claude codex cursor opencode) achecked=() method_choice
-    for ((i = 0; i < ${#all_agents[@]}; i++)); do
-      achecked[$i]=0; [ "${all_agents[$i]}" = "claude" ] && achecked[$i]=1
-    done
-    pick "Select target agents:" all_agents achecked
-    sel_agents=()
-    for ((i = 0; i < ${#all_agents[@]}; i++)); do
-      [ "${achecked[$i]}" -eq 1 ] && sel_agents+=("${all_agents[$i]}")
-    done
-    echo
-    read -rp "Install method: (s)ymlink [default] or (c)opy: " method_choice || method_choice=""
-    [ "$method_choice" = "c" ] || [ "$method_choice" = "C" ] && method="copy"
-  fi
-  [ "${#sel_agents[@]}" -eq 0 ] && { err "no agents selected"; exit 1; }
-
-  # An existing symlink already pointing at our source is not a conflict.
-  up_to_date() { [ "$method" = "symlink" ] && [ -L "$1" ] && [ "$(readlink "$1")" = "$2" ]; }
-
-  local total_installed=0 target
-  for target in "${sel_agents[@]}"; do
-    local dest_dir dest src s conflicts=0 overwrite=0 ans
-    dest_dir="$(agent_dir "$target")"
-    mkdir -p "$dest_dir"
-
-    for s in "${sel_skills[@]}"; do
-      dest="$dest_dir/$s"; src="$SCRIPT_DIR/$s"
-      { [ -e "$dest" ] || [ -L "$dest" ]; } && ! up_to_date "$dest" "$src" && conflicts=$((conflicts + 1))
-    done
-
-    if [ "$YES" -eq 1 ] || [ "$ALL" -eq 1 ]; then
-      overwrite=1
-    elif [ "$conflicts" -gt 0 ]; then
-      read -rp "Overwrite $conflicts existing in $dest_dir? [y/N] " ans || ans=""
-      [ "$ans" = "y" ] || [ "$ans" = "Y" ] && overwrite=1
-    fi
-
-    for s in "${sel_skills[@]}"; do
-      dest="$dest_dir/$s"; src="$SCRIPT_DIR/$s"
-      up_to_date "$dest" "$src" && continue
-      if { [ -e "$dest" ] || [ -L "$dest" ]; } && [ "$overwrite" -eq 0 ]; then
-        warn "skipping $s ($dest_dir)"; continue
-      fi
-      if [ "$method" = "symlink" ]; then
-        ln -sfn "$src" "$dest"
-      else
-        rm -rf "$dest"; cp -R "$src" "$dest"
-      fi
-      ok "$s -> $dest"
-      total_installed=$((total_installed + 1))
+  select_install
+  local -a selected=() foreign=()
+  local root skill target name src dest state method
+  for root in "${SELECTED_ROOTS[@]}"; do selected+=("fudge-$root"); done
+  for skill in "${SELECTED_OPTIONAL[@]}"; do selected+=("fudge-$skill"); done
+  method=symlink; [ "$COPY" -eq 0 ] || method=copy
+  note 'Ready to install:'
+  note "  Method: $method"
+  note '  Targets:'
+  for target in "${AGENTS[@]}"; do note "    $target  $(agent_dir "$target")"; done
+  note '  Root skills:'
+  for root in "${SELECTED_ROOTS[@]}"; do note "    fudge:$root"; done
+  [ "${#SELECTED_ROOTS[@]}" -gt 0 ] || note '    (none)'
+  note '  Optional individual skills:'
+  for skill in "${SELECTED_OPTIONAL[@]}"; do note "    fudge:$skill"; done
+  [ "${#SELECTED_OPTIONAL[@]}" -gt 0 ] || note '    (none)'
+  for target in "${AGENTS[@]}"; do
+    for name in "${selected[@]}"; do
+      src="$(source_for "$name")"; dest="$(agent_dir "$target")/$name"
+      state="$(install_state "$dest" "$src")"
+      [ "$state" != foreign ] || foreign+=("$dest")
     done
   done
-
-  echo
-  ok "Installed $total_installed skills to ${#sel_agents[@]} agents"
+  if [ "${#foreign[@]}" -gt 0 ]; then
+    printf 'Existing installs not owned by this installer:\n' >&2
+    printf '  %s\n' "${foreign[@]}" >&2
+    fail 'move or remove these entries manually, then rerun the installer'
+  fi
+  if [ "$YES" -eq 0 ] && [ -t 0 ]; then
+    local answer
+    read -rp 'Install these skills? [y/N] ' answer || answer=""
+    [ "$answer" = y ] || [ "$answer" = Y ] || { note 'Aborted.'; return 0; }
+  fi
+  if [ "${#SELECTED_ROOTS[@]}" -gt 0 ]; then
+    [ -f "$SCRIPT_DIR/scripts/build-root-skills.sh" ] || fail 'root package builder is missing'
+    bash "$SCRIPT_DIR/scripts/build-root-skills.sh" "$BUILD_DIR"
+    for root in "${SELECTED_ROOTS[@]}"; do
+      [ -f "$BUILD_DIR/fudge-$root/SKILL.md" ] || fail "root package fudge-$root was not built"
+    done
+  fi
+  local installed=0 current=0
+  for target in "${AGENTS[@]}"; do
+    local target_dir="$(agent_dir "$target")"
+    mkdir -p "$target_dir"
+    for name in "${selected[@]}"; do
+      src="$(source_for "$name")"; dest="$target_dir/$name"
+      state="$(install_state "$dest" "$src")"
+      if [ "$state" = current ]; then current=$((current+1)); continue; fi
+      [ "$state" != foreign ] || fail "destination changed during install: $dest"
+      if [ -L "$dest" ]; then rm "$dest"
+      elif [ -e "$dest" ]; then rm -rf "$dest"; fi
+      if [ "$COPY" -eq 1 ]; then
+        cp -R "$src" "$dest"
+        printf '%s\n' "$SCRIPT_DIR" > "$dest/.fudge-installer"
+      else
+        ln -s "$src" "$dest"
+      fi
+      note "Installed $name -> $dest"
+      installed=$((installed+1))
+    done
+  done
+  note "Installed $installed skill(s); $current already current."
 }
 
 do_list() {
-  local target dest_dir entry name resolved
+  local target dir entry name kind
+  [ "${#AGENTS[@]}" -gt 0 ] || AGENTS=("${AGENT_NAMES[@]}")
   for target in "${AGENTS[@]}"; do
-    dest_dir="$(agent_dir "$target")"
-    [ -d "$dest_dir" ] || continue
-    echo "$target ($dest_dir):"
-    for entry in "$dest_dir"/*; do
-      { [ -e "$entry" ] || [ -L "$entry" ]; } || continue
+    dir="$(agent_dir "$target")"
+    [ -d "$dir" ] || continue
+    note "$target ($dir):"
+    for entry in "$dir"/*; do
+      [ -e "$entry" ] || [ -L "$entry" ] || continue
       name="$(basename "$entry")"
-      if [ -L "$entry" ]; then
-        resolved="$(readlink -f "$entry" 2>/dev/null || readlink "$entry")"
-        case "$resolved" in
-          "$SCRIPT_DIR"/*) echo "  ✓ linked  $name" ;;
-          *) echo "  foreign   $name" ;;
-        esac
-      else
-        echo "  copy      $name"
-      fi
+      if owned_link "$entry"; then kind=linked
+      elif owned_copy "$entry"; then kind=copy
+      else kind=foreign; fi
+      note "  $kind  $name"
     done
   done
 }
 
 do_remove() {
-  local candidates=() labels=() target dest_dir entry name resolved
+  local target dir entry answer i
+  local -a candidates=() labels=() defaults=() selected=()
+  [ "${#AGENTS[@]}" -gt 0 ] || AGENTS=("${AGENT_NAMES[@]}")
   for target in "${AGENTS[@]}"; do
-    dest_dir="$(agent_dir "$target")"
-    [ -d "$dest_dir" ] || continue
-    for entry in "$dest_dir"/*; do
-      { [ -e "$entry" ] || [ -L "$entry" ]; } || continue
-      name="$(basename "$entry")"
-      if [ -L "$entry" ]; then
-        resolved="$(readlink -f "$entry" 2>/dev/null || readlink "$entry")"
-        case "$resolved" in "$SCRIPT_DIR"/*) ;; *) continue ;; esac
-      else
-        is_repo_skill "$name" || continue
+    dir="$(agent_dir "$target")"
+    [ -d "$dir" ] || continue
+    for entry in "$dir"/*; do
+      [ -e "$entry" ] || [ -L "$entry" ] || continue
+      if owned_link "$entry" || owned_copy "$entry"; then
+        candidates+=("$entry"); labels+=("$target/$(basename "$entry")")
       fi
-      candidates+=("$target:$entry")
-      labels+=("$target/$name")
     done
   done
-  if [ "${#candidates[@]}" -eq 0 ]; then
-    warn "no repo-installed skills found to remove"; return
-  fi
-
-  local checked=() i
-  for ((i = 0; i < ${#candidates[@]}; i++)); do checked[$i]=0; done
+  [ "${#candidates[@]}" -gt 0 ] || { note 'No installer-owned skills found.'; return 0; }
   if [ "$ALL" -eq 1 ]; then
-    for ((i = 0; i < ${#candidates[@]}; i++)); do checked[$i]=1; done
+    selected=("${labels[@]}")
+  elif [ -t 0 ]; then
+    pick 'Select installed skills to remove:' labels defaults selected
   else
-    pick "Select installed skills to remove:" labels checked
+    fail 'remove requires a terminal selection or --all'
   fi
-
-  local to_remove=()
-  for ((i = 0; i < ${#candidates[@]}; i++)); do
-    [ "${checked[$i]}" -eq 1 ] && to_remove+=("${candidates[$i]}")
-  done
-  [ "${#to_remove[@]}" -eq 0 ] && { warn "nothing selected"; return; }
-
-  if [ "$YES" -eq 0 ] && [ "$ALL" -eq 0 ]; then
-    local ans
-    read -rp "Remove ${#to_remove[@]} skill installs? [y/N] " ans || ans=""
-    if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then warn "aborted"; return; fi
+  [ "${#selected[@]}" -gt 0 ] || { note 'Nothing selected.'; return 0; }
+  note 'Ready to remove:'
+  for ((i=0; i<${#labels[@]}; i++)); do contains "${labels[$i]}" "${selected[@]}" && note "  ${candidates[$i]}"; done
+  if [ "$YES" -eq 0 ]; then
+    [ -t 0 ] || fail 'confirmation requires a terminal; pass -y'
+    read -rp 'Remove these installs? [y/N] ' answer || answer=""
+    [ "$answer" = y ] || [ "$answer" = Y ] || { note 'Aborted.'; return 0; }
   fi
-
-  local c entry_path
-  for c in "${to_remove[@]}"; do
-    entry_path="${c#*:}"
-    name="$(basename "$entry_path")"
-    if [ -L "$entry_path" ]; then
-      rm "$entry_path"; ok "removed $entry_path"
-    elif [ -d "$entry_path" ] && is_repo_skill "$name"; then
-      rm -rf "$entry_path"; ok "removed $entry_path"
-    else
-      err "refusing to remove $entry_path (no matching repo skill)"
-    fi
+  for ((i=0; i<${#labels[@]}; i++)); do
+    contains "${labels[$i]}" "${selected[@]}" || continue
+    entry="${candidates[$i]}"
+    if owned_link "$entry"; then rm "$entry"
+    elif owned_copy "$entry"; then rm -rf "$entry"
+    else fail "destination changed during remove: $entry"; fi
+    note "Removed $entry"
   done
 }
 

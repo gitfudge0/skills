@@ -1,6 +1,6 @@
 # Skills
 
-A personal collection of agent skills, one directory each, each with a `SKILL.md` loaded on demand by Codex or Claude Code.
+A personal collection of agent skills. The default install exposes two root skills, `fudge:design` and `fudge:ship`. Each root includes the specialist guidance it needs as internal references. The other skills below are available as optional, separately invokable installs.
 
 | Skill | What it does | Reach for it when |
 |---|---|---|
@@ -32,13 +32,51 @@ Skills write their run artifacts — reports, registers, run state, and other ge
 
 ## Install
 
-Symlink or copy a skill directory into the skills directory for your agent (`~/.codex/skills/` or `~/.claude/skills/`):
+Run `./install.sh` for an interactive install. It asks for target agents, shows **design** and **ship** checked by default, and offers a separate optional-skills picker with nothing checked. The final summary lists the exact skills, target directories, and symlink or copy method before installation. If you pass `-a`, the interactive agent picker is skipped.
 
-```bash
-ln -s "$PWD/fudge-test-plan" ~/.codex/skills/fudge-test-plan
+```text
+Choose target agents:
+  [ ] claude
+  [x] codex
+  [ ] cursor
+  [ ] opencode
+
+Root skills (installed by default):
+  [x] design
+  [x] ship
+
+Browse optional individual skills? [y/N]
+Search optional skills (blank for all):
+Ready to install:
+  Method: symlink
+  Targets:
+    codex  ~/.codex/skills
+  Root skills:
+    fudge:design
+    fudge:ship
+  Optional individual skills:
+    (none)
 ```
 
-The agent picks them up by the `name` and `description` in each `SKILL.md`'s frontmatter.
+The numbered terminal picker accepts Enter to keep the shown defaults, numbers to select specific entries, `a` for all, or `n` for none. The optional picker appears only when you choose to browse it. Before that picker, enter a search term to filter its choices, or leave the search blank to see every optional skill.
+
+For scripts, select at least one agent with `-a`. A nonterminal install without `-a` fails before it builds or installs anything. With `-a`, it prints the summary and proceeds without a prompt.
+
+```bash
+./install.sh install -a codex
+./install.sh install -a codex --root design
+./install.sh install -a codex --root design --root ship \
+  --skill accessible-ui --skill ui-mock
+./install.sh install -a codex --no-roots --skill test-plan
+./install.sh install -a codex --all
+./install.sh install -a codex --copy
+./install.sh list -a codex
+./install.sh remove -a codex --all -y
+```
+
+`--root` and `--skill` are repeatable. `--skill` on its own adds individual skills to the two default roots; `--no-roots` selects individuals only. `--all` explicitly installs both roots and every individual skill. `-y` skips terminal confirmation. Root packages are generated from the current source during installation and installed as `fudge-design` and `fudge-ship`. Selecting a root never creates separate installs of its specialists.
+
+The installer updates symlinks and copies it previously created. Copies carry a `.fudge-installer` marker. An entry at the destination that the installer cannot identify as its own is reported as a conflict and left untouched. `remove` likewise removes only installer-owned entries; older unmarked manual copies must be removed manually.
 
 ## Layout
 

@@ -1,11 +1,13 @@
 ---
 name: fudge:design
-description: "Route UI design work to the output the decision requires: task-specific guidance, a reviewable visual draft, durable project rules, or a requested component build. Use for design decisions across screens, flows, and components; use fudge:ui-mock for a standalone mock and fudge:design-system for a standalone visual system."
+description: "Route UI design work to the output the decision requires: task-specific guidance, a reviewable visual draft, durable project rules, or a requested component build. Use for design decisions across screens, flows, and components, including standalone mocks and design systems through bundled specialist guides."
 ---
 
 # fudge:design
 
-Own the UI decision from the person's task to the requested endpoint. Use the project's existing language, patterns, and source-of-truth documents. Apply `fudge-design-for-recognition` throughout to make the information, choices, actions, and feedback understandable in context. Read that skill when this one runs.
+When installed by the Fudge installer, specialist names such as `fudge:ui-mock` refer to bundled guides, not separately installed skills. From the installed root skill's `SKILL.md`, read `references/specialists/fudge-<specialist>/guide.md` for each specialist selected below, then follow links relative to that guide. The source specialist folders remain available for separate manual installation. If this skill runs inside `fudge:ship`, preserve ship's approval and verification gates.
+
+Own the UI decision from the person's task to the requested endpoint. Use the project's existing language, patterns, and source-of-truth documents. Apply `fudge-design-for-recognition` throughout to make the information, choices, actions, and feedback understandable in context. Read `references/specialists/fudge-design-for-recognition/guide.md` from the installed root skill when this one runs.
 
 ## Choose the endpoint
 
@@ -41,6 +43,6 @@ Read the relevant parts of existing `DESIGN.md` and `COMPONENTS.md` or the proje
 
 ## Adjacent skills
 
-- `fudge:ui-mock` owns a self-contained visual artifact with the frames the task needs. Call it in **artifact-only** mode for a visual draft, with the intended output path — its own default is `.fudge/<branch>/ui-mock/` unless `fudge:ship` supplies a run-local path. A static mock is not a working UI.
-- `fudge:design-system` owns token and style rules, component contracts, and specimens when the user requests them. Its outputs follow the requested scope and reuse the project's existing source of truth. Read its contract rather than creating competing rules or a fixed set of files.
-- Use `fudge:ui-mock` directly when visual states or options are the only deliverable and content and behavior rules are settled. Use `fudge:design` when the work also needs to resolve content, interaction, evidence, project rules, or implementation guidance. Route a standalone design system request directly to `fudge:design-system`.
+- `fudge:ui-mock` owns a self-contained visual artifact with the frames the task needs. Read its bundled guide and use **artifact-only** mode for a visual draft, with the intended output path — its own default is `.fudge/<branch>/ui-mock/` unless `fudge:ship` supplies a run-local path. A static mock is not a working UI.
+- `fudge:design-system` owns token and style rules, component contracts, and specimens when the user requests them. Read its bundled guide and follow its output contract, reusing the project's existing source of truth rather than creating competing rules or a fixed set of files.
+- For a standalone mock with settled content and behavior, fulfill the request through the bundled `fudge:ui-mock` guide without a broader design package. For a standalone design system, use the bundled `fudge:design-system` guide. When the work also needs to resolve content, interaction, evidence, project rules, or implementation guidance, use the corresponding design route above. A separately installed specialist remains available for explicit direct invocation.
