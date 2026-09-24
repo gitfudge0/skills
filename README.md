@@ -32,37 +32,27 @@ Skills write their run artifacts — reports, registers, run state, and other ge
 
 ## Install
 
-Run `./install.sh` for an interactive install. It asks for target agents, shows **design**, **ship**, and **review** checked by default, and offers a separate optional-skills picker with nothing checked. The final summary lists the exact skills, target directories, and symlink or copy method before installation. If you pass `-a`, the interactive agent picker is skipped.
+Run `./install.sh` in a terminal for a single-screen picker. **Codex** and the three core skills (**design**, **ship**, **review**) start selected; the 18 individual skills start unselected behind **Optional**. The screen updates the install count and summary as you change selections. You can switch between linking and copying before confirming.
 
 ```text
-Choose target agents:
-  [ ] claude
-  [x] codex
-  [ ] cursor
-  [ ] opencode
+FUDGE / INSTALL
 
-Root skills (installed by default):
-  [x] design
-  [x] ship
-  [x] review
+Agents                  Core skills              Optional
+  [ ] Claude              [x] Design              ▸ Individual skills  0/18
+  [x] Codex               [x] Ship
+  [ ] Cursor              [x] Review
+  [ ] OpenCode
 
-Browse optional individual skills? [y/N]
-Search optional skills (blank for all):
-Ready to install:
-  Method: symlink
-  Targets:
-    codex  ~/.codex/skills
-  Root skills:
-    fudge:design
-    fudge:ship
-    fudge:review
-  Optional individual skills:
-    (none)
+Method   (●) Link  ( ) Copy
+Summary  3 skills × 1 agent = 3 installs · ~/.codex/skills
+
+↑↓ move  Tab / Shift-Tab section  Space select  / search
+Backspace edit search  Enter review / confirm  Esc back / cancel
 ```
 
-The numbered terminal picker accepts Enter to keep the shown defaults, numbers to select specific entries, `a` for all, or `n` for none. The optional picker appears only when you choose to browse it. Before that picker, enter a search term to filter its choices, or leave the search blank to see every optional skill.
+Use Up/Down to move, Tab/Shift-Tab to change sections, and Space to select. Space on the **Optional** heading expands or collapses its list. `/` expands Optional and starts a search; type to filter and use Backspace to edit. Enter opens a confirmation on the same screen; Enter or `y` there installs, while Esc returns to the picker. Esc from the picker cancels without installing. On a narrow terminal the sections stack vertically with the same keys.
 
-For scripts, select at least one agent with `-a`. A nonterminal install without `-a` fails before it builds or installs anything. With `-a`, it prints the summary and proceeds without a prompt.
+For scripts, select at least one agent with `-a`. A nonterminal install without `-a` fails before it builds or installs anything. With `-a`, it prints the summary and proceeds without a prompt; the command flags retain their existing behavior. If an interactive terminal cannot support the picker, the installer falls back to the plain prompt flow.
 
 ```bash
 ./install.sh install -a codex
