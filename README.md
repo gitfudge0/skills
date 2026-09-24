@@ -32,27 +32,19 @@ Skills write their run artifacts — reports, registers, run state, and other ge
 
 ## Install
 
-Run `./install.sh` in a terminal for a single-screen picker. **Codex** and the three core skills (**design**, **ship**, **review**) start selected; the 18 individual skills start unselected behind **Optional**. The screen updates the install count and summary as you change selections. You can switch between linking and copying before confirming.
+Run `./install.sh` in a terminal. The installer asks one question at a time, then shows a review before writing anything. **Codex** and the three core skills (**design**, **ship**, **review**) start selected; the 18 individual skills start unselected. Symlink is the default method.
 
 ```text
-FUDGE / INSTALL
-
-Agents                  Core skills              Optional
-  [ ] Claude              [x] Design              ▸ Individual skills  0/18
-  [x] Codex               [x] Ship
-  [ ] Cursor              [x] Review
-  [ ] OpenCode
-
-Method   (●) Link  ( ) Copy
-Summary  3 skills × 1 agent = 3 installs · ~/.codex/skills
-
-↑↓ move  Tab / Shift-Tab section  Space select  / search
-Backspace edit search  Enter review / confirm  Esc back / cancel
+Step 1 of 5  Where should Fudge work?       Agents
+Step 2 of 5  Which core skills?            Design, Ship, Review
+Step 3 of 5  Add individual skills?        Optional skill search
+Step 4 of 5  How should skills be installed?  Symlink or Copy
+Step 5 of 5  Review installation           Destinations and changes
 ```
 
-Use Up/Down to move, Tab/Shift-Tab to change sections, and Space to select. Space on the **Optional** heading expands or collapses its list. `/` expands Optional and starts a search; type to filter and use Backspace to edit. Enter opens a confirmation on the same screen; Enter or `y` there installs, while Esc returns to the picker. Esc from the picker cancels without installing. On a narrow terminal the sections stack vertically with the same keys.
+Use Up/Down to move through answers and Space to select. Enter continues to the next question; on Review, Enter installs. Esc goes back one question, or cancels from the first question. Press `q` to cancel from a question. On Optional skills, `/` starts a search, Backspace edits it, and Enter leaves search so you can select a result. Back preserves earlier answers. Review shows the selected agents, skills, method, and new, update, current, and conflict counts. A conflict must be resolved or deselected before installation. A narrow terminal keeps the same question-by-question flow; unsupported terminals use plain prompts.
 
-For scripts, select at least one agent with `-a`. A nonterminal install without `-a` fails before it builds or installs anything. With `-a`, it prints the summary and proceeds without a prompt; the command flags retain their existing behavior. If an interactive terminal cannot support the picker, the installer falls back to the plain prompt flow.
+For scripts, select at least one agent with `-a`. A nonterminal install without `-a` fails before it builds or installs anything. With `-a` in a nonterminal, it prints the summary and proceeds without a prompt. In a supported terminal, flags such as `-a claude --copy` preselect the wizard's answers. The command flags retain their existing nonterminal behavior.
 
 ```bash
 ./install.sh install -a codex

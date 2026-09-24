@@ -161,23 +161,6 @@ ui_line() {
   fi
 }
 
-ui_pair() {
-  local left="$1" right="$2" left_kind="${3:-normal}" right_kind="${4:-normal}"
-  local left_width right_width left_style='' right_style=''
-  left_width=$(((UI_COLS-1)/2))
-  right_width=$((UI_COLS-1-left_width))
-  case "$left_kind" in section) left_style='1;35' ;; focus) left_style='1;7' ;; esac
-  case "$right_kind" in section) right_style='1;35' ;; focus) right_style='1;7' ;; esac
-  if [ "$UI_COLOR" -eq 1 ] && [ -n "$left_style" ]; then printf '\033[%sm' "$left_style"; fi
-  printf '%-*.*s' "$left_width" "$left_width" "$left"
-  if [ "$UI_COLOR" -eq 1 ] && [ -n "$left_style" ]; then printf '\033[0m'; fi
-  printf '%s' "$UI_DIVIDER"
-  if [ "$UI_COLOR" -eq 1 ] && [ -n "$right_style" ]; then printf '\033[%sm' "$right_style"; fi
-  printf '%-*.*s' "$right_width" "$right_width" "$right"
-  if [ "$UI_COLOR" -eq 1 ] && [ -n "$right_style" ]; then printf '\033[0m'; fi
-  printf '\n'
-}
-
 ui_display_dir() {
   local path
   path="$(agent_dir "$1")"
@@ -234,155 +217,169 @@ ui_filter_optional() {
     lowered="$(printf '%s' "${OPTIONAL[$i]}" | tr '[:upper:]' '[:lower:]')"
     case "$lowered" in *"$UI_SEARCH"*) UI_MATCHES+=("$i") ;; esac
   done
-  [ "$UI_OPT_POS" -lt "${#UI_MATCHES[@]}" ] || UI_OPT_POS=-1
+  if [ "${#UI_MATCHES[@]}" -eq 0 ]; then UI_OPT_POS=-1
+  elif [ "$UI_OPT_POS" -lt 0 ] || [ "$UI_OPT_POS" -ge "${#UI_MATCHES[@]}" ]; then UI_OPT_POS=0; fi
   UI_OPT_SCROLL=0
 }
 
-ui_optional_rows() {
-  if [ "$UI_COLS" -ge 90 ]; then UI_OPT_VISIBLE=$((UI_ROWS-18))
-  else UI_OPT_VISIBLE=$((UI_ROWS-22)); fi
-  [ "$UI_OPT_VISIBLE" -ge 1 ] || UI_OPT_VISIBLE=1
-  [ "$UI_OPT_VISIBLE" -le 8 ] || UI_OPT_VISIBLE=8
+ui_render_choice() {
+  local label="$1" selected="$2" focused="$3" marker=' ' check=' '
+  [ "$selected" -eq 0 ] || check="$UI_CHECK"
+  if [ "$focused" -eq 1 ]; then marker="$UI_ARROW"; ui_line "  $marker [$check] $label" focus
+  else ui_line "  $marker [$check] $label"; fi
 }
 
-ui_render_main() {
+ui_render_optional() {
+  local i index end visible selected=0
+  for ((i=0; i<${#OPTIONAL[@]}; i++)); do [ "${UI_OPT[$i]}" -eq 0 ] || selected=$((selected+1)); done
+  ui_line "  $selected selected  ·  / search" muted
+  if [ "$UI_SEARCH_MODE" -eq 1 ]; then
+    ui_line "  Search: $UI_SEARCH$UI_CURSOR" focus
+  elif [ -n "$UI_SEARCH" ]; then
+    ui_line "  Filter: $UI_SEARCH  ·  / to edit" muted
+  else
+    ui_line ''
+  fi
+  visible=$((UI_ROWS-13)); [ "$visible" -le 12 ] || visible=12
+  [ "$visible" -ge 1 ] || visible=1
+  if [ "$UI_OPT_POS" -ge $((UI_OPT_SCROLL+visible)) ]; then UI_OPT_SCROLL=$((UI_OPT_POS-visible+1)); fi
+  if [ "$UI_OPT_POS" -ge 0 ] && [ "$UI_OPT_POS" -lt "$UI_OPT_SCROLL" ]; then UI_OPT_SCROLL="$UI_OPT_POS"; fi
+  end=$((UI_OPT_SCROLL+visible)); [ "$end" -le "${#UI_MATCHES[@]}" ] || end="${#UI_MATCHES[@]}"
+  if [ "${#UI_MATCHES[@]}" -eq 0 ]; then ui_line '  No matching individual skills.' muted; fi
+  for ((i=UI_OPT_SCROLL; i<end; i++)); do
+    index="${UI_MATCHES[$i]}"
+    if [ "$UI_OPT_POS" -eq "$i" ] && [ "$UI_SEARCH_MODE" -eq 0 ]; then
+      ui_render_choice "fudge:${OPTIONAL[$index]}" "${UI_OPT[$index]}" 1
+    else
+      ui_render_choice "fudge:${OPTIONAL[$index]}" "${UI_OPT[$index]}" 0
+    fi
+  done
+  if [ "${#UI_MATCHES[@]}" -gt "$visible" ]; then
+    ui_line "  Showing $((UI_OPT_SCROLL+1))-$end of ${#UI_MATCHES[@]}  ·  Up/Down to browse" muted
+  fi
+}
+
+ui_review_lines() {
+  UI_REVIEW_LINES=('  TARGETS')
+  local i
+  for ((i=0; i<${#AGENT_NAMES[@]}; i++)); do
+    [ "${UI_AGENT[$i]}" -eq 0 ] || UI_REVIEW_LINES+=("    ${AGENT_NAMES[$i]}  $(agent_dir "${AGENT_NAMES[$i]}")")
+  done
+  UI_REVIEW_LINES+=('  ROOT SKILLS')
+  if [ "$UI_ROOT_COUNT" -eq 0 ]; then UI_REVIEW_LINES+=('    (none)'); fi
+  for ((i=0; i<${#ROOTS[@]}; i++)); do
+    [ "${UI_ROOT[$i]}" -eq 0 ] || UI_REVIEW_LINES+=("    fudge:${ROOTS[$i]}")
+  done
+  UI_REVIEW_LINES+=('  OPTIONAL SKILLS')
+  if [ "$UI_OPT_COUNT" -eq 0 ]; then UI_REVIEW_LINES+=('    (none)'); fi
+  for ((i=0; i<${#OPTIONAL[@]}; i++)); do
+    [ "${UI_OPT[$i]}" -eq 0 ] || UI_REVIEW_LINES+=("    fudge:${OPTIONAL[$i]}")
+  done
+}
+
+ui_render_counts() {
+  local kind="$1"
+  if [ "$UI_COLS" -ge 72 ]; then
+    ui_line "  $UI_NEW new  ·  $UI_UPDATE update  ·  $UI_CURRENT current  ·  $UI_FOREIGN conflict" "$kind"
+  else
+    ui_line "  $UI_NEW new  $UI_UPDATE update" "$kind"
+    ui_line "  $UI_CURRENT current  $UI_FOREIGN conflict" "$kind"
+  fi
+}
+
+ui_render_review() {
   ui_collect
-  ui_optional_rows
-  local i index marker check label show_count end more selected summary method destination match_word
-  local left right left_kind right_kind target
+  ui_review_lines
+  local i end visible path_width path_offset path_lines=0
+  ui_line "  ${#UI_NAMES[@]} skill(s) for $UI_AGENT_COUNT agent(s)  ·  $([ "$COPY" -eq 1 ] && printf Copy || printf Symlink)" muted
+  ui_line ''
+  if [ "$UI_FOREIGN" -gt 0 ]; then
+    path_width=$((UI_COLS-4))
+    path_lines=$(((${#UI_FIRST_FOREIGN}+path_width-1)/path_width))
+  fi
+  visible=$((UI_ROWS-14))
+  if [ "$UI_FOREIGN" -gt 0 ]; then
+    visible=$((UI_ROWS-16-path_lines))
+    [ "$UI_COLS" -ge 72 ] || visible=$((visible-1))
+  fi
+  [ "$visible" -ge 1 ] || visible=1
+  UI_REVIEW_VISIBLE="$visible"
+  end=$((UI_REVIEW_SCROLL+visible)); [ "$end" -le "${#UI_REVIEW_LINES[@]}" ] || end="${#UI_REVIEW_LINES[@]}"
+  for ((i=UI_REVIEW_SCROLL; i<end; i++)); do
+    case "${UI_REVIEW_LINES[$i]}" in
+      '  TARGETS'|'  ROOT SKILLS'|'  OPTIONAL SKILLS') ui_line "${UI_REVIEW_LINES[$i]}" section ;;
+      *) ui_line "${UI_REVIEW_LINES[$i]}" ;;
+    esac
+  done
+  if [ "${#UI_REVIEW_LINES[@]}" -gt "$visible" ]; then
+    ui_line "  Showing $((UI_REVIEW_SCROLL+1))-$end of ${#UI_REVIEW_LINES[@]}  ·  Up/Down to browse" muted
+  else ui_line ''; fi
+  ui_line ''
+  if [ "$UI_FOREIGN" -gt 0 ]; then
+    ui_render_counts error
+    ui_line '  Conflict:' error
+    for ((path_offset=0; path_offset<${#UI_FIRST_FOREIGN}; path_offset+=path_width)); do
+      ui_line "    ${UI_FIRST_FOREIGN:path_offset:path_width}" error
+    done
+    ui_line '  Resolve or deselect conflicts before installing.' alert
+  else
+    ui_render_counts section
+  fi
+}
+
+ui_render_step() {
+  local i label selected
   printf '\033[H\033[2J'
   ui_line '  FUDGE  /  Install skills' title
-  ui_line '  Choose where Fudge works and which skills appear in your agent.' muted
+  ui_line "  Step $UI_STEP of 5" muted
   ui_line ''
-  if [ "$UI_COLS" -ge 90 ]; then
-    ui_pair '  AGENTS' '  CORE SKILLS  ·  selected by default' section section
-    for ((i=0; i<${#AGENT_NAMES[@]}; i++)); do
-      marker=' '; left_kind=normal
-      if [ "$UI_FOCUS" -eq 0 ] && [ "$UI_AGENT_POS" -eq "$i" ]; then marker="$UI_ARROW"; left_kind=focus; fi
-      check=' '; [ "${UI_AGENT[$i]}" -eq 1 ] && check="$UI_CHECK"
-      left="  $marker [$check] ${AGENT_NAMES[$i]}   $(ui_display_dir "${AGENT_NAMES[$i]}")"
-      right=''; right_kind=normal
-      if [ "$i" -lt "${#ROOTS[@]}" ]; then
-        marker=' '
-        if [ "$UI_FOCUS" -eq 1 ] && [ "$UI_ROOT_POS" -eq "$i" ]; then marker="$UI_ARROW"; right_kind=focus; fi
-        check=' '; [ "${UI_ROOT[$i]}" -eq 1 ] && check="$UI_CHECK"
-        right="  $marker [$check] fudge:${ROOTS[$i]}"
-      fi
-      ui_pair "$left" "$right" "$left_kind" "$right_kind"
-    done
+  case "$UI_STEP" in
+    1)
+      ui_line '  Where should Fudge work?' section
+      ui_line '  Select one or more agents.' muted
+      ui_line ''
+      for ((i=0; i<${#AGENT_NAMES[@]}; i++)); do
+        ui_render_choice "${AGENT_NAMES[$i]}  $(ui_display_dir "${AGENT_NAMES[$i]}")" "${UI_AGENT[$i]}" "$([ "$UI_AGENT_POS" -eq "$i" ] && printf 1 || printf 0)"
+      done ;;
+    2)
+      ui_line '  Which core skills?' section
+      ui_line '  Selected by default. Choose any, or continue with none.' muted
+      ui_line ''
+      for ((i=0; i<${#ROOTS[@]}; i++)); do
+        ui_render_choice "fudge:${ROOTS[$i]}" "${UI_ROOT[$i]}" "$([ "$UI_ROOT_POS" -eq "$i" ] && printf 1 || printf 0)"
+      done ;;
+    3)
+      ui_line '  Add individual skills?' section
+      ui_line '  Optional. Select any, or continue with none.' muted
+      ui_line ''
+      ui_render_optional ;;
+    4)
+      ui_line '  How should skills be installed?' section
+      ui_line '  Choose a method for every selected agent.' muted
+      ui_line ''
+      for ((i=0; i<2; i++)); do
+        if [ "$i" -eq 0 ]; then label=Symlink; selected=$((1-COPY)); else label=Copy; selected="$COPY"; fi
+        ui_render_choice "$label" "$selected" "$([ "$UI_METHOD_POS" -eq "$i" ] && printf 1 || printf 0)"
+      done ;;
+    5)
+      ui_line '  Review installation' section
+      ui_render_review ;;
+  esac
+  ui_line ''
+  if [ -n "$UI_ERROR" ]; then ui_line "  $UI_ERROR" error; fi
+  if [ "$UI_STEP" -eq 5 ]; then
+    ui_line '  Up/Down browse' muted
+    ui_line '  Esc Back  Enter Install  q Cancel' muted
+  elif [ "$UI_STEP" -eq 1 ]; then
+    ui_line '  Up/Down move  Space select' muted
+    ui_line '  Enter Continue  Esc/q Cancel' muted
+  elif [ "$UI_STEP" -eq 3 ]; then
+    ui_line '  Up/Down move  Space select  / Search' muted
+    ui_line '  Esc Back  Enter Continue  q Cancel' muted
   else
-    ui_line '  AGENTS' section
-    for ((i=0; i<${#AGENT_NAMES[@]}; i++)); do
-      marker=' '; [ "$UI_FOCUS" -eq 0 ] && [ "$UI_AGENT_POS" -eq "$i" ] && marker="$UI_ARROW"
-      check=' '; [ "${UI_AGENT[$i]}" -eq 1 ] && check="$UI_CHECK"
-      label="  $marker [$check] ${AGENT_NAMES[$i]}   $(ui_display_dir "${AGENT_NAMES[$i]}")"
-      if [ "$marker" = "$UI_ARROW" ]; then ui_line "$label" focus; else ui_line "$label"; fi
-    done
-    ui_line '  CORE SKILLS  ·  selected by default' section
-    for ((i=0; i<${#ROOTS[@]}; i++)); do
-      marker=' '; [ "$UI_FOCUS" -eq 1 ] && [ "$UI_ROOT_POS" -eq "$i" ] && marker="$UI_ARROW"
-      check=' '; [ "${UI_ROOT[$i]}" -eq 1 ] && check="$UI_CHECK"
-      label="  $marker [$check] fudge:${ROOTS[$i]}"
-      if [ "$marker" = "$UI_ARROW" ]; then ui_line "$label" focus; else ui_line "$label"; fi
-    done
+    ui_line '  Up/Down move  Space select' muted
+    ui_line '  Esc Back  Enter Continue  q Cancel' muted
   fi
-  marker=' '; [ "$UI_FOCUS" -eq 2 ] && [ "$UI_OPT_POS" -eq -1 ] && marker="$UI_ARROW"
-  if [ "$UI_OPT_OPEN" -eq 1 ]; then
-    label="  $marker $UI_OPEN OPTIONAL SKILLS  ·  $UI_OPT_COUNT selected  ·  / search"
-  else
-    label="  $marker $UI_CLOSED OPTIONAL SKILLS  ·  $UI_OPT_COUNT selected  ·  Space to browse / search"
-  fi
-  if [ "$marker" = "$UI_ARROW" ]; then ui_line "$label" focus; else ui_line "$label" section; fi
-  if [ "$UI_OPT_OPEN" -eq 1 ]; then
-    if [ "$UI_SEARCH_MODE" -eq 1 ] || [ -n "$UI_SEARCH" ]; then
-      if [ "$UI_SEARCH_MODE" -eq 1 ]; then
-        ui_line "    Search optional skills: $UI_SEARCH$UI_CURSOR" focus
-      else
-        ui_line "    Filter: $UI_SEARCH  ·  / to edit" muted
-      fi
-      show_count=$((UI_OPT_VISIBLE-1))
-    else
-      show_count="$UI_OPT_VISIBLE"
-    fi
-    [ "$show_count" -ge 1 ] || show_count=1
-    if [ "$UI_OPT_POS" -ge "$UI_OPT_SCROLL" ] && [ "$UI_OPT_POS" -ge $((UI_OPT_SCROLL+show_count)) ]; then
-      UI_OPT_SCROLL=$((UI_OPT_POS-show_count+1))
-    elif [ "$UI_OPT_POS" -ge 0 ] && [ "$UI_OPT_POS" -lt "$UI_OPT_SCROLL" ]; then
-      UI_OPT_SCROLL="$UI_OPT_POS"
-    fi
-    end=$((UI_OPT_SCROLL+show_count))
-    [ "$end" -le "${#UI_MATCHES[@]}" ] || end="${#UI_MATCHES[@]}"
-    if [ "${#UI_MATCHES[@]}" -eq 0 ]; then ui_line '    No matching individual skills.' muted; fi
-    for ((i=UI_OPT_SCROLL; i<end; i++)); do
-      index="${UI_MATCHES[$i]}"
-      marker=' '; [ "$UI_FOCUS" -eq 2 ] && [ "$UI_OPT_POS" -eq "$i" ] && marker="$UI_ARROW"
-      check=' '; [ "${UI_OPT[$index]}" -eq 1 ] && check="$UI_CHECK"
-      label="  $marker [$check] fudge:${OPTIONAL[$index]}"
-      if [ "$marker" = "$UI_ARROW" ]; then ui_line "$label" focus; else ui_line "$label"; fi
-    done
-    more="$((UI_OPT_SCROLL+1))$UI_RANGE$end"
-    match_word=matches; [ "${#UI_MATCHES[@]}" -eq 1 ] && match_word=match
-    ui_line "    ${#UI_MATCHES[@]} $match_word  ·  showing $more  ·  Up/Down and Space" muted
-  fi
-  ui_line '  METHOD' section
-  label=''
-  for ((i=0; i<2; i++)); do
-    if [ "$i" -eq 0 ]; then method=Symlink; selected=$((1-COPY)); else method=Copy; selected="$COPY"; fi
-    check=' '; [ "$selected" -eq 1 ] && check="$UI_CHECK"
-    marker=' '; [ "$UI_FOCUS" -eq 3 ] && [ "$UI_METHOD_POS" -eq "$i" ] && marker="$UI_ARROW"
-    label="$label  $marker [$check] $method"
-  done
-  if [ "$UI_FOCUS" -eq 3 ]; then ui_line "$label" focus; else ui_line "$label"; fi
-  ui_line '  INSTALL SUMMARY' section
-  summary="  ${#UI_NAMES[@]} skill(s) $UI_MUL $UI_AGENT_COUNT agent(s)  ·  $UI_NEW new  $UI_UPDATE update  $UI_CURRENT current  $UI_FOREIGN conflict"
-  if [ "$UI_FOREIGN" -gt 0 ]; then ui_line "$summary" alert; else ui_line "$summary"; fi
-  destination="  ${UI_TARGETS:-No agent selected}"
-  if [ "$UI_AGENT_COUNT" -eq 1 ]; then
-    for ((i=0; i<${#AGENT_NAMES[@]}; i++)); do
-      [ "${UI_AGENT[$i]}" -eq 1 ] || continue
-      target="${AGENT_NAMES[$i]}"
-      destination="  $target  $(ui_display_dir "$target")"
-      break
-    done
-  fi
-  ui_line "$destination" muted
-  if [ -n "$UI_ERROR" ]; then ui_line "  $UI_ERROR" error; else ui_line '  Tab sections  ·  Up/Down move  ·  Space select  ·  Enter review' muted; fi
-  ui_line '  Esc cancel' muted
-}
-
-ui_render_confirm() {
-  ui_collect
-  local name target label i limit
-  printf '\033[H\033[2J'
-  ui_line '  FUDGE  /  Confirm installation' title
-  ui_line ''
-  ui_line "  ${#UI_NAMES[@]} skill(s) for $UI_AGENT_COUNT agent(s)" section
-  ui_line "  Method: $([ "$COPY" -eq 1 ] && printf copy || printf symlink)"
-  ui_line ''
-  ui_line '  TARGETS' section
-  for ((i=0; i<${#AGENT_NAMES[@]}; i++)); do
-    [ "${UI_AGENT[$i]}" -eq 1 ] || continue
-    target="${AGENT_NAMES[$i]}"
-    ui_line "    $target  $(agent_dir "$target")"
-  done
-  ui_line '  SKILLS' section
-  limit=$((UI_ROWS-14-UI_AGENT_COUNT))
-  [ "$limit" -ge 1 ] || limit=1
-  for ((i=0; i<${#UI_NAMES[@]} && i<limit; i++)); do
-    name="${UI_NAMES[$i]}"; ui_line "    ${name/fudge-/fudge:}"
-  done
-  if [ "${#UI_NAMES[@]}" -gt "$limit" ]; then ui_line "    +$((${#UI_NAMES[@]}-limit)) more selected skills" muted; fi
-  ui_line ''
-  label="  $UI_NEW new  ·  $UI_UPDATE update  ·  $UI_CURRENT current  ·  $UI_FOREIGN conflict"
-  if [ "$UI_FOREIGN" -gt 0 ]; then
-    ui_line "$label" error
-    ui_line "  Conflict: $UI_FIRST_FOREIGN" error
-    ui_line '  Resolve or deselect conflicts before installing. Esc to edit.' alert
-  else
-    ui_line "$label" section
-    ui_line '  Enter or y install  ·  Esc edit selection' focus
-  fi
-  [ -z "$UI_ERROR" ] || ui_line "  $UI_ERROR" error
 }
 
 ui_read_key() {
@@ -404,29 +401,34 @@ ui_read_key() {
 
 ui_move() {
   local direction="$1" max=0
-  case "$UI_FOCUS" in
-    0) max=$((${#AGENT_NAMES[@]}-1)); UI_AGENT_POS=$((UI_AGENT_POS+direction)); [ "$UI_AGENT_POS" -ge 0 ] || UI_AGENT_POS="$max"; [ "$UI_AGENT_POS" -le "$max" ] || UI_AGENT_POS=0 ;;
-    1) max=$((${#ROOTS[@]}-1)); UI_ROOT_POS=$((UI_ROOT_POS+direction)); [ "$UI_ROOT_POS" -ge 0 ] || UI_ROOT_POS="$max"; [ "$UI_ROOT_POS" -le "$max" ] || UI_ROOT_POS=0 ;;
-    2)
-      [ "$UI_OPT_OPEN" -eq 1 ] || return 0
-      max=$((${#UI_MATCHES[@]}-1)); UI_OPT_POS=$((UI_OPT_POS+direction))
-      [ "$UI_OPT_POS" -ge -1 ] || UI_OPT_POS="$max"
-      [ "$UI_OPT_POS" -le "$max" ] || UI_OPT_POS=-1 ;;
-    3) UI_METHOD_POS=$((1-UI_METHOD_POS)) ;;
+  case "$UI_STEP" in
+    1) max=$((${#AGENT_NAMES[@]}-1)); UI_AGENT_POS=$((UI_AGENT_POS+direction)); [ "$UI_AGENT_POS" -ge 0 ] || UI_AGENT_POS="$max"; [ "$UI_AGENT_POS" -le "$max" ] || UI_AGENT_POS=0 ;;
+    2) max=$((${#ROOTS[@]}-1)); UI_ROOT_POS=$((UI_ROOT_POS+direction)); [ "$UI_ROOT_POS" -ge 0 ] || UI_ROOT_POS="$max"; [ "$UI_ROOT_POS" -le "$max" ] || UI_ROOT_POS=0 ;;
+    3)
+      max=$((${#UI_MATCHES[@]}-1)); [ "$max" -ge 0 ] || return 0
+      UI_OPT_POS=$((UI_OPT_POS+direction))
+      [ "$UI_OPT_POS" -ge 0 ] || UI_OPT_POS="$max"
+      [ "$UI_OPT_POS" -le "$max" ] || UI_OPT_POS=0 ;;
+    4) UI_METHOD_POS=$((1-UI_METHOD_POS)) ;;
+    5)
+      max=$((${#UI_REVIEW_LINES[@]}-UI_REVIEW_VISIBLE))
+      [ "$max" -ge 0 ] || max=0
+      UI_REVIEW_SCROLL=$((UI_REVIEW_SCROLL+direction))
+      [ "$UI_REVIEW_SCROLL" -ge 0 ] || UI_REVIEW_SCROLL=0
+      [ "$UI_REVIEW_SCROLL" -le "$max" ] || UI_REVIEW_SCROLL="$max" ;;
   esac
 }
 
 ui_toggle() {
   local index
-  case "$UI_FOCUS" in
-    0) UI_AGENT[$UI_AGENT_POS]=$((1-${UI_AGENT[$UI_AGENT_POS]})) ;;
-    1) UI_ROOT[$UI_ROOT_POS]=$((1-${UI_ROOT[$UI_ROOT_POS]})) ;;
-    2)
-      if [ "$UI_OPT_POS" -eq -1 ]; then UI_OPT_OPEN=$((1-UI_OPT_OPEN)); UI_OPT_POS=-1
-      elif [ "$UI_OPT_POS" -lt "${#UI_MATCHES[@]}" ]; then
+  case "$UI_STEP" in
+    1) UI_AGENT[$UI_AGENT_POS]=$((1-${UI_AGENT[$UI_AGENT_POS]})) ;;
+    2) UI_ROOT[$UI_ROOT_POS]=$((1-${UI_ROOT[$UI_ROOT_POS]})) ;;
+    3)
+      if [ "$UI_OPT_POS" -ge 0 ] && [ "$UI_OPT_POS" -lt "${#UI_MATCHES[@]}" ]; then
         index="${UI_MATCHES[$UI_OPT_POS]}"; UI_OPT[$index]=$((1-${UI_OPT[$index]}))
       fi ;;
-    3) COPY="$UI_METHOD_POS" ;;
+    4) COPY="$UI_METHOD_POS" ;;
   esac
 }
 
@@ -441,18 +443,18 @@ ui_install() {
     done
   fi
   for ((i=0; i<${#OPTIONAL[@]}; i++)); do UI_OPT+=(0); done
-  UI_FOCUS=0 UI_AGENT_POS=1 UI_ROOT_POS=0 UI_OPT_POS=-1 UI_OPT_SCROLL=0
+  UI_STEP=1 UI_AGENT_POS=1 UI_ROOT_POS=0 UI_OPT_POS=0 UI_OPT_SCROLL=0 UI_REVIEW_SCROLL=0
   for ((i=0; i<${#UI_AGENT[@]}; i++)); do
     if [ "${UI_AGENT[$i]}" -eq 1 ]; then UI_AGENT_POS="$i"; break; fi
   done
-  UI_METHOD_POS="$COPY" UI_OPT_OPEN=0 UI_SEARCH='' UI_SEARCH_MODE=0
-  UI_PANEL=main UI_ERROR='' UI_CANCELLED=0 UI_CONFIRMED=0 UI_ACTIVE=0
+  UI_METHOD_POS="$COPY" UI_SEARCH='' UI_SEARCH_MODE=0
+  UI_ERROR='' UI_CANCELLED=0 UI_CONFIRMED=0 UI_ACTIVE=0
   UI_COLOR=1; [ -z "${NO_COLOR:-}" ] || UI_COLOR=0
   UI_MATCHES=(); ui_filter_optional
-  UI_ARROW='›' UI_CHECK='×' UI_OPEN='▾' UI_CLOSED='▸' UI_CURSOR='█' UI_MUL='×' UI_RANGE='–' UI_DIVIDER='│'
+  UI_ARROW='›' UI_CHECK='×' UI_CURSOR='█'
   case "$(locale charmap 2>/dev/null)" in
     UTF-8|utf8|UTF8) ;;
-    *) UI_ARROW='>' UI_CHECK='x' UI_OPEN='v' UI_CLOSED='>' UI_CURSOR='_' UI_MUL='x' UI_RANGE='-' UI_DIVIDER='|' ;;
+    *) UI_ARROW='>' UI_CHECK='x' UI_CURSOR='_' ;;
   esac
   UI_STTY="$(stty -g)" || return 1
   stty -echo -icanon min 1 time 0
@@ -462,13 +464,13 @@ ui_install() {
   trap 'ui_cleanup; exit 130' INT
   trap 'ui_cleanup; exit 143' TERM
   while true; do
-    if [ "$UI_PANEL" = confirm ]; then ui_render_confirm; else ui_render_main; fi
+    ui_render_step
     ui_read_key || { UI_CANCELLED=1; break; }
     key="$UI_KEY"; UI_ERROR=''
     if [ "$UI_SEARCH_MODE" -eq 1 ]; then
       case "$key" in
-        $'\033') UI_SEARCH_MODE=0; UI_OPT_POS=-1 ;;
-        ''|$'\n'|$'\r') UI_SEARCH_MODE=0; UI_FOCUS=2; [ "${#UI_MATCHES[@]}" -eq 0 ] || UI_OPT_POS=0 ;;
+        $'\033') UI_SEARCH_MODE=0 ;;
+        ''|$'\n'|$'\r') UI_SEARCH_MODE=0 ;;
         $'\177'|$'\b') UI_SEARCH="${UI_SEARCH%?}"; ui_filter_optional ;;
         *)
           if [ "${#key}" -eq 1 ] && [ "$key" != $'\t' ]; then
@@ -478,28 +480,32 @@ ui_install() {
       esac
       continue
     fi
-    if [ "$UI_PANEL" = confirm ]; then
-      case "$key" in
-        $'\033') UI_PANEL=main ;;
-        ''|$'\n'|$'\r'|y|Y)
-          if [ "$UI_FOREIGN" -gt 0 ]; then UI_ERROR='Resolve conflicts before installing.'
-          else UI_CONFIRMED=1; break; fi ;;
-      esac
-      continue
-    fi
     case "$key" in
       $'\033[A') ui_move -1 ;;
       $'\033[B') ui_move 1 ;;
-      $'\t') UI_FOCUS=$(((UI_FOCUS+1)%4)) ;;
-      $'\033[Z') UI_FOCUS=$(((UI_FOCUS+3)%4)) ;;
       ' ') ui_toggle ;;
-      '/') UI_FOCUS=2; UI_OPT_OPEN=1; UI_SEARCH_MODE=1; UI_OPT_POS=-1 ;;
+      '/') [ "$UI_STEP" -ne 3 ] || UI_SEARCH_MODE=1 ;;
       ''|$'\n'|$'\r')
-        ui_collect
-        if [ "$UI_AGENT_COUNT" -eq 0 ]; then UI_ERROR='Select at least one agent.'
-        elif [ "${#UI_NAMES[@]}" -eq 0 ]; then UI_ERROR='Select at least one skill.'
-        else UI_PANEL=confirm; fi ;;
-      $'\033') UI_CANCELLED=1; break ;;
+        case "$UI_STEP" in
+          1)
+            ui_collect
+            if [ "$UI_AGENT_COUNT" -eq 0 ]; then UI_ERROR='Select at least one agent.'
+            else UI_STEP=2; fi ;;
+          2) UI_STEP=3 ;;
+          3)
+            ui_collect
+            if [ "${#UI_NAMES[@]}" -eq 0 ]; then UI_ERROR='Select at least one skill.'
+            else UI_STEP=4; fi ;;
+          4) UI_STEP=5; UI_REVIEW_SCROLL=0 ;;
+          5)
+            ui_collect
+            if [ "$UI_FOREIGN" -gt 0 ]; then UI_ERROR='Resolve conflicts before installing.'
+            else UI_CONFIRMED=1; break; fi ;;
+        esac ;;
+      $'\033')
+        if [ "$UI_STEP" -eq 1 ]; then UI_CANCELLED=1; break
+        else UI_STEP=$((UI_STEP-1)); fi ;;
+      q|Q|$'\004') UI_CANCELLED=1; break ;;
     esac
   done
   ui_cleanup
