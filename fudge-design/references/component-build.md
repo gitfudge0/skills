@@ -1,0 +1,10 @@
+# Component build only
+
+Implement the requested UI components within the existing project. Keep scope to those components and the wiring needed to make their stated behavior usable. The component itself is the deliverable; a design package is optional only when separately requested.
+
+1. Read project instructions, existing `DESIGN.md` and `COMPONENTS.md` or the project's authoritative equivalents, tokens, UI patterns, and related components. Apply `fudge-design-for-recognition` to the component's label, placement, states, action, and feedback in its actual context.
+2. Resolve only consequential missing product choices with the user. Use `fudge:content-architecture` when labels or surrounding content need a contract, `fudge:interaction-design` when state transitions or failure behavior are unclear, and `fudge:accessible-ui` when accessibility behavior needs specific guidance. Specify the component contract for the worker: purpose, anatomy, variants, states, interactions, responsive behavior, accessibility, real copy, and files it may edit. Use `fudge:delegate` for implementation. Reuse established primitives and tokens.
+3. Inspect the rendered component in context at relevant sizes and follow its key interaction. Use `fudge:design-qa` when the built component needs comparison with a selected mock or design contract, or a UI fix needs a recorded retest. Route criterion-level accessibility assessment to `fudge:accessible-ui`. Check keyboard and focus behavior, feedback, empty or error states where relevant, and visual consistency with nearby UI. Run the project's relevant targeted checks yourself and read their raw output. Fix observed failures through delegation and verify again.
+4. If the component changes an existing documented contract, update its authoritative source to match the implemented behavior within this component's scope. Do not invent broader project direction. Report changed files, what the component does, the checks and visual inspection performed, and any material limit.
+
+When nested in `fudge:ship`, give ship the implementation evidence and let ship govern its own test, review, approval, and delivery sequence.
