@@ -4,7 +4,7 @@ A personal collection of agent skills. The default install exposes three root sk
 
 | Skill | What it does | Reach for it when |
 |---|---|---|
-| fudge:ship | Takes one idea, issue, or story to a verified feature. UI guidance or a mock is used when needed; you approve the test case matrix before code. Issue updates and the PR cycle are optional. | "take this feature from idea to completion" |
+| fudge:ship | Takes one idea, issue, or story through implementation and delivery at a depth matched to risk. Routine work uses relevant checks and a concise diff review; consequential work uses a formal test matrix and applicable audit. Issue updates and the PR cycle are optional. | "take this feature from idea to completion" |
 | fudge:design | Routes UI work to concise guidance, a reviewable draft, reusable project rules, or a requested component build. Output and effort follow the decision and its risk. | "design this flow", "guide this UI build", or "build these components" |
 | fudge:review | Reviews a PR or diff and reports findings as symptom, cause, and fix — verdict, one-line list, detail — in chat, Slack, GitHub, or HTML. Re-reviews after new commits. | "review this and don't bury me in text" |
 | fudge:ux-research | Discovers user needs or tests UI tasks with participants, then traces findings to design decisions. | "learn what users need" or "test whether people can complete this task" |
@@ -22,7 +22,7 @@ A personal collection of agent skills. The default install exposes three root sk
 | fudge:decision-room | Cross-functional personas pressure-test a decision independently, then synthesize into one recommendation. | "should we build this" |
 | fudge:design-system | Derives the requested tokens, style rules, component contracts, or visual specimens from a moodboard, screenshots, wireframe, or brief. Reuses the project's design source. | "define these tokens" or "make our product look like this" |
 | fudge-design-for-recognition | Shapes UI information and interaction so people can find, understand, decide, and act, then checks the rendered result. | "make this interface easier to use" |
-| fudge:test-plan | Builds a risk-based test case matrix for review, then optionally executes the approved cases and records observed results in HTML. | "what should I test here" |
+| fudge:test-plan | Plans distinct failure cases in chat or a formal HTML matrix, then executes selected cases when requested. | "what should I test here" |
 | fudge:conventions | Sets up project-specific coding rules, audits a change for convention drift or gaps, and amends approved rules without repeating the full interview. | "check this change against our conventions" |
 | fudge-unslop | Edits prose to cut generic AI phrasing and make it more direct and specific. | any writing task |
 

@@ -1,74 +1,63 @@
 ---
 name: fudge:ship
-description: Take an idea, issue, feature, story, or task through a complete software-factory run. Use for end-to-end building, "ship this," several fudge skills on one work item, or resuming a ship run. Route standalone code review to fudge:review.
+description: Take an idea, issue, feature, story, or task through implementation and delivery at a depth that matches its risk. Use for end-to-end building, "ship this," several fudge skills on one work item, or resuming a ship run. Route standalone code review to fudge:review.
 ---
 
 # fudge:ship
 
-During a ship run installed by the Fudge installer, stage names such as `fudge:test-plan`, `fudge:review`, and `fudge:design` refer to bundled guides. From this root `SKILL.md`, read `references/specialists/fudge-<specialist>/guide.md` for each selected stage or specialist, then follow links relative to that guide. The design and review guides are bundled so this root works when installed alone. The source skill folders remain available for separate manual installation. Keep every test-case approval, verification, review, and delivery gate below when following a bundled guide.
+During a ship run installed by the Fudge installer, stage names such as `fudge:test-plan`, `fudge:review`, and `fudge:design` refer to bundled guides. From this root `SKILL.md`, read `references/specialists/fudge-<specialist>/guide.md` for each selected stage or specialist, then follow links relative to that guide. The design and review guides are bundled so this root works when installed alone. The source skill folders remain available for separate manual installation.
 
-Build one work item to its chosen endpoint. A finished feature may be one part of a larger release. Finishing this run never implies that a release was cut.
+Build one work item to its chosen endpoint. A finished feature may be one part of a larger release. Finishing this work never implies that a release was cut.
 
-The user owns expected behavior and scope. The repository's `AGENTS.md`, `CLAUDE.md`, project-level skills, and existing conventions own implementation details. Do not make architecture or code structure a user approval gate.
+The user owns expected behavior and scope. The repository's `AGENTS.md`, `CLAUDE.md`, project-level skills, and existing conventions own implementation details. Use decisions and authorization already given in the conversation; ask only when a consequential choice remains unsettled. Do not make architecture or code structure a user approval gate.
 
-## Choose the run
+## Choose the work and depth
 
-Name the work item and its boundary. Choose an endpoint before implementation: **verified locally** by default, **PR opened**, **PR integrated**, or **release/deploy** only when explicitly selected. An analysis-only route ends with its requested artifact or decision instead. Issue tracking is a separate opt-in. A linked issue does not by itself authorize updates. State the choices and exclusions to the user; ask only about a choice that would materially change the outcome.
+Name the work item and its boundary. Use the endpoint already requested by the user; otherwise default to **verified locally**. Other endpoints are **PR opened**, **PR integrated**, or **release/deploy** when selected. An analysis-only route ends with its requested artifact or decision. Issue tracking is a separate opt-in; a linked issue does not itself authorize updates. Read [external workflows](references/external-workflows.md) before issue, PR, or release/deploy work.
 
-For a new run, create a unique `.fudge/<branch>/ship/<YYYY-MM-DD>-<slug>[-N]/` directory and a durable `run.json`. Keep run artifacts there. Read [run state and recovery](references/run-state.md) when creating or resuming a run, and again before implementation touches a worktree. If the endpoint includes a PR or issue updates, read [external workflows](references/external-workflows.md) before the first external write. Do not create a branch, commit, push, issue, PR, merge, release, or deployment outside the selected mode.
+Choose the smallest workflow that gives credible evidence for this change:
 
-Confirm that an implementation target is a Git repository. Analysis-only work may proceed outside Git. Preserve the original request, chosen endpoint, optional modes, approved behavior, artifact paths, gate response, verification evidence, and blockers in `run.json`.
+- **Routine:** bounded, reversible work with a clear requested behavior and limited blast radius. This is the default for a focused bug fix, local UI or installer change, documentation, or skill edit. Follow the routine path below.
+- **Comprehensive:** consequential work with material security, privacy, financial, permission, migration, data-loss, or external-release risk; broad cross-system changes with unsettled behavior; or an explicit request for formal test planning, staged approvals, or a full audit. Follow the comprehensive path below.
 
-## Output location
+An individual uncertainty may warrant one specialist without turning the whole work item into a comprehensive run. If scope or risk grows, switch paths and explain why. Preserve completed decisions and evidence rather than restarting or asking for the same approval again. A user correction narrows or changes the requested work; address that correction directly. For example, “we didn't need new tests” stops unnecessary test work but does not authorize deleting existing tests or other assets.
 
-Write this skill's files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix.
+## Route only the needed stages
 
-- `<branch>` is `git branch --show-current` with every `/` replaced by `-`. On a detached HEAD, use `git rev-parse --short HEAD`. Outside a git repository, use `.fudge/<skill>/` in the current directory.
-- Before the first write, add `.fudge/` to the file named by `git rev-parse --git-path info/exclude` unless it is already listed. Never edit `.gitignore` for this.
-- A path supplied by a calling skill overrides this default.
-- Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
+Use read-only recon to find the relevant behavior, dependencies, existing checks, and project instructions. Invoke a specialist only when its output serves this work item:
 
-Ship's run directory is `.fudge/<branch>/ship/<run>/`; it supplies run-local paths under that directory to every stage it calls.
-
-## Route
-
-Use only stages that serve this work item, in this order:
-
-| Stage | Owning skill | When it earns its place |
+| Need | Owning skill | Trigger |
 |---|---|---|
-| Understand | `fudge:gap-analysis` | A document corpus or conflicting requirements need reconciliation. |
-| Decide | `fudge:decision-room` | A consequential product choice remains unsettled. |
-| Design | `fudge:design` | UI guidance is needed, or a requested or consequential visual choice needs review. |
-| Test cases | `fudge:test-plan` in `plan-only` mode | **Every implementation run.** |
+| Reconcile requirements | `fudge:gap-analysis` | Documents conflict or leave a material gap. |
+| Decide product direction | `fudge:decision-room` | A consequential choice remains unsettled. |
+| Shape UI | `fudge:design` | UI guidance or a reviewable visual decision is needed. |
+| Plan distinct failure cases | `fudge:test-plan` | Risk or an explicit request warrants a separate test plan. |
 | Implement | `fudge:delegate` | Product or test files will change. |
-| Review | `fudge:review` | Every implementation run, unless the user explicitly waives review and accepts the reduced assurance. |
+| Formal review | `fudge:review` | The change is comprehensive or the user requests this review. |
 
-Read each selected skill and honor its output contract. Give `understand` the run-local output root and `decide` an exact run-local HTML path. Before the test-case gate, `design` may return concise guidance with source paths, or call `fudge:ui-mock` in artifact-only mode at an exact run-local HTML path. Choose a mock when the requested or consequential direction needs to be seen; do not require one for every UI task. This stage may not enter `fudge:design` component build, change project design documents, or write product or test code before test-case approval. Give `test-plan` a versioned run-local HTML path. Each stage that produces an artifact renders its own. Do not call `fudge:report-deck` to reformat it. A named stage selects membership, not order. For a standalone code review, use the `fudge:review` root without starting a ship run. If that root is unavailable, read the bundled `references/specialists/fudge-review/guide.md` and follow its standalone mode. Unknown stage names require clarification. If a required skill is unavailable, record a blocker and stop instead of replacing it silently.
+Read each selected skill and honor the contract for the chosen path. A named stage selects membership, not order. For standalone code review, use the `fudge:review` root without starting a ship run. If that root is unavailable, read the bundled `references/specialists/fudge-review/guide.md` and follow its standalone mode. Unknown stage names require clarification. If a required skill is unavailable, report the blocker instead of silently replacing it.
 
-Use read-only recon to find the relevant behavior, dependencies, test setup, and project instructions. Put only what later stages need in a short run-local recon note. Ask for a decision or mock review only when the choice cannot be made from the user's brief and repository context. Feedback on either returns to that stage; do not treat the original request as approval of an unseen artifact. A confirmed "do not build" decision ends the run without implementation.
+## Routine path
 
-For an implementation run, find and load the governing, actionable coding rules in the project's skills, `AGENTS.md`, `CLAUDE.md`, or equivalent sources; record their paths and revisions. If none are usable, or consequential rules conflict, pause before product or test code and offer `fudge:conventions` setup or a user resolution. Await a separate choice; no endpoint alone authorizes creating or committing a project conventions skill.
+1. Confirm the requested behavior from the conversation and repository. Resolve only material uncertainty. Use existing governing rules; when no project-specific convention is defined, follow the repository's patterns. A consequential conflict between rules needs resolution before the affected work.
+2. Brief one cohesive implementation worker through `fudge:delegate` unless independent work clearly benefits from separate workers. Protect pre-existing user edits. A user's request to remove newly added work does not imply removal of pre-existing files.
+3. Verify the behavior with the smallest relevant checks that can catch a plausible regression: existing focused tests, a manual walk, syntax or build checks, as appropriate. Add or change automated tests when a meaningful failure mode needs durable coverage or the user asks for them. Multiple UI steps alone do not require a new end-to-end suite. The root reads raw check output before reporting a pass.
+4. Read the final diff for scope, correctness, and unintended changes. Fix issues and recheck affected behavior. Give a concise result, verification evidence, and any material remaining risk. Complete the authorized endpoint.
 
-## The test-case gate
+Routine work needs no run directory, HTML matrix, separate test-case approval, blanket full-suite gates, two-pass review, or conventions audit. A direct request to commit or push remains authorization for that endpoint, subject to the repository's own safeguards. Do not re-ask a settled visual or behavior choice merely because implementation has begun.
 
-Before generating **any product or test code**, have `fudge:test-plan` produce a comprehensive, risk-based matrix in `plan-only` mode. This step may write only its run-local report. It may inspect the repository but may not run project commands or edit product or test files. The matrix must make each distinct case reviewable: case ID, concrete setup and action, observable expected result, risk/priority, test type, and what will remain untested with a reason. Cover relevant normal, boundary, failure, permission, integration, lifecycle, and regression behavior without padding the count. Include meaningful manual or environment-dependent cases even if they may later be `NOT RUN`.
+## Comprehensive path
 
-Present the matrix as a distinct, prominent artifact and summarize the highest-risk cases and coverage gaps in the message. Ask the user to approve the **expected behavior and test cases**, not the implementation approach. Stop here. Only a later, explicit response to this version approves it. Questions, partial feedback, and conditional answers request a revision; show the revised matrix and ask again. Preserve each version, the exact approval response, and its time in run state.
+Create a unique `.fudge/<branch>/ship/<YYYY-MM-DD>-<slug>[-N]/` directory and durable `run.json`. Keep run artifacts there. Read [run state and recovery](references/run-state.md) when creating or resuming the run and before implementation touches a worktree. Confirm an implementation target is a Git repository. Record the original request, endpoint, decisions already approved, artifacts, gate responses, verification evidence, and blockers. Supply run-local paths to selected stages. For UI work, `fudge:design` may return concise guidance or a reviewable mock; a mock is required only when the visual decision needs to be seen.
 
-No implementation worker receives a code-writing brief until that approval is recorded. If implementation or review reveals a new case or changes an approved expected result, revise the matrix, return to this gate, and await approval **before** related product or test code changes. This includes a code fix that would alter agreed behavior. New implementation detail that leaves behavior and coverage unchanged does not reopen the gate.
+Find and load actionable coding rules in project skills, `AGENTS.md`, `CLAUDE.md`, or equivalent sources, and record their paths and revisions. If consequential rules conflict, resolve the conflict before affected code. Offer `fudge:conventions` setup only when a missing project contract itself blocks the work; creating one requires separate authorization.
 
-## Build, verify, review
+Before product or test code, have `fudge:test-plan` produce a risk-based, versioned HTML matrix in `plan-only` mode. Include concrete setups, actions, observable outcomes, priority, type, and meaningful gaps without padding case count. Present the matrix. Ask for approval of its **expected behavior and material coverage** only where those decisions remain unsettled; record prior explicit decisions that cover the same contents against this version. A behavior approval does not, by itself, require writing a test for every case. Revise the matrix and seek approval only when an expected result or material coverage decision changes. Implementation details that leave them intact do not reopen the gate.
 
-After approval, establish the worktree baseline and planned ownership before dispatch. Protect dirty or untracked user files as [run state and recovery](references/run-state.md) specifies. Apply `fudge:delegate`: workers own non-overlapping files and follow repository/project instructions for architecture. One worker may invoke `fudge:test-plan` in `execute` mode to write the approved tests. It reports commands but runs no test, build, or lint gate under this skill.
+After the applicable approval, establish the worktree baseline and planned ownership as [run state and recovery](references/run-state.md) specifies. Delegate implementation. Write new tests for meaningful regression risks and approved coverage where an automated harness is suitable; use existing checks or manual evidence where they suffice. The root runs targeted checks and the relevant project gates, reads raw output, and records commands and results. Mark matrix cases `PASS`, `FAIL`, or `NOT RUN` from observed evidence in a separate report; never infer a pass from code inspection. Fix failures in scope and rerun affected checks. Surface high-risk unrun cases for an explicit decision.
 
-The root orchestrator runs the targeted cases and the relevant full test, build, and lint gates, reads their raw output, and stores commands and output under the run. Give the observed results to the test-plan worker to mark every approved case `PASS`, `FAIL`, or `NOT RUN` with evidence or a reason in a separate results report; keep the approved matrix immutable. Never infer a pass from code inspection. Fix failures in scope, rerun affected and full gates, and update the results report. A failing or high-risk unrun case is not a clean completion; surface the blocker or obtain an explicit user decision about the remaining risk.
+Review the full run diff with `fudge:review` in orchestrated two-pass mode. The root verifies candidate findings against source, diff, approved behavior, and gate output before fixes. Recheck applicable governing rules and use `fudge:conventions` in scoped audit mode when a project contract exists. Fix verified violations, then rerun affected verification, review, and audit. Only a separately approved amendment changes project rules. A later run-owned project-file edit invalidates the audit; run-local metadata does not.
 
-Review the full run diff against its protected baseline with `fudge:review` in orchestrated two-pass mode. Supply fresh raw gate output. The review worker returns candidates; the root checks each against source, diff, approved behavior, and evidence; the worker then renders only the approved findings at the run-local review path. Delegate deterministic fixes that preserve approved behavior, rerun verification, update case results, and re-review. Escalate product judgment, inseparable external edits, or a blocker still present after two automatic fix rounds. Never silently accept a finding or change the approved behavior to make a test pass.
+Before each push, merge, or finish, recheck the exact full-run-diff content hash and governing source revisions as run state specifies. Finish when the approved behavior, relevant verification, review, and current applicable audit meet the selected endpoint. Report unrun cases, accepted risks, exceptions, and incomplete external steps plainly.
 
-Recheck the governing rule sources, then invoke `fudge:conventions` in scoped audit mode over the **full run diff against the protected baseline**, using a run-local report path. The root rechecks its evidence and separates rule violations, ambiguous or uncovered cases, and evidence-backed improvement proposals. Fix in-scope violations through delegation and rerun affected verification, review, and audit; otherwise record an explicit user decision about the exception. Proposals are advisory. Only a separately approved, targeted `fudge:conventions` amendment changes project rules; never rewrite a rule to bless the implementation. Any later run-owned project-file edit, including a PR-feedback edit, invalidates the audit, however small. Run-local metadata and report writes do not.
-
-## Finish or resume
-
-Before each push, merge, or finish, recheck governing source revisions and the exact full run-diff content hash. Resolve a changed rule source and rerun the audit; rerun it whenever the diff hash changed. Finish only when the implementation, approved cases, root-run gates, review, and a current conventions audit meet the selected endpoint. Local completion means a verified work item, not a release. For selected issue or PR work, follow [external workflows](references/external-workflows.md) and record links, checks, feedback, and final state. Report any unrun case, accepted risk, conventions exception or proposal, skipped review, or incomplete external step plainly. Do not label an opened PR as integrated or a merged PR as deployed.
-
-On `resume`, inspect open runs and their saved state. If several match, let the user choose. Re-present an awaiting matrix or other consequential decision; do not infer approval from an old request. Recheck governing convention sources and their revisions. An interrupted implementation, review, or conventions audit needs a fresh baseline/recovery check before retrying. A plain resume reports a recorded blocker; retry only on an explicit corrective instruction. Preserve prior approval history and verification evidence.
+On `resume`, inspect open runs and saved state. If several match, let the user choose. Re-present only an awaiting or changed decision; retain prior approvals and verification evidence. Recheck the baseline and governing sources before retrying an interrupted stage. A plain resume reports a recorded blocker; retry only on an explicit corrective instruction.

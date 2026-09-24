@@ -1,41 +1,41 @@
 ---
 name: fudge:test-plan
-description: Produces a risk-based test case matrix for a feature, bug fix, or task, then optionally implements and runs an explicitly approved version. Use for test plans, edge cases, QA passes, pre-code test review, or execution of approved cases; fudge:ship uses its plan-only mode before product code.
+description: Plan distinct failure cases for a feature, bug fix, or task, then execute cases when requested. Use for test plans, edge cases, QA passes, formal pre-code review, or execution; fudge:ship calls it when risk or an explicit request warrants a separate plan.
 ---
 
 # Test blueprint
 
-A useful plan covers distinct ways the requested behavior could fail. Derive cases from the agreed behavior and the actual system around it, then give the user a concrete matrix they can correct before implementation. Keep meaningful coverage even when a feature needs many cases; merge only cases that prove the same thing.
+A useful plan covers distinct ways the requested behavior could fail. Derive cases from the agreed behavior and the actual system around it. Keep meaningful coverage even when a feature needs many cases; merge only cases that prove the same thing.
 
-The primary output is the plan: what to test, why it matters, and the observable result. Execution is a separate mode that consumes the approved plan. A plan is not code or permission to write code.
+The primary output is the plan: what to test, why it matters, and the observable result. A plan is not code or permission to write tests. Approval of expected behavior also does not require an automated test for every case.
 
 ## Modes
 
-Choose the mode before starting the workflow.
+Choose the mode and format before starting. Use a concise in-chat plan for an ordinary standalone request or a routine `fudge:ship` call. Use the versioned HTML matrix for an explicit formal artifact or a comprehensive `fudge:ship` run. The caller may supply an exact HTML path.
 
 | Mode | Use when | Contract |
 |---|---|---|
-| `plan-only` | The user asks for cases, edge cases, or testing advice, or an implementation request has no approved case matrix yet. This is the standalone default and the mandatory pre-code mode under `fudge:ship`. | Complete steps 1–6 and 8. Write only the HTML plan. Create no source or test code and run no test, build, lint, or other project commands. Mark every case `NOT RUN` with the reason `PLANNED — awaiting approved execution`. |
-| `execute` | The user explicitly approves a specific plan version and asks to write or run its cases, or a caller supplies that approval. | Consume that version, perform step 7, then update the HTML report with observed outcomes. A completed plan or a request to implement unseen cases is not approval. First produce the plan in `plan-only` mode and present it for review. |
+| `plan-only` | The user asks for cases, edge cases, or testing advice, or a ship run deliberately requests a separate plan. | Complete steps 1–6 at a depth matching risk. Present a concise plan in chat, or complete step 8 for formal HTML. Create no source or test code and run no project commands. In formal HTML, mark cases `NOT RUN` with the reason `PLANNED — awaiting approved execution`. |
+| `execute` | The user asks to implement or run the selected cases, or a caller supplies authorization. A formal matrix also requires agreement on its expected behavior and material coverage, which may already be recorded. | Use the selected cases and perform step 7. For a formal matrix, update the HTML results without changing approved expected outcomes. For a concise plan, report observed outcomes in chat. A prior plan alone does not authorize execution. |
 
-A caller may supply the exact output path for the HTML report in either mode. When supplied, write the report exactly there, create only its parent directory as needed, and do not also write a default report. Otherwise use the default in Output location below.
+A caller may supply the exact output path for a formal HTML report in either mode. When supplied, write the report exactly there, create only its parent directory as needed, and do not also write a default report. Otherwise use the default in Output location below.
 
 ## Output location
 
-Write this skill's files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix.
+For an HTML report, write files to `.fudge/<branch>/<skill>/` at the root of the current working tree (`git rev-parse --show-toplevel`), where `<skill>` is this skill's name without the `fudge-` prefix. A concise in-chat plan needs no file or output directory.
 
 - `<branch>` is `git branch --show-current` with every `/` replaced by `-`. On a detached HEAD, use `git rev-parse --short HEAD`. Outside a git repository, use `.fudge/<skill>/` in the current directory.
 - Before the first write, add `.fudge/` to the file named by `git rev-parse --git-path info/exclude` unless it is already listed. Never edit `.gitignore` for this.
 - A path supplied by a calling skill overrides this default.
 - Product changes (source code, tests, project docs, project skills) still go where the project keeps them.
 
-For this skill, `<skill>` is `test-plan`. The default HTML report path is `.fudge/<branch>/test-plan/test-plan-<feature-slug>.html`. In standalone `execute` mode, update that same file with observed outcomes rather than writing a separate results file. Test files written in `execute` mode are product code and go where the project keeps its tests, not under `.fudge/`.
+For this skill, `<skill>` is `test-plan`. The default formal HTML report path is `.fudge/<branch>/test-plan/test-plan-<feature-slug>.html`. In standalone formal `execute` mode, update that same file with observed outcomes rather than writing a separate results file. Test files written in `execute` mode are product code and go where the project keeps its tests, not under `.fudge/`.
 
-Under `fudge:ship`, split execution responsibility at the command boundary. The worker writes the approved test files and reports the exact targeted commands that should run, but runs no test, build, or lint command. The root orchestrator runs those targeted commands and every full gate, reads the raw output, and supplies the observed outcomes. The worker records the supplied outcomes at a separate caller-supplied results path, leaving the approved matrix file unchanged. A worker must not infer a result.
+Under comprehensive `fudge:ship`, split execution responsibility at the command boundary. The worker writes justified test files and reports the targeted commands; the root runs the relevant checks and gates, reads raw output, and supplies observed outcomes. The worker records those outcomes at a separate caller-supplied results path, leaving the approved matrix unchanged. Under routine `fudge:ship`, use `fudge:delegate`'s targeted-check allowance and let the root verify the relevant results. No worker may infer a result.
 
-Under `fudge:ship`, the matrix is the user's pre-code acceptance contract. Show its full report and a short coverage summary at the test gate; wait for explicit approval of that version before any product or test code is generated. If implementation exposes a new behavior, changes an expected result, or needs a new case, revise the matrix and return it to that gate before related code proceeds. This amendment rule belongs to `fudge:ship`; standalone planning may be revised without a ship gate.
+Under comprehensive `fudge:ship`, the formal matrix records the expected behavior and material coverage decisions. Show its report and a short coverage summary when those decisions still need approval. Reuse explicit decisions already made in the conversation. If implementation changes an expected result or a material coverage decision, revise the matrix and return to that gate before related code proceeds. New implementation details do not reopen the gate.
 
-Outside `fudge:ship`, a `fudge:delegate` worker may run only the targeted checks named in its brief. The top-level orchestrator still owns full gates.
+Outside comprehensive `fudge:ship`, a `fudge:delegate` worker may run the targeted checks named in its brief. The top-level orchestrator verifies results with the checks relevant to the change.
 
 ## Workflow
 
@@ -57,12 +57,12 @@ Before listing test ideas, go find out what this actually touches — don't imag
 - **Who's affected and how** — which users/roles/contexts exercise this, and whether some are higher-stakes than others (e.g. paying users, admins, first-time users mid-onboarding).
 - **What's the blast radius if it breaks** — cosmetic annoyance, silent wrong data, crash, data loss, security/permissions leak. This single judgment drives most of the prioritization in step 4.
 
-Probe moves — actually do these, don't just think about them:
-- Search the changed functions/symbols/endpoints for their callers with `rg`, then open relevant matches.
-- Find who else reads or writes the same table, cache key, queue, config value, or feature flag.
-- If a response shape or payload changed, search for other consumers of that shape (other endpoints, the frontend client, mobile, exports, webhooks).
-- Check migrations and column defaults for existing rows that predate the change — would a null/legacy value break the new logic?
-- Look for background jobs, cron, webhooks, or retry logic that touch the same record and could race with or duplicate this change.
+Probe the relevant dependency boundary, then stop when it is bounded:
+- Search changed functions, symbols, or endpoints for callers when code behavior changes.
+- Check other readers or writers when shared data, config, or state changes.
+- Check consumers when a response shape or payload changes.
+- Check existing rows when a migration or new column changes stored data.
+- Check jobs, webhooks, or retries when they touch the same changed record.
 
 See the `Upstream / downstream` section of `references/test-design-heuristics.md` for the fuller prompt list to run these probe findings through.
 
@@ -72,7 +72,7 @@ Every claim in the impact write-up either names a file/symbol you actually looke
 
 One pass is enough: follow the direct dependencies you find, don't transitively map the whole repo. If the probe turns up nothing beyond the changed file, say so and move on — that's a valid result, not a failed search.
 
-The output of this step is the short impact paragraph that goes in the report's overview section.
+The output of this step is a short impact paragraph for a formal report, or a brief risk note in a concise plan.
 
 ### 3. Decide which test types actually apply
 
@@ -83,17 +83,17 @@ Don't reach for unit + integration + e2e by default. The shape of the change tel
 | Pure function, calculation, data transform, isolated logic with no side effects | **Unit-heavy.** Boundary values, invalid input, edge cases. Maybe one integration test to confirm it's wired in correctly — rarely e2e. |
 | New/changed API endpoint, service method, or cross-module contract | **Integration-heavy.** Contract correctness, auth/permission checks, error responses, downstream effects. Unit tests for any nontrivial new logic inside it. |
 | UI component in isolation, no new user flow | **Unit/component-heavy.** Loading, error, empty, populated states. One integration test if it talks to real state/an API. |
-| New or changed user-facing flow spanning multiple steps/screens | **E2E-heavy.** Cover the primary path and every distinct high-risk branch, backed by integration tests where a contract could fail independently. Don't unit-test the glue. |
-| Bug fix | **Always start with a regression test that reproduces the exact reported failure.** Then boundary tests around the root cause. Then a quick check that nearby passing behavior didn't shift. |
+| New or changed user-facing flow spanning multiple steps/screens | Use an end-to-end check when the risk crosses a real integration boundary and the harness gives reliable signal. Verify the primary path and distinct high-risk branches at the cheapest effective layer; step count alone is not a reason to create an E2E suite. |
+| Bug fix | Prefer a regression test that reproduces the cause when recurrence risk and a stable harness justify it. Otherwise use a focused existing check or manual reproduction, then confirm nearby behavior did not shift. |
 | Refactor with no intended behavior change | The existing suite is the safety net. New tests only for any interface/behavior that actually changed shape — not the whole surface "just in case." |
 
 Most real changes are a mix, but the mix should be lopsided toward whatever layer the risk actually lives in. If you find yourself writing a balanced 5/5/5 split by default, that's a sign you're pattern-matching to "three test types exist" instead of reasoning about this specific change.
 
 ### 4. Build the case matrix
 
-Read `references/test-design-heuristics.md` now if you haven't already this session — it has the edge-case checklist, the risk-scoring rubric, and the oracle questions ("how would I actually know this is wrong?") that the rest of this step leans on.
+For a formal matrix or uncertain risk, read `references/test-design-heuristics.md` for its edge-case checklist, risk rubric, and oracle questions ("how would I actually know this is wrong?"). For a concise plan with clear risk, use the distinct failure modes already found.
 
-Generate candidate cases, then check the behavior against these categories: primary success path, boundaries and empty states, malformed or missing input, error and recovery paths, role/permission boundaries, cross-component contracts, state transitions and repeated actions, and regressions. Add concurrency, accessibility, performance, security, or compatibility where the change makes them material. For each category, either include its distinct risks or name why it does not apply.
+Generate candidate cases, then check the behavior against the categories that apply: primary success path, boundaries and empty states, malformed or missing input, error and recovery paths, role/permission boundaries, cross-component contracts, state transitions and repeated actions, and regressions. Add concurrency, accessibility, performance, security, or compatibility where material. In a formal matrix, name meaningful exclusions. A concise plan can omit irrelevant categories.
 
 Then apply this filter before anything goes in the final plan:
 
@@ -107,7 +107,7 @@ Before finalizing, do one more pass and ask: if I deleted this case, would anyth
 
 ### 5. Structure each case
 
-Every test case gets:
+For a formal matrix, every test case gets:
 - **ID** — short, typed prefix (U1, I1, E1, R1 for regression).
 - **Title** — one line, states the specific condition being verified, not just the feature name.
 - **Type** — unit / integration / e2e / regression.
@@ -117,20 +117,24 @@ Every test case gets:
 - **Expected result** — the observable, checkable outcome, including what must remain unchanged after a rejected or interrupted action. If you cannot state this concretely, the case is not ready for approval.
 - **Execution** — whether the case is automatable in the available harness, needs manual observation or live infrastructure, or is currently blocked. Name the dependency instead of implying it will run.
 
+For a concise plan, give each distinct case its setup/action, observable result, and why it matters. Add priority or execution notes only where they help the decision.
+
 ### 6. Name what's explicitly out of scope
 
-List every meaningful excluded risk or untestable case and why, including deferred performance/security work, missing infrastructure, third-party behavior, and unchanged behavior outside scope. Separate "not applicable" from "not covered." Give each gap an impact so the user can decide whether to accept it.
+In a formal matrix, list meaningful excluded risks or untestable cases and why, including missing infrastructure and relevant unchanged behavior. Separate "not applicable" from "not covered" and give consequential gaps an impact. In a concise plan, mention only material gaps.
 
-### 7. Execute approved cases and mark PASS/FAIL (`execute` mode only)
+### 7. Execute selected cases and record observed results (`execute` mode only)
 
-In `plan-only` mode, skip this step and go directly to step 8. In standalone `execute` mode, load the approved plan version and run it. Under `fudge:ship`, the worker prepares test files and commands while the root runs every command. Preserve case IDs and expected results from the approved version; an amendment needs fresh user approval before related code or tests change.
+In `plan-only` mode, skip this step; continue to step 8 only for formal HTML. In standalone formal `execute` mode, load the approved plan version and run the selected cases. Under comprehensive `fudge:ship`, the worker prepares justified test files and commands while the root runs the relevant checks. Preserve case IDs and expected results from an approved formal version; seek a new decision only if one of those results or material coverage choices changes.
 
-- **Decide where each case can actually run.** Unit/component and most integration cases belong in the repo's existing test framework (vitest, pytest, jest — whatever the project already uses); write them in the appropriate existing test files (or a new file following the repo's naming conventions) next to the code they cover. Cases needing live infrastructure the session can provide (a local DB for a migration round-trip, a dev server) can be run directly. E2E/manual cases with no available harness stay unexecuted.
-- **Run everything allowed and record the real outcome.** In standalone execution, run the relevant test files and normal verification gates for the task. Under `fudge:ship`, the worker runs no test, build, or lint commands; it gives the root exact targeted commands and records the root's supplied raw outcomes. Under other `fudge:delegate` use, the worker follows its brief and the top-level orchestrator runs full gates. A case is **PASS** only after its assertion was observed passing; **FAIL** if it ran and failed, with a pointer to the raw failure; **NOT RUN** if it could not execute, with a concrete reason. If a later authorized fix makes a failed case pass, keep the earlier failure evidence in the run history and report the latest observed result.
-- **Never mark from inference.** "The code obviously handles this" is not a PASS. In standalone execution, record only commands whose raw output you read. Under `fudge:ship`, record only the fresh raw outcomes supplied by the root; do not rerun or reinterpret them.
-- Statuses go in the report (step 8) as a Status badge per case row, and the stat strip should reflect the tally (test cases / passed / failed / not run).
+- **Choose evidence for each case.** Use an existing test, a focused manual check, or a new automated test when it offers durable signal for a meaningful failure mode. A planned case does not automatically become a new test file. Cases needing unavailable infrastructure can remain unexecuted with a reason.
+- **Run relevant checks and record the real outcome.** In standalone execution, run focused checks and any project gate needed for the risk. Under comprehensive `fudge:ship`, the root runs checks and gives the worker raw outcomes. Under routine `fudge:ship` or other `fudge:delegate` use, workers follow their brief and the root verifies relevant results. A case is **PASS** only after its outcome was observed; **FAIL** if it ran and failed; **NOT RUN** if it could not execute, with a concrete reason. Preserve earlier failure evidence when a later fix passes.
+- **Never mark from inference.** "The code obviously handles this" is not a PASS. Record only commands or manual observations whose evidence was read by the person responsible for verification.
+- In a formal report, show each case status and a tally. In a concise plan, report only the outcomes and gaps that matter.
 
-### 8. Build the HTML report
+For the concise format, finish with the short plan or observed outcomes in chat; do not create an HTML file.
+
+### 8. Build the HTML report (formal format only)
 
 Read `assets/example.html` for the exact structure, tone, and information density to match, and read `assets/styles.css` for the design system. `assets/example.html` is a fragment — it starts directly at `<title>` and ends after the closing `</script>`, with no `<!doctype>`, `<html>`, `<head>`, or `<body>` wrapper (that's the convention for artifact fragments elsewhere, but it is **not** what you deliver here). Build the final report as a single self-contained, standalone HTML **document**:
 

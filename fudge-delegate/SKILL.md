@@ -31,10 +31,10 @@ You may directly do: reading/searching to plan, answering read-only questions, v
 
 **A worker's claim of success is zero evidence.** "Build passed", "wrote the file", "all tests green" — unverified until you see it yourself. Workers over-report success routinely.
 
-**Workers do not run gates.** A worker may run fast, targeted checks on the files it touched — one test file, a typecheck of its own module — to self-correct while it works. It never runs the full suite, repo-wide lint, or a full build; those are gates and belong to the orchestrator. Scoped lint on its own files and a compile/typecheck of its own module (`cargo check -p`, `tsc` on a package) are targeted checks, not gates. Whatever a worker runs is for its own inner loop and counts for nothing toward verification — the orchestrator's run is the only one that counts. The reason is cost: a suite-wide run by a worker is paid twice, once by the worker and once by you.
+**Workers do not run gates.** A worker may run fast, targeted checks on the files it touched — one test file, a typecheck of its own module — to self-correct while it works. It never runs the full suite, repo-wide lint, or a full build; those are gates and belong to the orchestrator when relevant. Scoped lint on its own files and a compile/typecheck of its own module (`cargo check -p`, `tsc` on a package) are targeted checks, not gates. Whatever a worker runs is for its own inner loop and counts for nothing toward verification — the orchestrator's run is the only one that counts. The reason is cost: a suite-wide run by a worker is paid twice, once by the worker and once by you.
 
 - Worker claims a **file** → `wc -l` / `grep` it: exists, expected content, right path.
-- Worker claims its **targeted check passed** → irrelevant; your gate is the only run that counts. Run it yourself, read raw output.
+- Worker claims its **targeted check passed** → verify it yourself if relevant and read raw output before reporting it.
 - Worker claims a **diff** → `git status` / `git diff --stat`: only the allowed files changed.
 
 **Never relay an unverified success claim to the user as fact.**
@@ -47,40 +47,41 @@ Before dispatching, scan the brief for choices reversible in code but not in tas
 
 **Pre-authorize the gray areas.** Scope decisions stall workers like taste decisions do. Scan for steps a cautious worker could read as "beyond my brief" — a transformation dressed as a pure move, a fixup outside listed files — and explicitly sanction or forbid each. Add: "do not stop early to ask for continuation — stop only when genuinely blocked." A worker stopping to ask costs a full roundtrip.
 
-## Discovery first — fan it out too
+When the user corrects scope, brief the narrow correction. For example, if newly added tests were unnecessary, stop that work and preserve existing tests unless the user also asks to remove them. Carry forward decisions and authorization already settled in the conversation.
 
-One upfront exploration pass before dispatching. If the areas are independent, run several Explore agents **in one message** rather than sweeping serially yourself. Discovery also finds the gate commands — typecheck, targeted test, suite, lint, build — and their rough cost; "Plan the gates" and the brief checklist both depend on them. Paste the relevant findings — paths, conventions, gotchas, the check command a worker may run — into every brief so workers don't repeat discovery. For follow-up in an area a worker already knows, resume it via SendMessage rather than spawning fresh.
+## Discovery first
 
-## Shape the work: parallel by default
+Do one bounded exploration pass before dispatching. When independent areas truly need separate investigation, use parallel Explore agents. Discovery finds the relevant check commands and their rough cost. Put the findings workers need — paths, conventions, gotchas, and allowed targeted checks — into their briefs. For follow-up in an area a worker already knows, resume it via SendMessage rather than spawning fresh.
 
-Sequential is the fallback, not the starting point. Splitting into lanes and picking each one's model/effort happens here, at the root — never handed to a spawned "planner" subagent, which would only work from a compressed summary of what you already have directly: the discovery findings, the user's intent, the table above.
+## Shape the work
 
-1. Pull out any edit several lanes depend on (shared type, config, helper). Do that one first, alone.
-2. Group the rest by file set. Non-overlapping groups are lanes. Classify each against the table above and assign its model/effort.
-3. Dispatch every lane in **one message** (multiple Agent calls), each with its assigned model/effort. Gate once, after they all land — see Plan the gates.
-4. Only genuinely order-dependent chains stay sequential — and then it's **one worker resumed across batches of 3–6 tasks**, not a fresh worker per task; it carries learned fix patterns forward. One-task batches waste roundtrips; whole-plan batches invite stalling.
+Start with one cohesive worker for a bounded change. Split into parallel lanes only when the file sets and decisions are independent and parallel work clearly saves time. Pick each worker's model and effort at the root; do not hand that choice to a spawned planner.
+
+1. Keep related files and one behavior change in a single worker brief.
+2. For independent file sets with a clear time benefit, move shared dependencies first, then dispatch non-overlapping lanes together. Classify each lane against the table above.
+3. Verify once after a worker or parallel round lands, using checks suited to that change. Resume a worker for related follow-up work rather than spawning a fresh one.
 
 If two lanes must touch the same file, either serialize just that file into step 1 or give each `isolation: worktree` and merge yourself.
 
 Spawn fresh (pasting still-relevant findings) once a resumed worker's transcript is mostly spent history you'd re-pay for on every turn.
 
-**Don't idle-wait.** While lanes run, write the next round's briefs and read what you'll need to review.
+While a worker runs, prepare the verification and read what you will need to review.
 
 ## Plan the gates
 
-Before dispatching, list the gates this repo offers with rough cost: **cheap** (typecheck, a targeted test file, a grep or `git diff --stat`), **medium** (a package's test suite, lint), **expensive** (the full suite, a build, e2e). Discovery surfaces what the commands are. For prose, config, or artifact work with no suite, the gates are `git diff --stat` against the briefed file set, a grep for the expected content, and reading the output yourself — plan them the same way.
+Before dispatching, identify the checks that could catch a plausible mistake in this change and their rough cost: **cheap** (typecheck, a targeted test file, a grep or `git diff --stat`), **medium** (a package's test suite, lint), **expensive** (the full suite, a build, e2e). For prose, config, or artifact work with no runtime impact, inspect the diff, expected content, and file set yourself.
 
-**Schedule gates by what they can catch, not by habit.**
-- A cheap gate right after the shared-dependency step (step 1 of shaping) — every lane builds on it.
-- One gate after each parallel round lands — not per lane, and not per task within a resumed worker's batch. Pick the cheapest gate that actually answers "did this round break anything". The failure to avoid is a gate after every worker turn — it turns a parallel plan back into a serial one.
-- The expensive gates run once, before reporting to the user — or earlier only when a cheap gate cannot answer the question (a change to shared runtime code, a schema migration). Start them in the background at the earliest point they are meaningful and review the diff while they run; a late failure costs a fix plus a second full run, so the head start is what protects a deadline.
+**Schedule checks by what they can catch, not by habit.**
+- A cheap check after a shared-dependency edit when later lanes build on it.
+- One relevant check after the worker or parallel round lands. Pick the cheapest check that actually answers "did this change break anything?"
+- Run an expensive full suite or build when its coverage is needed for the changed surface or a repository gate requires it. Run it once at the earliest meaningful point and review the diff while it runs.
 
 The tradeoff: coarser gates make a failure harder to attribute. When a gate fails after a multi-lane round, use `git diff --stat` against each lane's file set to localize before sending a corrective brief — rather than adding more gates next time.
 
 ## Token discipline
 
 - Briefs carry **excerpts, not files** — the path, the ten lines that matter, the convention. Workers read the rest themselves.
-- Don't re-read a file a worker wrote. `git diff --stat` plus a targeted grep answers "did it land."
+- Read the changed diff once for correctness and scope. Use `git diff --stat` and targeted searches to locate what needs attention.
 - A fix pattern that will recur across lanes goes in every brief up front — cheaper than N correction roundtrips.
 - Never ask for output you'll re-derive yourself (see the brief checklist).
 

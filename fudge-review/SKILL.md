@@ -14,7 +14,7 @@ When installed by the Fudge installer, the conventions audit uses the bundled `r
 | Mode | When | What runs |
 |---|---|---|
 | standalone | The user asks for a review. Default. | Steps 0 to 8. |
-| orchestrated | `fudge:ship` calls this skill. | The two passes below. Ship supplies every path. |
+| orchestrated | A comprehensive `fudge:ship` run or an explicitly requested formal ship review calls this skill. | The two passes below. Ship supplies every path. |
 | re-review | A `findings.json` already exists for this branch. | Step 9. |
 
 Orchestrated mode runs in two passes:

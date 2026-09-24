@@ -5,7 +5,7 @@ description: "Route UI design work to the output the decision requires: task-spe
 
 # fudge:design
 
-When installed by the Fudge installer, specialist names such as `fudge:ui-mock` refer to bundled guides, not separately installed skills. From the installed root skill's `SKILL.md`, read `references/specialists/fudge-<specialist>/guide.md` for each specialist selected below, then follow links relative to that guide. The source specialist folders remain available for separate manual installation. If this skill runs inside `fudge:ship`, preserve ship's approval and verification gates.
+When installed by the Fudge installer, specialist names such as `fudge:ui-mock` refer to bundled guides, not separately installed skills. From the installed root skill's `SKILL.md`, read `references/specialists/fudge-<specialist>/guide.md` for each specialist selected below, then follow links relative to that guide. The source specialist folders remain available for separate manual installation. If this skill runs inside `fudge:ship`, follow its selected routine or comprehensive path.
 
 Own the UI decision from the person's task to the requested endpoint. Use the project's existing language, patterns, and source-of-truth documents. Apply `fudge-design-for-recognition` throughout to make the information, choices, actions, and feedback understandable in context. Read `references/specialists/fudge-design-for-recognition/guide.md` from the installed root skill when this one runs.
 
@@ -18,7 +18,7 @@ Own the UI decision from the person's task to the requested endpoint. Use the pr
 | Establish reusable rules across screens or components, or explicitly document the chosen design | **Project rules**: update the authoritative documents after the direction is chosen | [Design draft and project rules](references/design-package.md) |
 | Build specific UI components now | **Component build**: implement and verify those components | [Component build](references/component-build.md) |
 
-Choose enough output to let the user review or act on the requested decision. Increase effort for consequential uncertainty, affected states, or reuse across screens, not merely because the request concerns UI. A visual draft does not require project documents; a component request does not require a visual draft. If called from `fudge:ship` before its test-case gate, return guidance or an artifact-only mock at the exact run-local path. Do not enter component build or write product or test code until ship records test-case approval. Ship retains its test, review, approval, and delivery gates.
+Choose enough output to let the user review or act on the requested decision. Increase effort for consequential uncertainty, affected states, or reuse across screens, not merely because the request concerns UI. A visual draft does not require project documents; a component request does not require a visual draft. In a comprehensive `fudge:ship` run, return guidance or an artifact-only mock at the supplied run-local path while behavior still needs agreement; component build follows the applicable approval. In a routine ship task, use the settled direction and return the guidance or draft the task needs, then let ship implement and verify it without a separate test-case gate.
 
 ## Shared routing
 
