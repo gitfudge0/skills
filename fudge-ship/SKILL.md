@@ -25,12 +25,12 @@ Use only stages that serve this work item, in this order:
 |---|---|---|
 | Understand | `fudge:gap-analysis` | A document corpus or conflicting requirements need reconciliation. |
 | Decide | `fudge:decision-room` | A consequential product choice remains unsettled. |
-| Design | `fudge:ui-mock` | A requested mock or consequential UI direction needs to be seen. |
+| Design | `fudge:design` | UI guidance is needed, or a requested or consequential visual choice needs review. |
 | Test cases | `fudge:test-plan` in `plan-only` mode | **Every implementation run.** |
 | Implement | `fudge:delegate` | Product or test files will change. |
 | Review | `fudge:layered-review` | Every implementation run, unless the user explicitly waives review and accepts the reduced assurance. |
 
-Read each selected skill and honor its output contract. Give `understand` the run-local output root; `decide` and `design` an exact run-local HTML path, with `design` in artifact-only mode; `test-plan` a versioned run-local HTML path. The owning skill renders its own artifact. Do not call `fudge:report-deck` to reformat it. A named stage selects membership, not order. Route a standalone code review directly to `fudge:layered-review`, not through ship. Unknown stage names require clarification. If a required skill is unavailable, record a blocker and stop instead of replacing it silently.
+Read each selected skill and honor its output contract. Give `understand` the run-local output root and `decide` an exact run-local HTML path. Before the test-case gate, `design` may return concise guidance with source paths, or call `fudge:ui-mock` in artifact-only mode at an exact run-local HTML path. Choose a mock when the requested or consequential direction needs to be seen; do not require one for every UI task. This stage may not enter `fudge:design` component build, change project design documents, or write product or test code before test-case approval. Give `test-plan` a versioned run-local HTML path. Each stage that produces an artifact renders its own. Do not call `fudge:report-deck` to reformat it. A named stage selects membership, not order. Route a standalone code review directly to `fudge:layered-review`, not through ship. Unknown stage names require clarification. If a required skill is unavailable, record a blocker and stop instead of replacing it silently.
 
 Use read-only recon to find the relevant behavior, dependencies, test setup, and project instructions. Put only what later stages need in a short run-local recon note. Ask for a decision or mock review only when the choice cannot be made from the user's brief and repository context. Feedback on either returns to that stage; do not treat the original request as approval of an unseen artifact. A confirmed "do not build" decision ends the run without implementation.
 

@@ -1,6 +1,6 @@
-# Phase 2 — Target-framework mapping
+# Target-framework mapping
 
-Tokens that only exist as CSS custom properties get retyped by hand into the app, badly. Every token therefore ships its **exact code equivalent in the same row** of `DESIGN.md`, and beside the swatch in `DESIGN.html`.
+Map values when the user wants implementation guidance or the design deliverable is meant to hand values to a known app stack. Use the project's existing theme mechanism where it exists. Map the tokens needed by the requested scope; do not generate a code equivalent for unrelated groups just to fill a table.
 
 ## Detection
 
@@ -11,26 +11,23 @@ Tokens that only exist as CSS custom properties get retyped by hand into the app
 | `package.json` with `svelte` / `vue` / `@angular/core` | That framework |
 | Static HTML/CSS only, no manifest | None needed — CSS custom properties *are* the mapping |
 
-Multiple manifests or none of the above: ask the user **once**, in one message, then proceed. Do not run a detection round-trip per token group.
+If the consuming stack is unclear and the user only asked for design direction, omit the mapping. If code-level handoff is required, inspect the project and ask once only when the target cannot be inferred.
 
 ## Where the mapping lives
 
-In the token tables and specimens, never a separate document. Two consumers, two drift profiles:
-
-- **`DESIGN.html`** generates code strings from the same JS data arrays that render the swatches. Value and code are the same source — they cannot drift.
-- **`DESIGN.md`** tables are hand-copied. State this in the doc: *the Markdown tables are a copy; `DESIGN.html` is generated from one source and wins on conflict.*
+Put mappings beside the corresponding values or reference the authoritative token file. Do not create a separate mapping document unless the requested handoff needs one. If multiple files show the values, name the authority and check any copied code examples against it. Generating swatches and code strings from the same data is a useful approach when building an HTML specimen, not a requirement for every deliverable.
 
 ---
 
 ## Flutter profile
 
-The fully worked profile. Other frameworks get the equivalent treatment (see stubs below).
+Use the applicable parts of this profile for selected token groups.
 
 ### Colors
 
 `Color(0xFFRRGGBB)` — ARGB, alpha first, so `#C13B63` → `Color(0xFFC13B63)`.
 
-Semantic tokens have **no single Flutter value** — they resolve per `Brightness`. Express the semantic tier as two const classes, `AppColorsDark` and `AppColorsLight`, with identical member names, selected via `Theme.of(context).brightness`. Private const constructor, `static const Color` members, camelCase names matching the token (`color-surface-raised` → `surfaceRaised`).
+When both themes exist, semantic tokens resolve per `Brightness`. Keep identical semantic names in each theme and select through the app's theme mechanism, such as `Theme.of(context).brightness`. Do not introduce two classes for a single-theme scope.
 
 ### Typography
 
@@ -39,7 +36,7 @@ Semantic tokens have **no single Flutter value** — they resolve per `Brightnes
 - `fontSize` in logical px: **1rem = 16 logical px**.
 - Flutter's `height` is a multiplier of `fontSize`, so a unitless CSS line-height carries over unchanged.
 - Weights map directly: 400 → `FontWeight.w400`, etc.
-- Loading faces: `google_fonts` (`GoogleFonts.poppins()`) or bundled TTFs declared under `flutter: fonts:` in `pubspec.yaml`. Name both options.
+- Load the selected face through the project's existing font strategy. For a new Flutter app, `google_fonts` or bundled TTFs in `pubspec.yaml` are options.
 
 ### Radius
 
@@ -53,17 +50,17 @@ Flutter has **no `gap` property** on `Row`/`Column`. Insert space explicitly: `S
 
 ### Shadows
 
-One `List<BoxShadow>` per variant, per theme: `AppShadowsLight` / `AppShadowsDark`. `BoxShadow(color: Color.fromRGBO(r, g, b, a), offset: Offset(x, y), blurRadius: b)`. CSS spread has no direct equivalent — if a token uses spread, say what you dropped.
+Map each shadow variant and theme that exists, for example with `List<BoxShadow>`. `BoxShadow(color: Color.fromRGBO(r, g, b, a), offset: Offset(x, y), blurRadius: b)`. CSS spread has no direct equivalent — if a token uses spread, say what you dropped.
 
 ### Motion
 
 - `Duration(milliseconds: n)`.
-- Easings as **exact `Cubic(x1, y1, x2, y2)`**, never the nearest `Curves.*` constant. `Curves.easeOut` and friends are genuinely different curves and will drift from the web build. State this.
+- When matching a specified cubic-bezier curve, use `Cubic(x1, y1, x2, y2)` rather than an approximate named curve.
 - Reduced motion: the Flutter equivalent of `prefers-reduced-motion` is `MediaQuery.disableAnimationsOf(context)`. When true, use `Duration.zero` **and** skip transform-based transitions.
 
 ### Z-index
 
-**There is no Flutter equivalent.** Paint order comes from `Stack` child order (later children paint on top) and `Overlay` entry insertion order. Keep the z tokens as **ordering semantics only** — sort stack children or overlay insertions by them, never assign them to a widget property. The table's Flutter column says exactly that rather than inventing a value.
+**There is no Flutter z-index property.** Paint order comes from `Stack` child order (later children paint on top) and `Overlay` entry insertion order. Map layer semantics to that ordering rather than inventing a widget value.
 
 ### Blur
 
@@ -73,10 +70,10 @@ One `List<BoxShadow>` per variant, per theme: `AppShadowsLight` / `AppShadowsDar
 
 ## Stubs for other targets
 
-Same principle, less prose. Give the equivalent for every token group and flag every group with no equivalent, as z-index is flagged for Flutter.
+Use the same principle for token groups in scope, and flag any group with no direct equivalent.
 
-**React / plain web:** CSS custom properties are already the runtime form — `var(--color-brand)`. Add a typed TS module whose leaves are `var()` *references*, not resolved literals, so theming still works at runtime.
+**React / plain web:** CSS custom properties are already the runtime form — `var(--color-brand)`. Add a typed TS module only if the app uses one; keep references to runtime variables if theming is dynamic.
 
-**Tailwind:** a v4 `@theme` block mapping semantic names to the custom properties (and a v3 `theme.extend` fragment if the project is on v3). Map the **semantic** tier only — binding a utility to `--neutral-700` binds to a value instead of a meaning, and the next theme breaks it.
+**Tailwind:** map semantic names to the custom properties through the project's Tailwind version and conventions. Binding a utility directly to `--neutral-700` makes it harder to change theme meaning.
 
-**shadcn/ui:** its fixed slot vocabulary (`--background`, `--foreground`, `--primary`, …) on the `.dark` convention, aliased onto your semantic tokens. Aliases project outward; they never become a second source. A project that hand-edits the alias layer has forked the system invisibly — say so once.
+**shadcn/ui:** alias its slots (`--background`, `--foreground`, `--primary`, …) to the authoritative semantic tokens. Keep the alias layer from becoming a second token source.

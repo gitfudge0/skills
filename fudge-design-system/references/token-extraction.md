@@ -1,110 +1,28 @@
-# Phase 1 — Token extraction
+# Token extraction
 
-Two passes over the inspiration input. Pass A buys the identity; Pass B buys the long tail. Doing them together produces a palette that got 20% of the attention.
+Use this route when visual or written source material needs to become reusable style rules. Start with the requested property groups. For a full design system, cover the groups used across the agreed product surfaces; do not populate groups with arbitrary defaults merely to make a catalog look complete.
 
-## Inputs this handles
+## What the source can establish
 
-| Input | What you can pull |
-|---|---|
-| Moodboard / screenshot / UI mock image | Palette (eyeballed hexes), type character, radius character, rough spacing rhythm, icon sizes, which theme is primary |
-| Brand assets (logo, deck) | Exact brand hexes, exact faces |
-| Written brief ("warm, calm, dark, rounded") | Direction only — everything becomes a recorded assumption |
-| Existing product | Audit the CSS/theme file; extract real values |
-
-If the input is a dark mock, **dark is the primary theme**. `:root` carries dark; light is the `[data-theme="light"]` override. Inverting that reads as not having looked at the input.
-
----
-
-## Pass A — colors and typography
-
-### Tier 1 — primitives
-
-Name ramps by hue, number by lightness (`raspberry-300/500/600`, `neutral-0/50/100/300/500/700/800/900/950`). Give exact hexes. A brand ramp needs at least three steps (base, darker press/hover, lighter dark-mode hover). The neutral ramp needs enough steps to build both themes without inventing values later — typically 8–10.
-
-Eyeballing hexes off an image is acceptable and normal. Record it: *hexes are eyeballed from the inspiration, not sampled from a source file — expect small drift.*
-
-### Tier 2 — semantic tokens
-
-One table, **light and dark columns side by side**. Minimum set:
-
-| Group | Tokens |
-|---|---|
-| Background | `color-bg`, `color-bg-subtle` |
-| Surface | `color-surface`, `color-surface-raised` |
-| Text | `color-text-primary`, `color-text-secondary`, `color-text-muted` |
-| Brand | `color-brand`, `color-brand-hover` |
-| Support | `color-accent`, `color-tertiary`, `color-on-brand` |
-| Inverse CTA | `color-cta-inverse-bg`, `color-cta-inverse-text` |
-| Line | `color-border` |
-
-`color-brand-hover` usually differs between themes: darker in light, lighter in dark. The inverse-CTA pair is the high-contrast slab button that flips against the page — spell out what it is for.
-
-Give each semantic token a **meaning**, and say which meanings must not swap (e.g. brand = "now / in progress", accent = "done / trend").
-
-### Typography
-
-- Families: `font-display` and `font-body`, each with a full CSS stack. If the mock's faces are commercial, pick open substitutes and **name them as substitutes**, saying what pairing you matched (e.g. geometric-rounded + neutral-grotesque).
-- Scale in `rem` with a line-height and default weight per step. A workable ladder: `display-xl`, `display`, `heading`, `title`, `body`, `body-sm`, `caption`.
-- Weight tokens: `weight-regular/medium/semibold/bold`.
-- State the rem base (1rem = 16px) — Phase 2 depends on it.
-
----
-
-## Pass B — the rest
-
-| Group | Tokens | Source |
+| Source | Strong evidence | Treat as estimate or assumption |
 |---|---|---|
-| Radius | `radius-none/sm/md/lg/xl/full` | Extracted (measure corners in the mock) |
-| Spacing | `space-1…space-16` on a 4px grid | Extracted rhythm, regularised |
-| Gaps | `gap-xs/sm/md/lg` as aliases onto spacing | Derived, named for the layout job |
-| Border widths | `border-thin` (1px), `border-medium` (2px) | Extracted |
-| Shadows | `shadow-sm/md/lg`, **separate light and dark values** | Partly default |
-| Motion | `duration-fast/base/slow`; `ease-standard/decelerate/accelerate` as cubic-beziers | Default |
-| Z-index | `z-base/raised/sticky/overlay/modal/toast` | Default |
-| Icon sizes | `icon-sm/md/lg/xl` | Extracted |
-| Opacity | `opacity-disabled/muted/scrim/hover/pressed` | Default |
-| Blur | `blur-sm/md/lg` | Default |
+| Existing theme or CSS | Actual values and names | Intended meanings if undocumented |
+| Brand assets with specifications | Specified color and type values | Product UI usage beyond the brand guide |
+| Screenshots or moodboard | Color and type character, relative scale, shape and spacing rhythm | Exact sampled values, unseen states, behavior, second theme |
+| Written aesthetic brief | Direction and constraints | Every concrete value chosen to realize it |
 
-Note the shadow subtlety: if the mock separates layers by surface colour rather than by shadow, dark-theme shadows should be near-invisible **by design** — write that down so nobody later "fixes" it.
+Record which source supplied a value. Label visual estimates as estimates, including eyed or sampled hex colors. Say when spacing or radius values were regularized. Never present motion, elevation, focus treatment, z-index, opacity, or contrast as measured from a static picture.
 
-Motion always ships the reduced-motion rule: under `prefers-reduced-motion: reduce`, collapse durations to `0ms` **and skip transform-based transitions**, not merely shorten them.
+## Build the needed vocabulary
 
----
+Use primitives when multiple semantic values share a palette or scale. Semantic names describe purpose, such as `color-text-primary` or `color-surface-raised`; record their intended use so two colors with different meanings do not become interchangeable. A narrow palette request may need only a few colors. A full system usually needs a coherent set for background, surfaces, text, actions, borders, and feedback, but the product determines the actual set.
 
-## Extract vs default
+For typography, specify the chosen families, sizes, weights, and line heights that will be used. If an unavailable face is replaced, name the substitute and the quality it preserves. Define spacing, radius, shadow, icon, motion, and layer values as those patterns arise. Prefer the project's existing naming and units. Avoid adding a token for a one-off decoration unless it represents a reusable rule.
 
-| Can be extracted from a static image | Cannot — default it |
-|---|---|
-| Palette, both themes' direction | Motion durations and easings |
-| Type character, relative scale | Elevation/shadow depth |
-| Radius character | Z-index layering |
-| Spacing rhythm (to be regularised) | Opacity/state-layer values |
-| Icon sizes | Blur radii |
-| Which theme is primary | Focus-ring treatment |
+Add another theme when the brief, existing product, or explicit request calls for it. Make the source-supported theme primary. Mark the derived theme as designed or proposed, not extracted from a screenshot of the primary theme. Where colors will carry text or critical indicators, calculate the relevant contrast ratio and state any usage limit. If motion rules are provided, include reduced-motion behavior.
 
-## Assumptions section — mandatory
+## Source and presentation
 
-`DESIGN.md` ends with an Assumptions list. Every one of these gets a line when it applies:
+Identify one authoritative token/rule source: an existing theme file, generated CSS, or a design document. A Markdown table can be authoritative for a static guide; a runtime theme file may be authoritative for an app. If a visual HTML specimen is useful, render the requested groups at actual size and make clear whether its values are generated from, linked to, or copied from the authority. Check any copy for drift.
 
-- rem→px conversion basis, and any logical-pixel mapping claim.
-- Which token groups are defaults rather than extractions.
-- Radius/spacing regularisation onto the grid ("tidy rather than faithful").
-- Eyeballed hexes.
-- Substitute typefaces and what they substitute for.
-- Which theme got the scrutiny and which was derived by inversion.
-- **Computed contrast** for brand-on-bg and any borderline pair, with the ratio and the resulting usage restriction ("~4.0:1 — large text and fills only, not body copy"). Compute it; do not claim compliance you did not calculate.
-
----
-
-## `DESIGN.md` contract
-
-Tables, in this order: Primitives → Semantic (light/dark) → Typography (families, scale, weights) → Radius → Spacing → Gaps → Border widths → Shadows → Motion → Z-index → Icon sizes → Opacity → Blur → Assumptions. Every table carries the target-framework column from Phase 2.
-
-## `DESIGN.html` contract
-
-One self-contained page. A Google Fonts `<link>` is allowed; nothing else external.
-
-- All tokens as CSS custom properties. `:root` = primary theme; `[data-theme="…"]` = the other; a small JS toggle in the corner.
-- The page styles **itself** with its own tokens — background, text, cards, spacing. A token page that doesn't eat its own cooking hides the errors.
-- A section per token group with a **live specimen**: colour swatches with hex + code string, the type scale rendered at real size, radius squares, spacing bars, shadow cards, a hover-driven motion demo per duration/easing, a stacked z-index diagram, opacity and blur demos.
-- Specimens render from JS data arrays. The same arrays produce the framework code strings shown beneath each swatch, so value and code cannot diverge.
+A full design guide can include primitive and semantic colors, type, spacing, radius, and other product-specific groups, with examples and assumptions. A small request can be a compact table plus one specimen. Use only the sections needed to explain and hand off the choices.

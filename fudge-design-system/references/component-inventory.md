@@ -1,69 +1,21 @@
-# Phase 3 — Component inventory
+# Component inventory
 
-Input: the project's low-fi wireframe board (`mock.html` or equivalent Balsamiq-style artefact). Output: `COMPONENTS.md` + `COMPONENTS.html` at the project root.
+Use this route for a requested component, component set, or full system. Existing code, screens, and wireframes can all supply evidence. Inventory the surfaces relevant to the request; inspect every relevant frame for a full product inventory, but do not require a wireframe for a small component contract.
 
-## Mining the wireframe
+## Decide what belongs
 
-Read **every frame**, not a sample. For each frame, list the UI elements it contains. Then collapse the list: anything appearing in two or more frames, or appearing once but obviously reusable (a dialog, a snackbar), is a component. Anything that exists only as one screen's layout is not — it belongs in Phase 4.
+A component represents a reusable control, content pattern, or surface with a stable job and anatomy. A one-screen arrangement usually belongs to the screen design. Group full-system components by the jobs they serve, such as actions, navigation, input, feedback, and domain-specific content. Do not aim for a predetermined component count.
 
-While reading, record the **frame IDs** each component appears in. Those refs go in the doc and are what makes it auditable later.
+Record source references where they exist: frame IDs, screen names, code paths, or design nodes. If the request introduces a new component, mark its structure and behavior as proposed rather than extracted.
 
-### Grouping
+## Contract and specimens
 
-Group by job, not alphabetically. A workable set — drop empty groups, add domain ones:
+For each component in scope, state its purpose, anatomy, relevant variants and sizes, behavior across meaningful states, tokens or shared rules consumed, and source references. Include a target-framework mapping when the handoff is for a known stack. Do not enumerate hover for a touch-only surface or error for a passive decorative element; do specify focus, disabled, loading, validation, and data states when that component can reach them. Distinguish an empty collection from no search results where both can occur.
 
-| Group | Typical members |
-|---|---|
-| Actions | Button, IconButton, control bars |
-| Navigation & chrome | AppBar, section labels, page indicators, tab bars |
-| Containers & overlays | Scrim, BottomSheet, Dialog, Snackbar, inline notes, toasts |
-| Domain group(s) | Named after the product's own noun (e.g. "Library": tiles, grids, chips) |
-| Lists & rows | ListItem, settings row, chapter row, folder row |
-| Inputs | Slider, Stepper, Toggle, SegmentedControl, swatch picker |
-| Progress & data | ProgressBar, scrub bar, stat cards, charts |
-| Feature-specific | The one surface the product exists for (e.g. "Reader") |
+A written contract, a visual specimen, or both may be appropriate. Use realistic product copy in specimens so length and density can be judged. For a full library, provide enough examples to inspect each reusable pattern and the states most likely to change its layout or meaning; a matrix of every variant multiplied by every state is unnecessary unless the task calls for exhaustive coverage.
 
-Ten to thirty components is the normal range. If you have five you missed frames; if you have sixty you promoted layouts to components.
+## Token consistency
 
-## Hard gate — tokens only
+Components use the declared authoritative token or rule source. If a shared value is missing, add it there before applying it in multiple components. A one-off value may stay local when it truly belongs only to that component; document why if the distinction matters to handoff. Do not duplicate a complete token block in every file unless a self-contained artifact needs it.
 
-Components consume **only** tokens.
-
-- The token block is copied **verbatim** from `DESIGN.html` into `COMPONENTS.html`.
-- **Zero** raw `#hex`, `rgb()`, `rgba()`, `hsl()` anywhere outside that block.
-- Verified by grep, with the count reported:
-
-```bash
-awk '/^:root \{/{inblock=1} inblock&&/^\}/{inblock=0;next} !inblock' COMPONENTS.html \
-  | grep -cE '#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\('
-```
-
-Expect `0`. Non-zero means a component invented a value — which means a token is missing. Add the token to `DESIGN.md`/`DESIGN.html` first, then use it; do not patch the component.
-
-The same rule covers sizes and durations: if a padding is not a `--space-*`, a corner not a `--radius-*`, a transition not a `--duration-*`, it is a leak.
-
-## `COMPONENTS.md` contract
-
-A short preamble stating: what the product is, that this document is the contract and `COMPONENTS.html` is the live specimen sheet, that `DESIGN.md`/`DESIGN.html` define the tokens and nothing here introduces a value that isn't one. Then the rules that hold everywhere — the dominant shape, what each brand/accent colour *means* and which meanings must not swap, how depth is expressed, and where frame refs point.
-
-Then, per component, a two-column table:
-
-| Row | Content |
-|---|---|
-| **Purpose** | One line. What commitment or job it serves. |
-| **Anatomy** | Structure as an arrow chain: container → leading icon → label. |
-| **Variants** | Named variants and sizes. |
-| **States** | default, hover, pressed/active, focus-visible, disabled, loading, error — whichever apply. A component missing states gets forked downstream, and forks are permanent. |
-| **Tokens** | The token **names** consumed, comma-separated. Not values. |
-| **Used in** | Wireframe frame refs (`A1 A3 B4 …`). |
-| **Target framework** | The widget/element mapping and how it's themed (e.g. `FilledButton` via `FilledButtonThemeData` with `StadiumBorder()`). |
-
-Data-bearing components additionally ship the four data states: loading, empty, partial, error — and empty must distinguish *nothing yet* from *nothing matched*.
-
-## `COMPONENTS.html` contract
-
-- Self-contained; same theme-toggle mechanism as `DESIGN.html` (`:root` = primary theme, `[data-theme="…"]` override, corner toggle).
-- Verbatim token block at the top.
-- One section per group, one specimen block per component, rendering **every variant and every state** side by side.
-- **Realistic product content.** Real-looking book titles, real settings labels, real chapter names — not "Lorem" and not "Button". Placeholder copy hides the layout bugs that real strings expose.
-- The page's own chrome is built from the same tokens.
+For a token-only HTML specimen, verify CSS declarations outside the declared token-definition area do not introduce raw colors. Check the actual style declarations and any inline styles; a plain grep across the entire HTML file will also find legitimate token definitions, swatch labels, and documentation examples and cannot establish a leak. Compare any copied token definitions with their authoritative source. Apply the same principle to sizes and durations where they are part of the shared token contract.
