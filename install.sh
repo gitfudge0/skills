@@ -3,27 +3,27 @@ set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="$SCRIPT_DIR/.fudge-build"
-ROOTS=(design ship)
+ROOTS=(design ship review)
 AGENT_NAMES=(claude codex cursor opencode)
 OPTIONAL=()
 for skill_dir in "$SCRIPT_DIR"/*/; do
   [ -f "$skill_dir/SKILL.md" ] || continue
   skill_name="$(basename "$skill_dir")"
-  case "$skill_name" in fudge-design|fudge-ship) ;; *) OPTIONAL+=("${skill_name#fudge-}") ;; esac
+  case "$skill_name" in fudge-design|fudge-ship|fudge-review) ;; *) OPTIONAL+=("${skill_name#fudge-}") ;; esac
 done
 
 usage() {
   cat <<HELP
 Usage: $0 [install|list|remove] [options]
 
-Install defaults to the design and ship root skills. Individual skills are optional.
+Install defaults to the design, ship, and review root skills. Individual skills are optional.
 
 Options:
   -a <agent>         target agent, repeatable: claude|codex|cursor|opencode
-  --root <name>      root skill, repeatable: design|ship
+  --root <name>      root skill, repeatable: design|ship|review
   --skill <name>     individual skill, repeatable (see below)
   --no-roots         install only explicitly selected individual skills
-  --all              select both roots and every individual skill
+  --all              select all three roots and every individual skill
   --copy             copy instead of symlink (install only)
   -y                 skip confirmation; update installer-owned installs
   -h, --help         show this help
@@ -63,6 +63,7 @@ while [ "$#" -gt 0 ]; do
     --skill)
       [ "$#" -ge 2 ] || fail '--skill needs a name'
       requested="${2#fudge-}"
+      contains "$requested" "${ROOTS[@]}" && fail "$2 is a root skill; use --root $requested"
       contains "$requested" "${OPTIONAL[@]}" || fail "unknown individual skill: $2"
       append_unique SELECTED_OPTIONAL "$requested"; EXPLICIT_SELECTION=1; shift 2 ;;
     --no-roots) NO_ROOTS=1; EXPLICIT_SELECTION=1; shift ;;
@@ -88,12 +89,12 @@ agent_dir() {
 }
 source_for() {
   case "$1" in
-    fudge-design|fudge-ship) printf '%s/%s\n' "$BUILD_DIR" "$1" ;;
+    fudge-design|fudge-ship|fudge-review) printf '%s/%s\n' "$BUILD_DIR" "$1" ;;
     *) printf '%s/%s\n' "$SCRIPT_DIR" "$1" ;;
   esac
 }
 is_known_name() {
-  case "$1" in fudge-design|fudge-ship) return 0 ;; esac
+  case "$1" in fudge-design|fudge-ship|fudge-review) return 0 ;; esac
   local short="${1#fudge-}"
   [ "$1" = "fudge-$short" ] && contains "$short" "${OPTIONAL[@]}"
 }
@@ -107,9 +108,9 @@ owned_link() {
   is_known_name "$name" || return 1
   expected="$(source_for "$name")"
   [ "$(readlink "$1")" = "$expected" ] && return 0
-  # Earlier installer versions linked root skills directly to their source folders.
+  # Earlier installer versions linked roots, and review as an optional skill, to source folders.
   case "$name" in
-    fudge-design|fudge-ship) [ "$(readlink "$1")" = "$SCRIPT_DIR/$name" ] ;;
+    fudge-design|fudge-ship|fudge-review) [ "$(readlink "$1")" = "$SCRIPT_DIR/$name" ] ;;
     *) return 1 ;;
   esac
 }

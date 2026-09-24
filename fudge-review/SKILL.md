@@ -1,11 +1,13 @@
 ---
-name: fudge-review
+name: fudge:review
 description: Reviews a PR or diff, then renders the findings in layers (verdict, one-line list, detail) for chat, Slack, GitHub, or an HTML report. Use for "review this PR", "look at this diff", "what do you think of these changes", "re-review after the new commits", or "post the review to Slack/GitHub". Also use to share or re-render findings from an earlier review.
 ---
 
 # Review
 
 fudge:review reviews a change, verifies every finding itself, stores the result in `findings.json`, and renders it for the chosen medium. The reader sees the verdict first and opens detail only when they want it.
+
+When installed by the Fudge installer, the conventions audit uses the bundled `references/specialists/fudge-conventions/guide.md`. Follow its links relative to that guide. A separate `fudge:conventions` install is not required for this review.
 
 ## Modes
 

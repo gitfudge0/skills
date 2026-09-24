@@ -1,11 +1,12 @@
 # Skills
 
-A personal collection of agent skills. The default install exposes two root skills, `fudge:design` and `fudge:ship`. Each root includes the specialist guidance it needs as internal references. The other skills below are available as optional, separately invokable installs.
+A personal collection of agent skills. The default install exposes three root skills: `fudge:design`, `fudge:ship`, and `fudge:review`. Each root includes the specialist guidance it needs as internal references. The other skills below are available as optional, separately invokable installs.
 
 | Skill | What it does | Reach for it when |
 |---|---|---|
 | fudge:ship | Takes one idea, issue, or story to a verified feature. UI guidance or a mock is used when needed; you approve the test case matrix before code. Issue updates and the PR cycle are optional. | "take this feature from idea to completion" |
 | fudge:design | Routes UI work to concise guidance, a reviewable draft, reusable project rules, or a requested component build. Output and effort follow the decision and its risk. | "design this flow", "guide this UI build", or "build these components" |
+| fudge:review | Reviews a PR or diff and reports findings as symptom, cause, and fix — verdict, one-line list, detail — in chat, Slack, GitHub, or HTML. Re-reviews after new commits. | "review this and don't bury me in text" |
 | fudge:ux-research | Discovers user needs or tests UI tasks with participants, then traces findings to design decisions. | "learn what users need" or "test whether people can complete this task" |
 | fudge:content-architecture | Organizes routes, navigation, labels, and interface copy around a person's task, with evidence and assumptions recorded. | "make this information findable" or "fix these labels and instructions" |
 | fudge:interaction-design | Specifies actions, states, permissions, feedback, and recovery across a UI task. | "define how this flow behaves" or "what happens when save or submit fails" |
@@ -18,7 +19,6 @@ A personal collection of agent skills. The default install exposes two root skil
 | fudge:mindmap | Turns a document, transcript, or pile of notes into an interactive animated HTML mindmap. | "mindmap this document" |
 | fudge:ui-mock | Shows the requested UI decision and consequential states in a self-contained HTML mock with task-relevant frames. | "mock this up before building" |
 | fudge:ui-prototype | Builds a bounded runnable UI draft to test branching, navigation, persistence, or recovery before production. | "let me try this flow" or "prototype how save and resume should work" |
-| fudge:review | Reviews a PR or diff and reports findings as symptom, cause, and fix — verdict, one-line list, detail — in chat, Slack, GitHub, or HTML. Re-reviews after new commits. | "review this and don't bury me in text" |
 | fudge:decision-room | Cross-functional personas pressure-test a decision independently, then synthesize into one recommendation. | "should we build this" |
 | fudge:design-system | Derives the requested tokens, style rules, component contracts, or visual specimens from a moodboard, screenshots, wireframe, or brief. Reuses the project's design source. | "define these tokens" or "make our product look like this" |
 | fudge-design-for-recognition | Shapes UI information and interaction so people can find, understand, decide, and act, then checks the rendered result. | "make this interface easier to use" |
@@ -32,7 +32,7 @@ Skills write their run artifacts — reports, registers, run state, and other ge
 
 ## Install
 
-Run `./install.sh` for an interactive install. It asks for target agents, shows **design** and **ship** checked by default, and offers a separate optional-skills picker with nothing checked. The final summary lists the exact skills, target directories, and symlink or copy method before installation. If you pass `-a`, the interactive agent picker is skipped.
+Run `./install.sh` for an interactive install. It asks for target agents, shows **design**, **ship**, and **review** checked by default, and offers a separate optional-skills picker with nothing checked. The final summary lists the exact skills, target directories, and symlink or copy method before installation. If you pass `-a`, the interactive agent picker is skipped.
 
 ```text
 Choose target agents:
@@ -44,6 +44,7 @@ Choose target agents:
 Root skills (installed by default):
   [x] design
   [x] ship
+  [x] review
 
 Browse optional individual skills? [y/N]
 Search optional skills (blank for all):
@@ -54,6 +55,7 @@ Ready to install:
   Root skills:
     fudge:design
     fudge:ship
+    fudge:review
   Optional individual skills:
     (none)
 ```
@@ -65,7 +67,8 @@ For scripts, select at least one agent with `-a`. A nonterminal install without 
 ```bash
 ./install.sh install -a codex
 ./install.sh install -a codex --root design
-./install.sh install -a codex --root design --root ship \
+./install.sh install -a codex --root review
+./install.sh install -a codex --root design --root ship --root review \
   --skill accessible-ui --skill ui-mock
 ./install.sh install -a codex --no-roots --skill test-plan
 ./install.sh install -a codex --all
@@ -74,7 +77,7 @@ For scripts, select at least one agent with `-a`. A nonterminal install without 
 ./install.sh remove -a codex --all -y
 ```
 
-`--root` and `--skill` are repeatable. `--skill` on its own adds individual skills to the two default roots; `--no-roots` selects individuals only. `--all` explicitly installs both roots and every individual skill. `-y` skips terminal confirmation. Root packages are generated from the current source during installation and installed as `fudge-design` and `fudge-ship`. Selecting a root never creates separate installs of its specialists.
+`--root` and `--skill` are repeatable. `--skill` on its own adds individual skills to the three default roots; `--no-roots` selects individuals only. `--all` explicitly installs all three roots and every individual skill. `-y` skips terminal confirmation. Root packages are generated from the current source during installation and installed as `fudge-design`, `fudge-ship`, and `fudge-review`. Selecting a root never creates separate installs of its specialists. Use `--root review` to install review alone; `--skill review` is rejected because review is a root.
 
 The installer updates symlinks and copies it previously created. Copies carry a `.fudge-installer` marker. An entry at the destination that the installer cannot identify as its own is reported as a conflict and left untouched. `remove` likewise removes only installer-owned entries; older unmarked manual copies must be removed manually.
 

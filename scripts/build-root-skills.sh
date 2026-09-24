@@ -19,7 +19,7 @@ fi
 stage_dir="$(mktemp -d "$output_dir/.fudge-stage.XXXXXX")"
 trap 'rm -rf "$stage_dir"' EXIT
 
-for root in fudge-design fudge-ship; do
+for root in fudge-design fudge-ship fudge-review; do
   cp -R "$source_dir/$root" "$stage_dir/$root"
   mkdir -p "$stage_dir/$root/references/specialists"
   touch "$stage_dir/$root/.fudge-build-generated"
@@ -35,6 +35,12 @@ for specialist in "$source_dir"/fudge-*; do
     fudge-design)
       roots=(fudge-ship)
       ;;
+    fudge-review)
+      roots=(fudge-ship)
+      ;;
+    fudge-conventions)
+      roots=(fudge-design fudge-ship fudge-review)
+      ;;
     *)
       roots=(fudge-design fudge-ship)
       ;;
@@ -48,14 +54,14 @@ for specialist in "$source_dir"/fudge-*; do
   done
 done
 
-for root in fudge-design fudge-ship; do
+for root in fudge-design fudge-ship fudge-review; do
   if [[ -e "$output_dir/$root" && ! -f "$output_dir/$root/.fudge-build-generated" ]]; then
     printf 'Refusing to replace an unmarked directory: %s\n' "$output_dir/$root" >&2
     exit 1
   fi
 done
 
-for root in fudge-design fudge-ship; do
+for root in fudge-design fudge-ship fudge-review; do
   rm -rf "$output_dir/$root"
   mv "$stage_dir/$root" "$output_dir/$root"
 done
