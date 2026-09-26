@@ -5,7 +5,7 @@ description: Take an idea, issue, feature, story, or task through implementation
 
 # fudge:ship
 
-During a ship run installed by the Fudge installer, stage names such as `fudge:test-plan`, `fudge:review`, and `fudge:design` refer to bundled guides. From this root `SKILL.md`, read `references/specialists/fudge-<specialist>/guide.md` for each selected stage or specialist, then follow links relative to that guide. The design and review guides are bundled so this root works when installed alone. The source skill folders remain available for separate manual installation.
+During a ship run installed by the Fudge installer, stage names such as `fudge:test-plan`, `fudge:review`, `fudge:ux`, and `fudge:design` refer to bundled guides. From this root `SKILL.md`, read `references/specialists/fudge-<specialist>/guide.md` for each selected stage or specialist, then follow links relative to that guide. The UX, design, and review guides are bundled so this root works when installed alone. The source skill folders remain available for separate manual installation.
 
 Build one work item to its chosen endpoint. A finished feature may be one part of a larger release. Finishing this work never implies that a release was cut.
 
@@ -30,12 +30,13 @@ Use read-only recon to find the relevant behavior, dependencies, existing checks
 |---|---|---|
 | Reconcile requirements | `fudge:gap-analysis` | Documents conflict or leave a material gap. |
 | Decide product direction | `fudge:decision-room` | A consequential choice remains unsettled. |
-| Shape UI | `fudge:design` | UI guidance or a reviewable visual decision is needed. |
+| Shape the experience | `fudge:ux` | User needs, content structure, task flow, state behavior, or usability needs a decision. |
+| Shape the interface | `fudge:design` | Visual expression, UI guidance, a reviewable mock, or component direction is needed. |
 | Plan distinct failure cases | `fudge:test-plan` | Risk or an explicit request warrants a separate test plan. |
 | Implement | `fudge:delegate` | Product or test files will change. |
 | Formal review | `fudge:review` | The change is comprehensive or the user requests this review. |
 
-Read each selected skill and honor the contract for the chosen path. A named stage selects membership, not order. For standalone code review, use the `fudge:review` root without starting a ship run. If that root is unavailable, read the bundled `references/specialists/fudge-review/guide.md` and follow its standalone mode. Unknown stage names require clarification. If a required skill is unavailable, report the blocker instead of silently replacing it.
+Read each selected skill and honor the contract for the chosen path. A named stage selects membership, not order; UX and design can inform each other in either direction. Use one or both when the task calls for them, carrying settled decisions across the guides without restating their rules. For standalone code review, use the `fudge:review` root without starting a ship run. If that root is unavailable, read the bundled `references/specialists/fudge-review/guide.md` and follow its standalone mode. Unknown stage names require clarification. If a required skill is unavailable, report the blocker instead of silently replacing it.
 
 ## Routine path
 
@@ -48,7 +49,7 @@ Routine work needs no run directory, HTML matrix, separate test-case approval, b
 
 ## Comprehensive path
 
-Create a unique `.fudge/<branch>/ship/<YYYY-MM-DD>-<slug>[-N]/` directory and durable `run.json`. Keep run artifacts there. Read [run state and recovery](references/run-state.md) when creating or resuming the run and before implementation touches a worktree. Confirm an implementation target is a Git repository. Record the original request, endpoint, decisions already approved, artifacts, gate responses, verification evidence, and blockers. Supply run-local paths to selected stages. For UI work, `fudge:design` may return concise guidance or a reviewable mock; a mock is required only when the visual decision needs to be seen.
+Create a unique `.fudge/<branch>/ship/<YYYY-MM-DD>-<slug>[-N]/` directory and durable `run.json`. Keep run artifacts there. Read [run state and recovery](references/run-state.md) when creating or resuming the run and before implementation touches a worktree. Confirm an implementation target is a Git repository. Record the original request, endpoint, decisions already approved, artifacts, gate responses, verification evidence, and blockers. Supply run-local paths to selected stages. For UI work, `fudge:ux` may settle content or behavior and `fudge:design` may return concise visual guidance or a reviewable mock; a mock is required only when the visual decision needs to be seen.
 
 Find and load actionable coding rules in project skills, `AGENTS.md`, `CLAUDE.md`, or equivalent sources, and record their paths and revisions. If consequential rules conflict, resolve the conflict before affected code. Offer `fudge:conventions` setup only when a missing project contract itself blocks the work; creating one requires separate authorization.
 

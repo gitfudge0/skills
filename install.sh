@@ -3,27 +3,27 @@ set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="$SCRIPT_DIR/.fudge-build"
-ROOTS=(design ship review)
+ROOTS=(design ux ship review)
 AGENT_NAMES=(claude codex cursor opencode)
 OPTIONAL=()
 for skill_dir in "$SCRIPT_DIR"/*/; do
   [ -f "$skill_dir/SKILL.md" ] || continue
   skill_name="$(basename "$skill_dir")"
-  case "$skill_name" in fudge-design|fudge-ship|fudge-review) ;; *) OPTIONAL+=("${skill_name#fudge-}") ;; esac
+  case "$skill_name" in fudge-design|fudge-ux|fudge-ship|fudge-review) ;; *) OPTIONAL+=("${skill_name#fudge-}") ;; esac
 done
 
 usage() {
   cat <<HELP
 Usage: $0 [install|list|remove] [options]
 
-Install defaults to the design, ship, and review root skills. Individual skills are optional.
+Install defaults to the design, ux, ship, and review root skills. Individual skills are optional.
 
 Options:
   -a <agent>         target agent, repeatable: claude|codex|cursor|opencode
-  --root <name>      root skill, repeatable: design|ship|review
+  --root <name>      root skill, repeatable: design|ux|ship|review
   --skill <name>     individual skill, repeatable (see below)
   --no-roots         install only explicitly selected individual skills
-  --all              select all three roots and every individual skill
+  --all              select all four roots and every individual skill
   --copy             copy instead of symlink (install only)
   -y                 skip confirmation; update installer-owned installs
   -h, --help         show this help
@@ -89,12 +89,12 @@ agent_dir() {
 }
 source_for() {
   case "$1" in
-    fudge-design|fudge-ship|fudge-review) printf '%s/%s\n' "$BUILD_DIR" "$1" ;;
+    fudge-design|fudge-ux|fudge-ship|fudge-review) printf '%s/%s\n' "$BUILD_DIR" "$1" ;;
     *) printf '%s/%s\n' "$SCRIPT_DIR" "$1" ;;
   esac
 }
 is_known_name() {
-  case "$1" in fudge-design|fudge-ship|fudge-review) return 0 ;; esac
+  case "$1" in fudge-design|fudge-ux|fudge-ship|fudge-review) return 0 ;; esac
   local short="${1#fudge-}"
   [ "$1" = "fudge-$short" ] && contains "$short" "${OPTIONAL[@]}"
 }
@@ -110,7 +110,7 @@ owned_link() {
   [ "$(readlink "$1")" = "$expected" ] && return 0
   # Earlier installer versions linked roots, and review as an optional skill, to source folders.
   case "$name" in
-    fudge-design|fudge-ship|fudge-review) [ "$(readlink "$1")" = "$SCRIPT_DIR/$name" ] ;;
+    fudge-design|fudge-ux|fudge-ship|fudge-review) [ "$(readlink "$1")" = "$SCRIPT_DIR/$name" ] ;;
     *) return 1 ;;
   esac
 }
@@ -434,7 +434,8 @@ ui_toggle() {
 
 ui_install() {
   local i key char
-  UI_AGENT=(); UI_ROOT=(1 1 1); UI_OPT=()
+  UI_AGENT=(); UI_ROOT=()
+  for ((i=0; i<${#ROOTS[@]}; i++)); do UI_ROOT+=(1); done
   if [ "${#AGENTS[@]}" -eq 0 ]; then
     UI_AGENT=(0 1 0 0)
   else

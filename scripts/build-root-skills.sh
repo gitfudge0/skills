@@ -19,7 +19,8 @@ fi
 stage_dir="$(mktemp -d "$output_dir/.fudge-stage.XXXXXX")"
 trap 'rm -rf "$stage_dir"' EXIT
 
-for root in fudge-design fudge-ship fudge-review; do
+roots=(fudge-design fudge-ux fudge-ship fudge-review)
+for root in "${roots[@]}"; do
   cp -R "$source_dir/$root" "$stage_dir/$root"
   mkdir -p "$stage_dir/$root/references/specialists"
   touch "$stage_dir/$root/.fudge-build-generated"
@@ -29,24 +30,33 @@ for specialist in "$source_dir"/fudge-*; do
   [[ -d "$specialist" ]] || continue
   name="${specialist##*/}"
   case "$name" in
-    fudge-ship|fudge-mindmap|fudge-report-deck|fudge-unslop)
+    fudge-mindmap|fudge-report-deck|fudge-unslop)
       continue
       ;;
     fudge-design)
-      roots=(fudge-ship)
+      bundle_roots=(fudge-design fudge-ux fudge-ship)
+      ;;
+    fudge-ux)
+      bundle_roots=(fudge-design fudge-ux fudge-ship)
       ;;
     fudge-review)
-      roots=(fudge-ship)
+      bundle_roots=(fudge-ship)
+      ;;
+    fudge-ship)
+      continue
       ;;
     fudge-conventions)
-      roots=(fudge-design fudge-ship fudge-review)
+      bundle_roots=(fudge-ship fudge-review)
+      ;;
+    fudge-test-plan)
+      bundle_roots=(fudge-ship)
       ;;
     *)
-      roots=(fudge-design fudge-ship)
+      bundle_roots=(fudge-design fudge-ux fudge-ship)
       ;;
   esac
 
-  for root in "${roots[@]}"; do
+  for root in "${bundle_roots[@]}"; do
     guide_dir="$stage_dir/$root/references/specialists/$name"
     mkdir -p "$guide_dir"
     cp -R "$specialist"/. "$guide_dir/"
@@ -54,14 +64,14 @@ for specialist in "$source_dir"/fudge-*; do
   done
 done
 
-for root in fudge-design fudge-ship fudge-review; do
+for root in "${roots[@]}"; do
   if [[ -e "$output_dir/$root" && ! -f "$output_dir/$root/.fudge-build-generated" ]]; then
     printf 'Refusing to replace an unmarked directory: %s\n' "$output_dir/$root" >&2
     exit 1
   fi
 done
 
-for root in fudge-design fudge-ship fudge-review; do
+for root in "${roots[@]}"; do
   rm -rf "$output_dir/$root"
   mv "$stage_dir/$root" "$output_dir/$root"
 done
