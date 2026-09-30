@@ -30,7 +30,7 @@ for specialist in "$source_dir"/fudge-*; do
   [[ -d "$specialist" ]] || continue
   name="${specialist##*/}"
   case "$name" in
-    fudge-mindmap|fudge-report-deck|fudge-unslop)
+    fudge-mindmap|fudge-report-deck|fudge-system-decomposition|fudge-unslop)
       continue
       ;;
     fudge-design)
