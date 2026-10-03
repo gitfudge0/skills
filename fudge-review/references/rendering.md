@@ -130,7 +130,7 @@ An inline comment for a blocker:
 
 ## HTML
 
-Default path: `.fudge/<branch>/review/review.html`. A path from a calling skill overrides it; write there and create only its parent directory.
+Resolve the unique default review directory through package-root `shared/artifacts.md`; place `review.html` there. A caller supplies its exact destination. Preserve existing artifacts unless deliberately re-rendering the identified review.
 
 Build the page by copying `assets/example-review.html` and replacing its content. Follow `assets/design-system.md` for tokens, type, and components. These bundled assets win over any report or template that happens to exist in the repo under review. HTML suits cross-repo reviews, 15 or more findings, and constraints a chat message would bury, such as deploy order.
 
@@ -149,3 +149,7 @@ Method           divider pill, then a collapsed <details> block
 ```
 
 Severity renders as pills, never emoji. `SUSPECTED` and `pre-existing` render as muted pills next to the severity pill.
+
+## Readiness wording
+
+Use the subject-aware, CI-aware verdict rules in the review root. A local review with any open actionable author blocker or should-fix says “Needs changes” (`needs-changes`); otherwise it says “No blocking findings” (`no-blocking-findings`). Neither mergeable label applies to local reviews. The “Mergeable after fixes” examples above illustrate PR reviews only. For PRs, use “Mergeable” only when applicable CI passes and no blocking findings remain. Failed or pending checks qualify readiness explicitly; no checks means runtime/build verification is absent. Render only recorded evidence and never imply static tracing executed the application.

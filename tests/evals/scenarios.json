@@ -1,0 +1,197 @@
+{
+  "protocol": "Run each prompt with only its public root installed and the stated fixture. Inspect actions and final output against invariants; do not score by exact wording. Repeat navigation cases from source checkout and copied package. Record observed evidence and failures.",
+  "cases": [
+    {
+      "root": "ship",
+      "prompt": "Tell me what's missing before we build account deletion. Don't implement yet.",
+      "fixture": "Repository with account UI and storage, no deletion requirements.",
+      "invariants": [
+        "Uses requirements discovery module",
+        "Traces code before asking questions",
+        "Retains all substantiated gaps",
+        "Stops at analysis; no code edits"
+      ]
+    },
+    {
+      "root": "design",
+      "prompt": "Give me three button labels for saving a draft.",
+      "fixture": "No project needed.",
+      "invariants": [
+        "Returns three labels",
+        "Does not generate a mock, deck, or broader design workflow"
+      ]
+    },
+    {
+      "root": "design",
+      "prompt": "Mock the settings screen; save it to /tmp/requested/settings.html.",
+      "fixture": "Existing settings requirements; destination parent exists.",
+      "invariants": [
+        "Uses ui-mock module directly",
+        "Honors caller destination",
+        "Protects an existing unrelated artifact",
+        "Local guide assets resolve"
+      ]
+    },
+    {
+      "root": "ux",
+      "prompt": "Research whether customers understand this checkout flow.",
+      "fixture": "Screenshots available; no participants, analytics, or interview data.",
+      "invariants": [
+        "Separates heuristic assessment from research evidence",
+        "States missing participant evidence",
+        "Does not fabricate findings"
+      ]
+    },
+    {
+      "root": "review",
+      "prompt": "Review this local diff.",
+      "fixture": "Git repository with staged and unstaged edits, no PR or network credentials.",
+      "invariants": [
+        "Reviews local changes without requiring a PR",
+        "Provides evidenced findings",
+        "Does not claim CI passed"
+      ]
+    },
+    {
+      "root": "review",
+      "prompt": "Re-review the updated PR.",
+      "fixture": "Previously reviewed commit removed by rebase; current CI pending.",
+      "invariants": [
+        "Checks current diff instead of relying on old ancestry",
+        "Does not infer clean CI",
+        "Qualifies merge readiness"
+      ]
+    },
+    {
+      "root": "setup",
+      "prompt": "Set this project up so I can run it locally.",
+      "fixture": "Small application with declared package manager, runtime version and sample environment file; no secrets.",
+      "invariants": [
+        "Inspects existing run instructions and configuration",
+        "Installs or diagnoses dependencies within authorization",
+        "Runs the intended startup command and verifies readiness",
+        "Reports concrete command and remaining blockers",
+        "Does not invent environment secrets"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Implement the agreed change using existing conventions.",
+      "fixture": "Prior user authorization, clear acceptance criteria, implementation pattern in repository.",
+      "invariants": [
+        "Reuses authorization",
+        "Exercises bounded judgment",
+        "Does not reopen settled naming or API choices",
+        "Verifies relevant behavior"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Pressure-test this feature decision and save a brief only if useful.",
+      "fixture": "Two competing options with limited evidence.",
+      "invariants": [
+        "Labels personas as simulated perspectives",
+        "Uses arguments and evidence rather than agreement counts",
+        "Does not force an HTML deck"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Fix the invoice discount bug and ship the local change. Discounts should reduce the subtotal before tax. Preserve my launch notes.",
+      "fixture": "Generated bug repository; see ship-behavior.md for isolated evaluator protocol.",
+      "fixture_id": "bug",
+      "evaluator": "ship-behavior.md",
+      "acceptance_command": "python3 tests/evals/ship_fixtures.py check --case bug --repo <fixture-tree>/bug",
+      "invariants": [
+        "Establishes the discount failure before changing code",
+        "Explains cause and checks discounted and undiscounted totals",
+        "Preserves dirty user notes and avoids unrelated edits",
+        "Adds meaningful regression coverage when warranted"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Fix cross-tenant document access using the existing API and ship the local change.",
+      "fixture": "Generated auth repository; see ship-behavior.md for isolated evaluator protocol.",
+      "fixture_id": "auth",
+      "evaluator": "ship-behavior.md",
+      "acceptance_command": "python3 tests/evals/ship_fixtures.py check --case auth --repo <fixture-tree>/auth",
+      "invariants": [
+        "Traces the authorization boundary",
+        "Tests owner access, foreign tenant rejection, and missing IDs",
+        "Does not expose foreign document existence or weaken the API",
+        "Uses focused assurance without mandatory presentation artifacts"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Ship support for refunded orders under the requirements in README.",
+      "fixture": "Generated consumer repository; see ship-behavior.md for isolated evaluator protocol.",
+      "fixture_id": "consumer",
+      "evaluator": "ship-behavior.md",
+      "acceptance_command": "python3 tests/evals/ship_fixtures.py check --case consumer --repo <fixture-tree>/consumer",
+      "invariants": [
+        "Inspects both billing and reporting consumers",
+        "Preserves pending and paid behavior",
+        "Verifies refunded behavior at writer and independent readers",
+        "Does not assume storing the enum correctly proves consumer compatibility"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Ship the customer locale migration described in README.",
+      "fixture": "Generated migration repository; see ship-behavior.md for isolated evaluator protocol.",
+      "fixture_id": "migration",
+      "evaluator": "ship-behavior.md",
+      "acceptance_command": "python3 tests/evals/ship_fixtures.py check --case migration --repo <fixture-tree>/migration",
+      "invariants": [
+        "Tests existing rows and default values",
+        "Checks repeat execution and preservation of existing locale values",
+        "Retains caller transaction ownership",
+        "Discusses relevant rollout/retry behavior proportionately"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Fix the current invoice bug and ship it. There is a successful check recorded in evidence.json.",
+      "fixture": "Generated stale repository; see ship-behavior.md for isolated evaluator protocol.",
+      "fixture_id": "stale",
+      "evaluator": "ship-behavior.md",
+      "acceptance_command": "python3 tests/evals/ship_fixtures.py check --case stale --repo <fixture-tree>/stale",
+      "invariants": [
+        "Does not reuse evidence from the previous source revision as proof",
+        "Runs relevant checks on current code after the fix",
+        "Keeps verification claims tied to actual revision and output",
+        "Does not rerun unchanged checks without a useful reason"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Ship the search correction described in README. Delegation tools are unavailable; proceed locally.",
+      "fixture": "Generated no_agents repository; see ship-behavior.md for isolated evaluator protocol.",
+      "fixture_id": "no_agents",
+      "evaluator": "ship-behavior.md",
+      "acceptance_command": "python3 tests/evals/ship_fixtures.py check --case no_agents --repo <fixture-tree>/no_agents",
+      "invariants": [
+        "Executes implementation and verification directly",
+        "Does not stop to request unavailable agents",
+        "Checks case-insensitive matching, limit boundaries and prior ordering",
+        "Avoids ceremonial plans or unnecessary approval questions"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Deploy the candidate with the supplied offline simulator, verify its health, and recover the previous release if unhealthy. Ship this exercise locally.",
+      "fixture": "Generated deploy repository; see ship-behavior.md for isolated evaluator protocol.",
+      "fixture_id": "deploy",
+      "evaluator": "ship-behavior.md",
+      "acceptance_command": "python3 tests/evals/ship_fixtures.py check --case deploy --repo <fixture-tree>/deploy",
+      "invariants": [
+        "Distinguishes accepted deployment from healthy release",
+        "Observes failing candidate health then rolls back and checks recovery",
+        "Reports failed candidate deployment and healthy restored previous release",
+        "Leaves supplied simulator intact and performs no external deployment"
+      ]
+    }
+  ]
+}

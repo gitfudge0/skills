@@ -1,47 +1,36 @@
 ---
 name: fudge:design
-description: "Shape how an interface expresses a settled or emerging experience: visual hierarchy, composition, mocks, type and layout choices, component guidance, or rendered critique. Route user needs, content structure, and flow decisions to fudge:ux when they are consequential."
+description: "Shape visual hierarchy, screens, components, design systems, static mocks, prototypes, or rendered UI checks. Use for interface expression; route consequential user needs and behavior questions to UX."
 ---
 
 # fudge:design
 
-When installed by the Fudge installer, specialist names such as `fudge:ui-mock` refer to bundled guides, not separately installed skills. From the installed root skill's `SKILL.md`, read `references/specialists/fudge-<specialist>/guide.md` for each specialist selected below, then follow links relative to that guide. The source specialist folders remain available for separate manual installation. `fudge:ux` is bundled at `references/specialists/fudge-ux/guide.md` for a consequential experience question. If this skill runs inside `fudge:ship`, follow its selected routine or comprehensive path.
+## Locate guidance
 
-Own the interface expression from the person's task to the requested endpoint. Use the project's existing language, patterns, and source-of-truth documents. For task-specific visual guidance, a draft, or a component decision, read the bundled `references/specialists/fudge-design-for-recognition/guide.md`. It is the single source for expressing chosen grouping and priority through hierarchy, typography, color, depth, controls, and visible feedback. Apply only the concepts that affect the task. UX and visual design can inform each other in either order; send a specific unresolved need, content, or behavior question to the `fudge:ux` guide, then carry its scoped decision into the visual work. Revisit UX only if the design exposes a new consequential question.
+Resolve the package root before opening shared or bundled guidance: walk ancestors of this file to `.fudge-package.json`. All `references/modules/`, `references/roots/`, and `shared/` paths below are relative to that package root, even when this guide is nested. In the source checkout, the root is the ancestor containing `scripts/skill-manifest.json`; module guides are `modules/<name>/guide.md`, root guides are `fudge-<name>/SKILL.md`, and shared paths are unchanged. The primary installed root is package-root `SKILL.md`; other root guides are under `references/roots/<name>/guide.md`. Bundling rewrites a reference to the primary root to `SKILL.md`. Links to this guide's own references remain relative to this file. Read only the selected guidance.
+
+Use package-root `shared/execution.md` for implementation/delegation policy, `shared/writing.md` for prose, and `shared/artifacts.md` before writing review artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read optional package-root `shared/report-deck/guide.md`; concise chat is the default.
+
+Own the visual question through its requested endpoint. Inspect existing UI, project instructions, vocabulary, authoritative design documents, tokens, and components. Use established patterns for routine choices; resolve only consequential unsettled product choices with the user. Read `references/modules/design-for-recognition/guide.md` for task-specific hierarchy, typography, color, surfaces, controls, and feedback.
 
 ## Choose the endpoint
 
-| Request | Output | Read |
-|---|---|---|
-| Advice, critique, or implementation guidance | **Guidance**: concise, task-specific direction with source paths; no artifact by default | This file |
-| Design or compare a screen, flow, or visual direction | **Visual draft**: a reviewable artifact showing the requested decision and consequential states | [Design draft and project rules](references/design-package.md) |
-| Establish reusable rules across screens or components, or explicitly document the chosen design | **Project rules**: update the authoritative documents after the direction is chosen | [Design draft and project rules](references/design-package.md) |
-| Build specific UI components now | **Component build**: implement and verify those components | [Component build](references/component-build.md) |
-
-Choose enough output to let the user review or act on the requested decision. Increase effort for consequential uncertainty, affected states, or reuse across screens, not merely because the request concerns UI. A visual draft does not require project documents; a component request does not require a visual draft. In a comprehensive `fudge:ship` run, return guidance or an artifact-only mock at the supplied run-local path while behavior still needs agreement; component build follows the applicable approval. In a routine ship task, use the settled direction and return the guidance or draft the task needs, then let ship implement and verify it without a separate test-case gate.
-
-## Shared routing
-
-1. Read the user's goal, relevant UI, project instructions, existing design documents, tokens, components, and vocabulary. Identify the person's task, the chosen content priority, and the states that affect the visual choice.
-2. Route only the questions this task raises to the guides below. Carry their decisions, evidence, and open questions into the selected mode; do not run every guide as a fixed sequence. Use `fudge:gap-analysis` only when scattered or conflicting source material obstructs a coherent design. Use `fudge:decision-room` only for a consequential unresolved product choice. Let the user settle consequential naming, tone, visual, or interaction choices that the brief and project do not establish. Follow existing patterns for routine choices and mark remaining assumptions.
-3. Use `fudge:delegate` for artifact and code edits. Brief workers with the chosen direction, exact output paths, existing patterns, and bounded ownership. The orchestrator inspects the result and runs relevant verification, reading the raw output before reporting completion. A visual draft needs rendered inspection; a component build also needs relevant project checks.
-4. Return the requested output and its evidence: applicable constraints for guidance, the draft path and decisions for visual work, authoritative paths for project rules, or changed files and observed behavior for a component build. Keep open choices visible.
-
-| Question or risk | Specialist |
+| Request | Route and output |
 |---|---|
-| Chosen grouping and priority need visual expression, or typography, color, surfaces, controls, or feedback need design judgment | `fudge-design-for-recognition`. |
-| User needs, content structure, or flow behavior could change the visual choice | `fudge:ux`; read its bundled guide and route its specific question. |
-| Accessibility guidance or criterion-level assessment is needed for the target UI | `fudge:accessible-ui`; scope the check and its evidence, and make no blanket conformance claim. |
-| A static frame cannot answer a consequential interaction question | `fudge:ui-prototype` for a bounded runnable task at an exact unused path under its own output location (`.fudge/<branch>/ui-prototype/`) unless `fudge:ship` supplies a run-local path. |
-| Built UI needs comparison with its selected design, or a UI fix needs retesting | `fudge:design-qa`. |
-| A launched UI needs outcome definitions, event checks, or an evidence-based iteration decision | `fudge:experience-measurement`. |
+| Advice or critique | Concise direction tied to the task and source evidence; no artifact by default |
+| Show or compare screens | `references/modules/ui-mock/guide.md`, artifact-only mode; inspect the rendered static frames |
+| Test an interaction that static frames cannot answer | `references/modules/ui-prototype/guide.md`; bounded runnable exploration |
+| Tokens, theming, component library, reusable rules | `references/modules/design-system/guide.md`; reuse authoritative sources |
+| Implement specific components | [Component build](references/component-build.md); build and verify the requested scope |
+| Compare built UI with selected design | `references/modules/design-qa/guide.md`; record observed differences and retests |
+| Draft plus durable project rules | [Design draft and project rules](references/design-package.md) |
 
-## Guidance
+A mock request with settled content enters the mock module directly. A component request does not require a mock. Create durable documents only when requested or when the chosen scope establishes reusable rules. Keep one-off decisions with the task.
 
-Read the relevant parts of existing `DESIGN.md` and `COMPONENTS.md` or the project's authoritative equivalents, plus the mock, project instructions, and implementation patterns. Reach for a guide above only when its specific question affects the answer. Give the user or calling agent a short, task-specific brief: the task, applicable content and interaction decisions, tokens and components to reuse, consequential states, visual and responsive direction, accessibility constraints, and source paths. Mark a missing or conflicting rule as unresolved rather than inventing a new project convention. If the decision needs a visual to be reviewable, switch to the visual draft route. Guidance itself creates no artifact; the caller owns implementation and verification.
+## Work the decision
 
-## Adjacent skills
-
-- `fudge:ui-mock` owns a self-contained visual artifact with the frames the task needs. Read its bundled guide and use **artifact-only** mode for a visual draft, with the intended output path — its own default is `.fudge/<branch>/ui-mock/` unless `fudge:ship` supplies a run-local path. A static mock is not a working UI.
-- `fudge:design-system` owns token and style rules, component contracts, and specimens when the user requests them. Read its bundled guide and follow its output contract, reusing the project's existing source of truth rather than creating competing rules or a fixed set of files.
-- For a standalone mock with settled content and behavior, fulfill the request through the bundled `fudge:ui-mock` guide without a broader design package. For a standalone design system, use the bundled `fudge:design-system` guide. When the work also needs to resolve content, interaction, evidence, project rules, or implementation guidance, use the corresponding design route above. A separately installed specialist remains available for explicit direct invocation.
+1. Identify the person's task, content priority, constraints, and consequential states. Mark assumptions and distinguish observed behavior from recommendations.
+2. Read `references/roots/ux/guide.md` only when needs, content, flow, or state behavior could change the visual decision. Pass the specific question and retain settled decisions. Read `references/modules/accessible-ui/guide.md` for scoped accessibility guidance or assessment. For conflicting requirements or consequential tradeoffs, hand the bounded discovery or pressure-test question to public `fudge:ship` when available; otherwise surface the concrete unresolved decision.
+3. Produce the selected output using shared execution and artifact guidance. Supply exact output paths and bounded ownership to any worker. UX and design can inform each other; neither is a mandatory prerequisite.
+4. Inspect rendered artifacts at relevant sizes and states. For code, also run relevant project checks and read raw output. A mock is evidence of appearance, not working behavior; inspection is not participant research or blanket accessibility conformance.
+5. Return the decision, output or changed paths, verification evidence, and material open questions. When called by ship, honor its supplied path and already settled behavior; let ship own delivery.

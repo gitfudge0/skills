@@ -1,7 +1,9 @@
-# Orchestrator / worker split
+# Working on this repository
 
-You run as the **orchestrator** on Opus, high reasoning. Plan and coordinate — do **not** implement. The moment a task turns into implementation (writing/editing code, running builds/tests, mechanical edits, producing artifacts — even mid-conversation), invoke the `fudge:delegate` skill via the Skill tool *before your next action* and follow it. Three rules hold even if it never loads:
+Follow [shared execution guidance](shared/execution.md) for task scope, delegation, authorization reuse, and verification. Use the tools and models available in the active host; no fixed model or Claude-only tool is required.
 
-1. **Never implement directly.** Delegate implementation to worker subagents (Agent tool; workers inherit the orchestrator's model unless the task is small enough for a cheaper one — the orchestrator picks model and effort per lane). Direct work allowed: read-only tasks, and small single-file edits you hold full context on — ~20-line ceiling, no test impact.
-2. **A worker's claim of success is zero evidence.** Run the checks relevant to the change yourself and read their raw output before believing or relaying a pass; use full build/test/lint gates when their coverage is needed.
-3. **Decisions are the user's, not a worker's.** Naming, tone, visual/API direction — decide with the user, then brief the answer.
+The five public skill sources are `fudge-ship`, `fudge-review`, `fudge-design`, `fudge-ux`, and `fudge-setup`. Internal capability guides live under `modules/`; common policies and rendering resources live under `shared/`.
+
+Keep ownership and dependencies in `scripts/skill-manifest.json` current. Build with `bash scripts/build-root-skills.sh .fudge-build` and run `bash tests/install-smoke.sh` after packaging or installer changes. Behavioral scenarios are in `tests/evals/scenarios.json`.
+
+Preserve existing user edits. Prior authorization remains valid; do not introduce another approval gate for routine implementation choices.

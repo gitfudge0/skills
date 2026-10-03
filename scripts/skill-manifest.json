@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "roots": {
+    "design": {"source": "fudge-design", "modules": ["design-for-recognition", "design-system", "ui-mock", "ui-prototype", "design-qa"], "roots": ["ux"]},
+    "ux": {"source": "fudge-ux", "modules": ["ux-research", "content-architecture", "interaction-design", "accessible-ui", "experience-measurement"], "roots": ["design"]},
+    "ship": {"source": "fudge-ship", "modules": ["gap-analysis", "test-plan", "decision-room"], "roots": ["design", "ux", "review", "setup"]},
+    "review": {"source": "fudge-review", "modules": [], "roots": ["setup"]},
+    "setup": {"source": "fudge-setup", "modules": [], "roots": []}
+  },
+  "modules": {
+    "design-for-recognition": {"owner": "design", "source": "modules/design-for-recognition"},
+    "design-system": {"owner": "design", "source": "modules/design-system"},
+    "ui-mock": {"owner": "design", "source": "modules/ui-mock"},
+    "ui-prototype": {"owner": "design", "source": "modules/ui-prototype"},
+    "design-qa": {"owner": "design", "source": "modules/design-qa"},
+    "ux-research": {"owner": "ux", "source": "modules/ux-research"},
+    "content-architecture": {"owner": "ux", "source": "modules/content-architecture"},
+    "interaction-design": {"owner": "ux", "source": "modules/interaction-design"},
+    "accessible-ui": {"owner": "ux", "source": "modules/accessible-ui"},
+    "experience-measurement": {"owner": "ux", "source": "modules/experience-measurement"},
+    "gap-analysis": {"owner": "ship", "source": "modules/gap-analysis"},
+    "test-plan": {"owner": "ship", "source": "modules/test-plan"},
+    "decision-room": {"owner": "ship", "source": "modules/decision-room"}
+  },
+  "shared": ["shared"],
+  "helpers": []
+}

@@ -6,11 +6,13 @@ Both files live in the output location from SKILL.md. `findings.json` is the onl
 
 ```json
 {
+  "schema_version": 2,
+  "subject": { "kind": "pr | local", "base": "<explicit sha/range>", "head": "<sha or null>", "scope": ["path"], "snapshot": "reviewed-snapshot.json", "snapshot_sha256": "<hash>", "pre_existing": ["path or attribution note"] },
   "pr": { "repo": "owner/name", "number": 61, "url": "", "base": "main", "head_branch": "", "head": "<sha reviewed>" },
   "round": 1,
   "reviewed_at": "<ISO-8601>",
   "ci": "passed | failed | pending | none",
-  "verdict": "needs-changes | mergeable-after-fixes | mergeable",
+  "verdict": "needs-changes | mergeable-after-fixes | no-blocking-findings | mergeable",
   "findings": [{
     "id": "R1", "severity": "blocker | should-fix | nit",
     "topic": "correctness | security | contract | conventions | tests | quality",
@@ -26,9 +28,10 @@ Both files live in the output location from SKILL.md. `findings.json` is the onl
 
 Field notes:
 
-- `pr.head` is the sha this round reviewed. The next re-review starts after it.
+- `pr` is null for local reviews. `subject` records the exact comparison, scope, attribution, and a bounded content snapshot including tracked and in-scope untracked files. The snapshot must support old/new comparison after rewritten history. Hash the canonical snapshot. Legacy PR records remain readable; capture their missing snapshot when possible and state any limit.
+- `pr.head` is the SHA this round reviewed. An incremental commit range is valid only with unchanged scope/base and verified ancestry.
 - `ci` value `none` renders as "No CI ran".
-- `verdict` and the counts in the verdict line come from open findings with audience `author`. Team findings don't change the verdict.
+- `verdict` and the counts in the verdict line come from open findings with audience `author`. Team findings don't change the verdict. For `subject.kind: local`, any open blocker or should-fix sets `verdict: needs-changes`; otherwise use `no-blocking-findings`. Local reviews never use `mergeable` or `mergeable-after-fixes`. For PRs, severity and the root's CI qualifications govern the verdict.
 - `title`, `cause`, `impact`, and `fix` follow the word caps in SKILL.md. `impact` stays `null` unless the harm isn't visible in the title.
 - `where` lists one or more locations. The first is the main one.
 - `evidence` says what you read or traced, at which sha. For a suspected finding, it says what would settle it.
@@ -63,7 +66,7 @@ Not checked: mailer templates, which this PR doesn't touch.
 
 ## Re-review status rules
 
-Start from the stored file. Review only commits after `pr.head`.
+Start from the stored file and current final scoped diff. Check ancestry and baseline first. Use an incremental commit range only when valid; otherwise compare stored/current snapshots and fully reassess the current scoped change.
 
 - `open` becomes `fixed` when the code at the new head removes the cause. Update `evidence` with how you checked.
 - `open` stays `open` when the cause is still there. Update `where` if the lines moved.
@@ -72,7 +75,7 @@ Start from the stored file. Review only commits after `pr.head`.
 - `dropped` stays `dropped`.
 - New findings take the next unused ID. Set `round_found` to the new round.
 - Add prior comments posted since the last round, with statuses.
-- Update `pr.head`, `round`, `reviewed_at`, `ci`, and `verdict`.
+- Update `subject`, `pr.head` when applicable, `round`, `reviewed_at`, `ci`, and `verdict`. Preserve prior snapshots and stable finding IDs.
 
 ## Worked examples
 
