@@ -101,6 +101,18 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual([p.name for p in self.skills.iterdir()], ['fudge-design'])
         result = self.run_install('-a', 'codex', '--skill', 'mindmap', '-y', success=False)
         self.assertIn('removed', result.stderr)
+    def test_system_decomposition_migrates_into_ship(self):
+        self.skills.mkdir(parents=True)
+        legacy = self.skills / 'fudge-system-decomposition'
+        legacy.symlink_to(self.repo / 'fudge-system-decomposition')
+        self.run_install('-a', 'codex', '--root', 'setup', '-y')
+        self.assertTrue(legacy.is_symlink())
+        self.run_install('-a', 'codex', '--skill', 'system-decomposition', '-y')
+        self.assertFalse(legacy.is_symlink())
+        module = self.skills / 'fudge-ship/references/modules/system-decomposition'
+        self.assertTrue((module / 'guide.md').is_file())
+        self.assertTrue((module / 'references/lenses.md').is_file())
+        self.assertFalse((module / 'SKILL.md').exists())
     def test_bad_navigation_and_unmarked_build_are_rejected(self):
         source = self.repo / 'fudge-setup/SKILL.md'
         source.write_text(source.read_text() + '\nRead `references/modules/missing/guide.md`.\n')

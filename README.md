@@ -4,7 +4,7 @@ Five public skills cover project setup, requirements discovery, implementation, 
 
 | Public skill | Purpose | Internal capabilities |
 |---|---|---|
-| `fudge:ship` | Discover requirements, implement, verify, deliver | Gap analysis, test planning, decision pressure-testing; routes to design, UX, review, setup |
+| `fudge:ship` | Discover requirements, implement, verify, deliver | Gap analysis, system decomposition, test planning, decision pressure-testing; routes to design, UX, review, setup |
 | `fudge:review` | Review a PR or local diff | Findings, re-review, conventions checks |
 | `fudge:design` | Shape and build the visual experience | Visual craft, design systems, static mocks, prototypes, design QA |
 | `fudge:ux` | Shape the experience people need | Research, content architecture, interaction design, accessibility, measurement |
@@ -31,7 +31,7 @@ Only the five public roots are installed. Each package includes its dependency c
 
 ### Migration
 
-`--root conventions` selects `setup`. Legacy `--skill` names select their owning root: for example, `--skill ui-mock` selects `design`, and `--skill gap-analysis` selects `ship`. `--no-roots --skill NAME` remains a migration form. `--skill mindmap` reports its removal.
+`--root conventions` selects `setup`. Legacy `--skill` names select their owning root: for example, `--skill ui-mock` selects `design`, and `--skill gap-analysis` and `--skill system-decomposition` select `ship`. `--no-roots --skill NAME` remains a migration form. `--skill mindmap` reports its removal.
 
 Installation removes retired entries only when they are owned by this checkout's installer and their owning root was selected. Explicitly removed mindmap entries are also cleaned up. Review lists planned cleanup before confirmation. Recognized ownership is an exact installer link target (including old dangling links), or a copy marker containing this checkout's path. Foreign directories, manual copies, and unrelated dangling links are preserved. A foreign entry at a selected public destination blocks installation without overwriting it.
 

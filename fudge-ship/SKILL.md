@@ -1,6 +1,6 @@
 ---
 name: fudge:ship
-description: Take an idea, issue, feature, story, or task through implementation and delivery at a depth that matches its risk. Use for end-to-end building, "ship this," several fudge skills on one work item, or resuming a ship run. Route standalone code review to fudge:review.
+description: Take an idea, issue, feature, story, or task through implementation and delivery at a depth that matches its risk. Use for end-to-end building, "ship this," several fudge skills on one work item, resuming a ship run, or decomposing a system before building. Route standalone code review to fudge:review.
 ---
 
 # fudge:ship
@@ -39,6 +39,7 @@ Use selected guidance only when its output serves this work item:
 | Need | Owning skill | Trigger |
 |---|---|---|
 | Reconcile requirements | `references/modules/gap-analysis/guide.md` | Documents conflict or leave a material gap. |
+| Decompose a system | `references/modules/system-decomposition/guide.md` | A broad brief needs responsibilities, contracts, or candidate work before implementation; decomposition-only requests stop at analysis. |
 | Pressure-test a decision | `references/modules/decision-room/guide.md` | A consequential choice remains unsettled. |
 | Shape the experience | `references/roots/ux/guide.md` | User needs, content structure, task flow, state behavior, or usability needs a decision. |
 | Shape the interface | `references/roots/design/guide.md` | Visual expression, UI guidance, a reviewable mock, or component direction is needed. |

@@ -192,6 +192,18 @@
         "Reports failed candidate deployment and healthy restored previous release",
         "Leaves supplied simulator intact and performs no external deployment"
       ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Decompose this integration before we write tickets: connect our care platform to an EHR so clinicians and patients can view relevant information. Do not implement or create tickets.",
+      "fixture": "Thin integration brief; no provider contract, patient matching rules, access policy, or system code supplied.",
+      "invariants": [
+        "Uses system-decomposition module without starting implementation",
+        "Separates known systems and required responsibilities from proposed components",
+        "Retains identity, access, data scope and freshness unknowns",
+        "Does not invent a provider protocol, dedicated service, or committed backlog",
+        "Does not start coaching unless requested"
+      ]
     }
   ]
 }
