@@ -87,6 +87,22 @@
     },
     {
       "root": "ship",
+      "prompt": "Build the agreed Rails resource with create, show, update, and archive APIs using the contracts in README. Ship it verified locally.",
+      "fixture": "Rails repository with README defining endpoint behavior, authorization, schema, service interfaces and error responses; separate model/migration, service and controller/request-spec files; established test and lint commands. Delegation tools support at least three concurrent workers. Include one shared response helper that multiple lanes need.",
+      "invariants": [
+        "Performs a proportionate decomposition pass before implementation dispatch, using repository evidence rather than reopening settled API choices",
+        "Identifies shared contracts, prerequisites, dependencies, exact file ownership, integration owner and coordinator verification gates",
+        "Resolves the shared response helper prerequisite before dependent workers edit",
+        "Dispatches useful independent implementation lanes concurrently after contracts are settled; does not require one worker per layer or artificial agent counts",
+        "Avoids concurrent overlapping file edits unless isolation and integration are managed",
+        "Reconciles integrated controller, service and persistence behavior and inspects the combined diff",
+        "Runs required project gates and verifies endpoint behavior against the integrated revision using accessible raw evidence",
+        "Assigns corrections to the responsible owner and rechecks behavior affected by later edits",
+        "Consolidates required broad build/test/lint gates once per integrated round rather than imposing per-lane gates or duplicate worker full suites; workers may run cheap focused checks while implementing"
+      ]
+    },
+    {
+      "root": "ship",
       "prompt": "Pressure-test this feature decision and save a brief only if useful.",
       "fixture": "Two competing options with limited evidence.",
       "invariants": [
@@ -106,7 +122,8 @@
         "Establishes the discount failure before changing code",
         "Explains cause and checks discounted and undiscounted totals",
         "Preserves dirty user notes and avoids unrelated edits",
-        "Adds meaningful regression coverage when warranted"
+        "Adds meaningful regression coverage when warranted",
+        "Makes a brief decomposition decision and explains one cohesive worker when parallel coordination would outweigh the benefit"
       ]
     },
     {
@@ -176,7 +193,8 @@
         "Executes implementation and verification directly",
         "Does not stop to request unavailable agents",
         "Checks case-insensitive matching, limit boundaries and prior ordering",
-        "Avoids ceremonial plans or unnecessary approval questions"
+        "Avoids ceremonial plans or unnecessary approval questions",
+        "Identifies ownership, dependencies and verification proportionately before direct editing without requesting unavailable tools"
       ]
     },
     {

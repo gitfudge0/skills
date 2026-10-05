@@ -48,6 +48,7 @@ records deployment and health observations locally.
 | Correctness | Checker exit/output and independent diff review |
 | Regression protection | Existing behavior preserved; durable regression added when justified, and evidence it catches the original defect where feasible |
 | Diagnosis | Observed failure or bounded evidence-backed cause before implementation |
+| Decomposition and integration | Contracts and shared prerequisites resolved before dependent dispatch; explicit lane/file ownership and integration owner; useful independent lanes overlap when tools allow, or a proportionate one-worker rationale; combined behavior checked |
 | Verification | Current code checked; acceptance behavior tied to actual outputs |
 | Questions | Total, necessary, and needless questions with reasons |
 | Duplicate checks | Repeated equivalent commands with unchanged relevant code and inputs; count only repeats lacking a stated engineering reason |
@@ -59,3 +60,9 @@ Re-running a check after a fix is necessary, not duplication. A rerun for change
 inputs or flaky evidence may also be justified. A new regression test that merely
 asserts a source-code shape does not satisfy behavior protection. Evaluate
 judgment and correctness first; do not reward fewer checks at their expense.
+
+The Rails parallel-dispatch scenario in `scenarios.json` uses a separately supplied
+Rails repository, not a generated Python fixture. Evaluate its lane timing,
+ownership, prerequisite ordering, and integrated checks from the action transcript
+and final diff; do not substitute source-string assertions or claim this scenario
+ran from a packaging check.
