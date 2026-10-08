@@ -55,6 +55,18 @@ class WizardTests(unittest.TestCase):
         result, lines = self.run_wizard([10, 10, 10, 10, ord('q')], conflict=True)
         self.assertIsNone(result)
         self.assertIn('Resolve or deselect conflicts before installing.', lines)
+    def test_html_plan_review_uses_standalone_destination(self):
+        screen = Screen([10, 10, 10, 10, ord('q')])
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            (target / 'fudge-html-plan').mkdir()
+            with patch.object(UI.curses, 'wrapper', side_effect=lambda action: action(screen)), patch.object(UI.curses, 'curs_set'):
+                result = UI.choose(['codex'], ['html-plan'], ['codex'], ['html-plan'], False,
+                    lambda agent: target, lambda path: False, package_for=lambda root: 'fudge-html-plan')
+        self.assertIsNone(result)
+        self.assertTrue(any('conflict' in line.lower() and 'fudge:html-plan' in line for line in screen.lines))
+        self.assertIn('Resolve or deselect conflicts before installing.', screen.lines)
+
     def test_terminal_support_and_fallback(self):
         with patch.object(UI.sys.stdin, 'isatty', return_value=True), patch.object(UI.sys.stdout, 'isatty', return_value=True), patch.object(UI.shutil, 'get_terminal_size', return_value=os.terminal_size((100, 30))), patch.dict(os.environ, TERM='xterm-256color'):
             self.assertTrue(UI.supported())

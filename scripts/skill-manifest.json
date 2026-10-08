@@ -6,7 +6,8 @@
     "ship": {"source": "fudge-ship", "modules": ["gap-analysis", "test-plan", "decision-room", "system-decomposition", "html-plan"], "roots": ["design", "ux", "review", "setup"]},
     "review": {"source": "fudge-review", "modules": [], "roots": ["setup"]},
     "setup": {"source": "fudge-setup", "modules": [], "roots": []},
-    "write": {"source": "fudge-write", "modules": [], "roots": []}
+    "write": {"source": "fudge-write", "modules": [], "roots": []},
+    "html-plan": {"source": "html-plan", "modules": [], "roots": []}
   },
   "modules": {
     "design-for-recognition": {"owner": "design", "source": "modules/design-for-recognition"},

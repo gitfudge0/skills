@@ -81,7 +81,7 @@ def build(output):
     validate_manifest(manifest)
     validate_source(manifest)
     output.mkdir(parents=True, exist_ok=True)
-    names = ['fudge-' + name for name in manifest['roots']]
+    names = [spec.get('package', 'fudge-' + name) for name, spec in manifest['roots'].items()]
     for name in names:
         target = output / name
         if target.exists() or target.is_symlink():
@@ -90,7 +90,7 @@ def build(output):
     with tempfile.TemporaryDirectory(prefix='.fudge-stage.', dir=output) as stage:
         stage = Path(stage)
         for name, spec in manifest['roots'].items():
-            package = stage / ('fudge-' + name)
+            package = stage / spec.get('package', 'fudge-' + name)
             shutil.copytree(SOURCE / spec['source'], package)
             included = closure(manifest, name)
             modules = set()

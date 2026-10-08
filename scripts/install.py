@@ -13,15 +13,15 @@ SOURCE = Path(__file__).resolve().parent.parent
 BUILD = SOURCE / '.fudge-build'
 MANIFEST = json.loads((SOURCE / 'scripts/skill-manifest.json').read_text())
 ROOTS = list(MANIFEST['roots'])
-ALIASES = {name: spec['owner'] for name, spec in MANIFEST['modules'].items()}
+PACKAGES = {name: spec.get('package', 'fudge-' + name) for name, spec in MANIFEST['roots'].items()}
+ALIASES = {name: spec['owner'] for name, spec in MANIFEST['modules'].items() if name not in ROOTS}
 ALIASES.update({'conventions': 'setup', 'delegate': 'ship', 'unslop': 'ship', 'report-deck': 'design'})
 RETIRED = set(ALIASES) | {'mindmap'}
-KNOWN = set(ROOTS) | RETIRED
+LEGACY = {'html-plan': 'html-plan'}
 AGENTS = {'claude': '.claude/skills', 'codex': '.codex/skills', 'cursor': '.cursor/skills', 'opencode': '.config/opencode/skills'}
 
 def owned(path):
-    name = path.name.removeprefix('fudge-')
-    if path.name != 'fudge-' + name or name not in KNOWN:
+    if path.name not in set(PACKAGES.values()) | set(LEGACY) | {'fudge-' + name for name in RETIRED}:
         return False
     if path.is_symlink():
         # Compare literal targets, including dangling old source links. Never resolve
@@ -31,7 +31,8 @@ def owned(path):
     return path.is_dir() and marker.is_file() and marker.read_text().strip() == str(SOURCE)
 
 def retired_for(target, roots):
-    return [target / ('fudge-' + name) for name in sorted(RETIRED)
+    legacy = [target / name for name, root in LEGACY.items() if root in roots and owned(target / name)]
+    return legacy + [target / ('fudge-' + name) for name in sorted(RETIRED)
             if (name == 'mindmap' or ALIASES.get(name) in roots)
             and owned(target / ('fudge-' + name))]
 
@@ -70,8 +71,8 @@ def main():
     parser = argparse.ArgumentParser(description='Install public Fudge skills. Specialists are bundled internal modules.')
     parser.add_argument('command', nargs='?', choices=['install', 'list', 'remove'], default='install')
     parser.add_argument('-a', '--agent', action='append', choices=AGENTS, default=[])
-    parser.add_argument('--root', action='append', default=[], help='design, ux, ship, review, setup, write (conventions is a migration alias)')
-    parser.add_argument('--skill', action='append', default=[], help='legacy name; selects its owning public root')
+    parser.add_argument('--root', action='append', default=[], help=', '.join(ROOTS) + ' (conventions is a migration alias)')
+    parser.add_argument('--skill', action='append', default=[], help='public skill or legacy name; legacy modules select their owning root')
     parser.add_argument('--all', action='store_true', help='select all public roots; remove all owned entries')
     parser.add_argument('--no-roots', action='store_true', help='legacy flag, accepted only with --skill')
     parser.add_argument('--copy', action='store_true')
@@ -98,7 +99,7 @@ def main():
     keyboard_confirmed = False
     if args.command == 'install':
         if interactive and not args.all and keyboard_supported():
-            selection = keyboard_choose(list(AGENTS), ROOTS, agents or ['codex'], roots or ROOTS, args.copy, lambda agent: Path.home() / AGENTS[agent], owned, retired_for)
+            selection = keyboard_choose(list(AGENTS), ROOTS, agents or ['codex'], roots or ROOTS, args.copy, lambda agent: Path.home() / AGENTS[agent], owned, retired_for, package_for=lambda root: PACKAGES[root])
             if selection is None:
                 print('Aborted.')
                 return
@@ -128,7 +129,7 @@ def main():
     if args.command == 'remove':
         candidates = [entry for target in targets if target.is_dir() for entry in sorted(target.iterdir()) if owned(entry)]
         if roots:
-            candidates = [entry for entry in candidates if ALIASES.get(entry.name.removeprefix('fudge-'), entry.name.removeprefix('fudge-')) in roots]
+            candidates = [entry for entry in candidates if LEGACY.get(entry.name, ALIASES.get(entry.name.removeprefix('fudge-'), entry.name.removeprefix('fudge-'))) in roots]
         elif not args.all:
             if not candidates:
                 print('No installer-owned skills found.')
@@ -138,7 +139,7 @@ def main():
             chosen = select('Choose installs to remove:', [str(p) for p in candidates], [])
             candidates = [p for p in candidates if str(p) in chosen]
     else:
-        candidates = [target / ('fudge-' + root) for target in targets for root in roots]
+        candidates = [target / PACKAGES[root] for target in targets for root in roots]
         conflicts = [p for p in candidates if (p.exists() or p.is_symlink()) and not owned(p)]
         if conflicts:
             raise ValueError('Existing installs not owned by this installer:\n  ' + '\n  '.join(map(str, conflicts)))
@@ -165,7 +166,7 @@ def main():
     for target in targets:
         target.mkdir(parents=True, exist_ok=True)
         for root in roots:
-            path = target / ('fudge-' + root)
+            path = target / PACKAGES[root]
             if path.exists() or path.is_symlink():
                 erase(path)
             source = BUILD / path.name

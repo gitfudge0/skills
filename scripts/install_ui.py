@@ -11,7 +11,7 @@ def supported():
     return sys.stdin.isatty() and sys.stdout.isatty() and size.lines >= 23 and size.columns >= 50 and term.startswith(('xterm', 'screen', 'tmux', 'rxvt', 'ansi', 'linux', 'alacritty', 'wezterm', 'kitty', 'iterm'))
 
 
-def choose(agents, roots, selected_agents, selected_roots, copy, target_for, owned, retired_for=lambda target, roots: []):
+def choose(agents, roots, selected_agents, selected_roots, copy, target_for, owned, retired_for=lambda target, roots: [], package_for=lambda root: 'fudge-' + root):
     """Return (agents, roots, copy), or None on cancellation."""
     selected_agents = set(selected_agents)
     selected_roots = set(selected_roots)
@@ -54,10 +54,11 @@ def choose(agents, roots, selected_agents, selected_roots, copy, target_for, own
                     for root in roots:
                         if root not in selected_roots:
                             continue
-                        path = target_for(agent) / ('fudge-' + root)
+                        path = target_for(agent) / package_for(root)
                         exists = path.exists() or path.is_symlink()
                         state = 'conflict' if exists and not owned(path) else 'update' if exists else 'new'
-                        rows.append(f'  {state}: fudge:{root}')
+                        label = 'fudge:' + root if path.name == 'fudge-' + root else path.name
+                        rows.append(f'  {state}: {label}')
                         if state == 'conflict':
                             conflicts.append(str(path))
                 cleanup = [path for agent in agents if agent in selected_agents
