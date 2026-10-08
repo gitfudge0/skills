@@ -4,7 +4,7 @@ Six public skills cover project setup, requirements discovery, implementation, d
 
 | Public skill | Purpose | Internal capabilities |
 |---|---|---|
-| `fudge:ship` | Discover requirements, implement, verify, deliver | Gap analysis, system decomposition, test planning, decision pressure-testing; routes to design, UX, review, setup |
+| `fudge:ship` | Discover requirements, implement, verify, deliver | Gap analysis, system decomposition, interactive HTML planning, test planning, decision pressure-testing; routes to design, UX, review, setup |
 | `fudge:review` | Review a PR or local diff | Findings, re-review, conventions checks |
 | `fudge:design` | Shape and build the visual experience | Visual craft, design systems, static mocks, prototypes, design QA |
 | `fudge:ux` | Shape the experience people need | Research, content architecture, interaction design, accessibility, measurement |
@@ -42,12 +42,13 @@ Installation removes retired entries only when they are owned by this checkout's
 ```text
 fudge-{ship,review,design,ux,setup,write}/SKILL.md
 modules/<capability>/guide.md
+html-plan/SKILL.md                  # standalone source bundled into ship
 shared/{execution.md,writing.md,artifacts.md,artifact_path.py}
 shared/report-deck/
 scripts/skill-manifest.json
 ```
 
-The manifest declares module ownership and root dependencies. The builder computes a closure with no recursive root copies. An installed package contains:
+The manifest declares module ownership, optional source entry filenames, and root dependencies. HTML planning reuses the standalone `html-plan/` source as a ship module, including its runtime, block reference, and examples; no separate skill install is needed. Node.js is required only to pack an HTML plan. The builder computes a closure with no recursive root copies. An installed package contains:
 
 ```text
 SKILL.md

@@ -79,6 +79,35 @@ class InstallerTests(unittest.TestCase):
                 self.assertFalse(installed.is_symlink())
                 self.assertEqual((foreign / 'manual.txt').read_text(), 'keep')
                 shutil.rmtree(foreign)
+    def test_ship_html_plan_packs_without_source_checkout(self):
+        self.run_install('-a', 'codex', '--root', 'ship', '--copy', '-y')
+        installed = self.skills / 'fudge-ship'
+        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-ship'})
+        marker = json.loads((installed / '.fudge-package.json').read_text())
+        self.assertIn('html-plan', marker['modules'])
+        module = installed / 'references/modules/html-plan'
+        self.assertTrue((module / 'guide.md').is_file())
+        self.assertFalse((module / 'SKILL.md').exists())
+        for source in (self.repo / 'html-plan').rglob('*'):
+            if source.is_file() and source.name != 'SKILL.md':
+                self.assertEqual((module / source.relative_to(self.repo / 'html-plan')).read_bytes(), source.read_bytes())
+        # A copied installation must work after the entire checkout disappears.
+        shutil.rmtree(self.repo)
+        if not shutil.which('node'):
+            self.skipTest('Node.js is required to exercise the HTML packer')
+        packed = self.base / 'standalone-plan.html'
+        result = subprocess.run([
+            'node', str(module / 'runtime/pack.mjs'),
+            str(module / 'examples/sample-plan.html'),
+            '--root', str(module), '-o', str(packed),
+        ], cwd=self.base, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        text = packed.read_text()
+        self.assertIn('<style data-htmlplan>', text)
+        self.assertIn('<script data-htmlplan>', text)
+        self.assertNotIn('src="../runtime/htmlplan.js"', text)
+        self.assertNotIn('href="../runtime/htmlplan.css"', text)
+
     def test_copy_update(self):
         self.run_install('-a', 'codex', '--root', 'setup', '--copy', '-y')
         installed = self.skills / 'fudge-setup'

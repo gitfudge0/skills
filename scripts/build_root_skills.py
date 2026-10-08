@@ -30,7 +30,7 @@ def validate_manifest(manifest):
             assert manifest['modules'][module]['owner'] == name, module
     for name, spec in manifest['modules'].items():
         assert name in manifest['roots'][spec['owner']]['modules'], name
-        assert (SOURCE / spec['source'] / 'guide.md').is_file(), name
+        assert (SOURCE / spec['source'] / spec.get('entry', 'guide.md')).is_file(), name
     for path in manifest['shared'] + manifest['helpers']:
         assert (SOURCE / path).exists(), path
 
@@ -49,7 +49,7 @@ def validate_source(manifest):
                     target = SOURCE / spec['source'] / 'SKILL.md' if spec else None
                 elif parts[:2] == ['references', 'modules']:
                     spec = manifest['modules'].get(parts[2])
-                    target = SOURCE / spec['source'] / 'guide.md' if spec else None
+                    target = SOURCE / spec['source'] / spec.get('entry', 'guide.md') if spec else None
                 else:
                     target = SOURCE / address
                 if target is None or not target.is_file():
@@ -102,7 +102,12 @@ def build(output):
                     shutil.copytree(SOURCE / dependency['source'], destination)
                     (destination / 'SKILL.md').rename(destination / 'guide.md')
             for module in sorted(modules):
-                shutil.copytree(SOURCE / manifest['modules'][module]['source'], package / 'references/modules' / module)
+                module_spec = manifest['modules'][module]
+                destination = package / 'references/modules' / module
+                shutil.copytree(SOURCE / module_spec['source'], destination)
+                entry = module_spec.get('entry', 'guide.md')
+                if entry != 'guide.md':
+                    (destination / entry).rename(destination / 'guide.md')
             for path in manifest['shared']:
                 shutil.copytree(SOURCE / path, package / path)
             for path in manifest['helpers']:
