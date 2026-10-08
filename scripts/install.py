@@ -67,12 +67,12 @@ def select(title, choices, defaults):
     return result
 
 def main():
-    parser = argparse.ArgumentParser(description='Install five public Fudge skills. Specialists are bundled internal modules.')
+    parser = argparse.ArgumentParser(description='Install public Fudge skills. Specialists are bundled internal modules.')
     parser.add_argument('command', nargs='?', choices=['install', 'list', 'remove'], default='install')
     parser.add_argument('-a', '--agent', action='append', choices=AGENTS, default=[])
-    parser.add_argument('--root', action='append', default=[], help='design, ux, ship, review, setup (conventions is a migration alias)')
+    parser.add_argument('--root', action='append', default=[], help='design, ux, ship, review, setup, write (conventions is a migration alias)')
     parser.add_argument('--skill', action='append', default=[], help='legacy name; selects its owning public root')
-    parser.add_argument('--all', action='store_true', help='select all five public roots; remove all owned entries')
+    parser.add_argument('--all', action='store_true', help='select all public roots; remove all owned entries')
     parser.add_argument('--no-roots', action='store_true', help='legacy flag, accepted only with --skill')
     parser.add_argument('--copy', action='store_true')
     parser.add_argument('-y', action='store_true', help='apply without terminal confirmation')

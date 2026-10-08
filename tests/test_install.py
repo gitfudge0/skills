@@ -29,7 +29,7 @@ class InstallerTests(unittest.TestCase):
         return result
     def test_defaults_and_standalone_navigation(self):
         self.run_install('install', '-a', 'codex')
-        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup']})
+        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'write']})
         spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
         builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
@@ -43,6 +43,42 @@ class InstallerTests(unittest.TestCase):
         self.run_install('remove', '-a', 'codex', '--all', '-y')
         self.run_install('-a', 'codex', '--root', 'setup', '-y')
         self.assertEqual([p.name for p in self.skills.iterdir()], ['fudge-setup'])
+    def test_write_standalone_copy_and_symlink(self):
+        spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
+        builder = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(builder)
+        for copy in (False, True):
+            with self.subTest(copy=copy):
+                args = ['-a', 'codex', '--root', 'write', '-y']
+                if copy:
+                    args.append('--copy')
+                self.run_install(*args)
+                installed = self.skills / 'fudge-write'
+                self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-write'})
+                self.assertEqual(installed.is_symlink(), not copy)
+                builder.validate_package(installed)
+                marker = json.loads((installed / '.fudge-package.json').read_text())
+                self.assertEqual(marker['root'], 'write')
+                self.assertFalse((installed / 'references/roots').exists())
+                self.assertFalse((installed / 'references/modules').exists())
+                source_references = self.repo / 'fudge-write/references'
+                self.assertTrue(source_references.is_dir())
+                for source in source_references.rglob('*'):
+                    if source.is_file():
+                        packaged = installed / 'references' / source.relative_to(source_references)
+                        self.assertEqual(packaged.read_bytes(), source.read_bytes())
+                source = self.repo / 'fudge-write/SKILL.md'
+                source.write_text(source.read_text() + '\nStandalone update fixture.\n')
+                self.run_install(*args)
+                self.assertIn('Standalone update fixture.', (installed / 'SKILL.md').read_text())
+                foreign = self.skills / 'fudge-manual'
+                foreign.mkdir()
+                (foreign / 'manual.txt').write_text('keep')
+                self.run_install('remove', '-a', 'codex', '--root', 'write', '-y')
+                self.assertFalse(installed.exists())
+                self.assertFalse(installed.is_symlink())
+                self.assertEqual((foreign / 'manual.txt').read_text(), 'keep')
+                shutil.rmtree(foreign)
     def test_copy_update(self):
         self.run_install('-a', 'codex', '--root', 'setup', '--copy', '-y')
         installed = self.skills / 'fudge-setup'

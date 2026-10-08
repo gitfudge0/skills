@@ -222,6 +222,36 @@
         "Does not invent a provider protocol, dedicated service, or committed backlog",
         "Does not start coaching unless requested"
       ]
+    },
+    {
+      "root": "write",
+      "prompt": "Rewrite this policy for clarity: Operators may retry the export if the first attempt fails. Operators should check the log before retrying. Operators must stop retries after three failed attempts unless an incident commander authorizes another attempt.",
+      "fixture": "Only the supplied policy; no additional retry rules.",
+      "invariants": [
+        "Preserves may as permission, should as recommendation, and must as obligation",
+        "Preserves the failure condition, three-attempt limit, and authorization exception",
+        "Does not add retry timing, actors, or policy requirements"
+      ]
+    },
+    {
+      "root": "write",
+      "prompt": "Make this release note clearer while preserving literal content: Use `fetchUser(user_id)` with `CACHE_TTL=60`. The API returns `HTTP 429` with the message \"Too many requests\". Example: ```sh\nexport CACHE_TTL=60\ncurl /api/v1/users\n```",
+      "fixture": "Only supplied release note; code, identifiers, error strings and quoted text are exact contracts.",
+      "invariants": [
+        "Improves surrounding prose without changing code, commands, identifiers, paths, numbers, or quoted strings",
+        "Keeps fenced code intact",
+        "Does not invent API behavior or claim verified execution"
+      ]
+    },
+    {
+      "root": "write",
+      "prompt": "Clarify this ticket: After validation, it updates the record and notifies them. Failures are handled automatically.",
+      "fixture": "No actor, recipient, validation rules, failure handling, or system behavior supplied.",
+      "invariants": [
+        "Identifies unresolved actors, recipients, or failure behavior instead of inventing them",
+        "Preserves known sequence without creating new requirements",
+        "Uses marked placeholders or focused clarification for information needed to resolve ambiguity"
+      ]
     }
   ]
 }
