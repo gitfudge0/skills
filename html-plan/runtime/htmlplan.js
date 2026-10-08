@@ -608,11 +608,11 @@ function buildResponse() {
 /* ───────────────────────── chrome: bar, sheet, toc ───────────────────────── */
 let bar, sheetBg;
 function closeSheet() { sheetBg?.remove(); sheetBg = null; }
-function openSheet(title, bodyNodes, footerNodes) {
+function openSheet(title, bodyNodes, footerNodes, opt = {}) {
   closeSheet();
   sheetBg = h('div', { class: 'nw-sheet-bg', onclick: (e) => { if (e.target === sheetBg) closeSheet(); } },
-    h('div', { class: 'nw-sheet', role: 'dialog' },
-      h('header', null, h('h3', null, title), h('button', { class: 'nw-btn', onclick: closeSheet }, 'Close')),
+    h('div', { class: 'nw-sheet' + (opt.cls ? ' ' + opt.cls : ''), role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
+      h('header', null, h('div', { class: 'nw-sheet-hd' }, h('h3', null, title), opt.sub ? h('p', { class: 'nw-sheet-sub' }, opt.sub) : null), h('button', { class: 'nw-sheet-x', title: 'Close', 'aria-label': 'Close', onclick: closeSheet }, '×')),
       h('div', { class: 'body' }, bodyNodes), footerNodes ? h('footer', null, footerNodes) : null));
   document.body.append(sheetBg);
 }
@@ -622,12 +622,16 @@ function openResponse() {
   const ans = readAnswers(); const asks = $$('doc-ask'); const nTodo = asks.filter((a) => askTodo(a, ans)).length;
   const list = asks.length ? h('div', { class: 'nw-asks' }, h('div', { class: 'ttl' }, 'Decisions', h('b', { class: nTodo ? 'todo' : '' }, nTodo ? `${nTodo} to answer` : 'all answered')),
     asks.map((a, i) => { const st = askChanged(a, ans) ? 'changed' : S.seen[a.id] ? 'kept' : 'todo'; const no = a.closest('doc-claim')?.dataset.no;
-      return h('button', { class: 'nw-askrow ' + st, onclick: () => goToAsk(a) }, h('span', { class: 'k' }, String(i + 1)), h('span', { class: 'q' }, askQ(a, i), h('small', null, [no ? `claim ${no}` : '', words(askPick(a, ans), 9)].filter(Boolean).join(' · '))), h('span', { class: 's' }, st === 'todo' ? 'to answer' : st === 'kept' ? 'as proposed' : 'changed')); })) : null;
+      return h('button', { class: 'nw-askrow ' + st, onclick: () => goToAsk(a) }, h('span', { class: 'dot', 'aria-hidden': 'true' }), h('span', { class: 'k' }, String(i + 1)), h('span', { class: 'q' }, askQ(a, i), h('small', null, [no ? `claim ${no}` : '', words(askPick(a, ans), 9)].filter(Boolean).join(' · '))), h('span', { class: 's' }, st === 'todo' ? 'to answer' : st === 'kept' ? 'as proposed' : 'changed')); })) : null;
   const state = h('span', { class: 'nw-send-state' });
   const liveOn = false, send = null;
-  const copy = h('button', { class: 'nw-btn' + (liveOn ? '' : ' primary'), onclick: async () => { try { await navigator.clipboard.writeText(r.md); toast('Copied — paste it back to Claude'); } catch { const ta = h('textarea'); ta.value = r.md; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast('Copied'); } } }, 'Copy response');
+  const doCopy = async () => { try { await navigator.clipboard.writeText(r.md); toast('Copied — paste it back to Claude'); } catch { const ta = h('textarea'); ta.value = r.md; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast('Copied'); } [copy, mini].forEach((b) => { b.classList.add('done'); b.textContent = '✓ Copied'; clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('done'); b.textContent = b === copy ? 'Copy response' : 'Copy'; }, 1600); }); };
+  const copy = h('button', { class: 'nw-btn' + (liveOn ? '' : ' primary'), onclick: doCopy }, 'Copy response');
+  const mini = h('button', { class: 'nw-resp-copy', onclick: doCopy }, 'Copy');
+  const resp = h('div', { class: 'nw-resp' }, h('div', { class: 'nw-resp-hd' }, h('span', null, 'Response', h('i', null, ' · markdown')), mini), pre);
   const reset = h('button', { class: 'nw-btn danger', onclick: () => { if (reset.dataset.arm !== '1') { reset.dataset.arm = '1'; reset.textContent = 'Clear everything?'; setTimeout(() => { reset.dataset.arm = ''; reset.textContent = 'Reset'; }, 3000); return; } S.comments = {}; S.drafts = {}; S.strikes = {}; S.seen = {}; writeAnswers(S.defaults); $$('doc-calls').forEach((d) => d._reset?.()); $$('doc-draft, doc-schema').forEach((d) => d._reset?.()); try { localStorage.removeItem(KEY); } catch {} $$('.has-comment').forEach((e) => e.classList.remove('has-comment')); onFormChange(); closeSheet(); toast('Reset'); } }, 'Reset');
-  openSheet('Your response', [list, h('p', { class: 'hint' }, liveOn ? 'This goes to Claude when you press Send.' : 'Copy this and paste it to Claude.'), pre], [reset, state, h('span', { class: 'sp' }), copy, send]);
+  const sub = [asks.length ? `${asks.length} decision${asks.length === 1 ? '' : 's'}` : '', r.nChanged ? `${r.nChanged} changed` : '', r.nComments ? `${r.nComments} comment${r.nComments === 1 ? '' : 's'}` : '', r.nDrafts ? `${r.nDrafts} edit${r.nDrafts === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ');
+  openSheet('Your response', [list, h('p', { class: 'hint' }, liveOn ? 'This goes to Claude when you press Send.' : 'Copy this and paste it to Claude.'), resp], [reset, state, h('span', { class: 'sp' }), copy, send], { sub, cls: 'resp' });
 }
 function refreshChrome() {
   if (!bar) return;
