@@ -3,11 +3,11 @@
   "roots": {
     "design": {"source": "fudge-design", "modules": ["design-for-recognition", "design-system", "ui-mock", "ui-prototype", "design-qa"], "roots": ["ux"]},
     "ux": {"source": "fudge-ux", "modules": ["ux-research", "content-architecture", "interaction-design", "accessible-ui", "experience-measurement"], "roots": ["design"]},
-    "ship": {"source": "fudge-ship", "modules": ["gap-analysis", "test-plan", "decision-room", "system-decomposition", "html-plan"], "roots": ["design", "ux", "review", "setup"]},
-    "review": {"source": "fudge-review", "modules": [], "roots": ["setup", "html-plan"]},
+    "ship": {"source": "fudge-ship", "modules": ["gap-analysis", "test-plan", "decision-room", "system-decomposition", "plan"], "roots": ["design", "ux", "review", "setup"]},
+    "review": {"source": "fudge-review", "modules": [], "roots": ["setup", "plan"]},
     "setup": {"source": "fudge-setup", "modules": [], "roots": []},
     "write": {"source": "fudge-write", "modules": [], "roots": []},
-    "html-plan": {"source": "html-plan", "modules": [], "roots": []}
+    "plan": {"source": "plan", "modules": [], "roots": []}
   },
   "modules": {
     "design-for-recognition": {"owner": "design", "source": "modules/design-for-recognition"},
@@ -24,7 +24,7 @@
     "test-plan": {"owner": "ship", "source": "modules/test-plan"},
     "system-decomposition": {"owner": "ship", "source": "modules/system-decomposition"},
     "decision-room": {"owner": "ship", "source": "modules/decision-room"},
-    "html-plan": {"owner": "ship", "source": "html-plan", "entry": "SKILL.md"}
+    "plan": {"owner": "ship", "source": "plan", "entry": "SKILL.md"}
   },
   "shared": ["shared"],
   "helpers": []

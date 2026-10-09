@@ -29,7 +29,7 @@ class InstallerTests(unittest.TestCase):
         return result
     def test_defaults_and_standalone_navigation(self):
         self.run_install('install', '-a', 'codex')
-        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'write']} | {'fudge-html-plan'})
+        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'write']} | {'fudge-plan'})
         spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
         builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
@@ -79,18 +79,18 @@ class InstallerTests(unittest.TestCase):
                 self.assertFalse(installed.is_symlink())
                 self.assertEqual((foreign / 'manual.txt').read_text(), 'keep')
                 shutil.rmtree(foreign)
-    def test_ship_html_plan_packs_without_source_checkout(self):
+    def test_ship_plan_packs_without_source_checkout(self):
         self.run_install('-a', 'codex', '--root', 'ship', '--copy', '-y')
         installed = self.skills / 'fudge-ship'
         self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-ship'})
         marker = json.loads((installed / '.fudge-package.json').read_text())
-        self.assertIn('html-plan', marker['modules'])
-        module = installed / 'references/modules/html-plan'
+        self.assertIn('plan', marker['modules'])
+        module = installed / 'references/modules/plan'
         self.assertTrue((module / 'guide.md').is_file())
         self.assertFalse((module / 'SKILL.md').exists())
-        for source in (self.repo / 'html-plan').rglob('*'):
+        for source in (self.repo / 'plan').rglob('*'):
             if source.is_file() and source.name != 'SKILL.md':
-                self.assertEqual((module / source.relative_to(self.repo / 'html-plan')).read_bytes(), source.read_bytes())
+                self.assertEqual((module / source.relative_to(self.repo / 'plan')).read_bytes(), source.read_bytes())
         # A copied installation must work after the entire checkout disappears.
         shutil.rmtree(self.repo)
         if not shutil.which('node'):
@@ -108,38 +108,38 @@ class InstallerTests(unittest.TestCase):
         self.assertNotIn('src="../runtime/htmlplan.js"', text)
         self.assertNotIn('href="../runtime/htmlplan.css"', text)
 
-    def test_html_plan_standalone_update_remove_and_coexistence(self):
+    def test_plan_standalone_update_remove_and_coexistence(self):
         for copy in (False, True):
             with self.subTest(copy=copy):
-                args = ['-a', 'codex', '--skill', 'html-plan', '-y']
+                args = ['-a', 'codex', '--skill', 'plan', '-y']
                 if copy:
                     args.append('--copy')
                 self.run_install(*args)
-                installed = self.skills / 'fudge-html-plan'
-                self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-html-plan'})
+                installed = self.skills / 'fudge-plan'
+                self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-plan'})
                 self.assertEqual(installed.is_symlink(), not copy)
-                self.assertEqual(json.loads((installed / '.fudge-package.json').read_text())['root'], 'html-plan')
-                for source in (self.repo / 'html-plan').rglob('*'):
+                self.assertEqual(json.loads((installed / '.fudge-package.json').read_text())['root'], 'plan')
+                for source in (self.repo / 'plan').rglob('*'):
                     if source.is_file():
-                        self.assertEqual((installed / source.relative_to(self.repo / 'html-plan')).read_bytes(), source.read_bytes())
-                source = self.repo / 'html-plan/SKILL.md'
+                        self.assertEqual((installed / source.relative_to(self.repo / 'plan')).read_bytes(), source.read_bytes())
+                source = self.repo / 'plan/SKILL.md'
                 source.write_text(source.read_text() + '\nStandalone HTML update fixture.\n')
                 self.run_install(*args)
                 self.assertIn('Standalone HTML update fixture.', (installed / 'SKILL.md').read_text())
                 self.run_install('-a', 'codex', '--root', 'ship', '-y')
                 self.assertTrue((installed / 'SKILL.md').exists())
-                self.assertTrue((self.skills / 'fudge-ship/references/modules/html-plan/guide.md').exists())
+                self.assertTrue((self.skills / 'fudge-ship/references/modules/plan/guide.md').exists())
                 listing = self.run_install('list', '-a', 'codex')
-                self.assertIn('owned  fudge-html-plan', listing.stdout)
-                self.run_install('remove', '-a', 'codex', '--root', 'html-plan', '-y')
+                self.assertIn('owned  fudge-plan', listing.stdout)
+                self.run_install('remove', '-a', 'codex', '--root', 'plan', '-y')
                 self.assertFalse(installed.exists())
                 self.assertFalse(installed.is_symlink())
                 self.assertTrue((self.skills / 'fudge-ship').exists())
                 self.run_install('remove', '-a', 'codex', '--all', '-y')
 
-    def test_html_plan_copy_packs_without_checkout(self):
-        self.run_install('-a', 'codex', '--root', 'html-plan', '--copy', '-y')
-        installed = self.skills / 'fudge-html-plan'
+    def test_plan_copy_packs_without_checkout(self):
+        self.run_install('-a', 'codex', '--root', 'plan', '--copy', '-y')
+        installed = self.skills / 'fudge-plan'
         shutil.rmtree(self.repo)
         if not shutil.which('node'):
             self.skipTest('Node.js is required to exercise the HTML packer')
@@ -151,26 +151,51 @@ class InstallerTests(unittest.TestCase):
         self.assertIn('<script data-htmlplan>', packed.read_text())
         self.assertIn('<style data-htmlplan>', packed.read_text())
 
-    def test_html_plan_foreign_and_legacy_ownership(self):
+    def test_plan_foreign_and_legacy_ownership(self):
         self.skills.mkdir(parents=True)
         legacy = self.skills / 'html-plan'
         legacy.symlink_to(self.repo / 'html-plan')
+        old_package = self.skills / 'fudge-html-plan'
+        old_package.symlink_to(self.repo / '.fudge-build/fudge-html-plan')
         self.run_install('-a', 'codex', '--root', 'ship', '-y')
         self.assertTrue(legacy.is_symlink())
-        foreign = self.skills / 'fudge-html-plan'
+        self.assertTrue(old_package.is_symlink())
+        foreign = self.skills / 'fudge-plan'
         foreign.symlink_to(self.base / 'missing')
         self.run_install('-a', 'codex', '--root', 'html-plan', '-y', success=False)
         self.assertTrue(foreign.is_symlink())
         self.assertTrue(legacy.is_symlink())
+        self.assertTrue(old_package.is_symlink())
         foreign.unlink()
         self.run_install('-a', 'codex', '--root', 'html-plan', '-y')
         self.assertFalse(legacy.is_symlink())
+        self.assertFalse(old_package.is_symlink())
         self.assertTrue(foreign.is_symlink())
         legacy.symlink_to(self.base / 'unrelated')
+        old_package.mkdir()
+        (old_package / 'manual.txt').write_text('keep')
         self.run_install('-a', 'codex', '--all', '-y')
         self.run_install('remove', '-a', 'codex', '--all', '-y')
         self.assertTrue(legacy.is_symlink())
+        self.assertEqual((old_package / 'manual.txt').read_text(), 'keep')
         self.assertFalse(foreign.is_symlink())
+
+    def test_plan_legacy_copy_and_selection_aliases(self):
+        self.skills.mkdir(parents=True)
+        for name in ('html-plan', 'fudge-html-plan'):
+            with self.subTest(name=name):
+                legacy = self.skills / name
+                legacy.mkdir()
+                (legacy / '.fudge-installer').write_text(str(self.repo) + '\n')
+                self.run_install('-a', 'codex', '--skill', name, '--copy', '-y')
+                self.assertFalse(legacy.exists())
+                self.assertTrue((self.skills / 'fudge-plan/SKILL.md').is_file())
+                self.run_install('remove', '-a', 'codex', '--root', name, '-y')
+                self.assertFalse((self.skills / 'fudge-plan').exists())
+                legacy.mkdir()
+                (legacy / '.fudge-installer').write_text(str(self.repo) + '\n')
+                self.run_install('remove', '-a', 'codex', '--root', 'plan', '-y')
+                self.assertFalse(legacy.exists())
 
     def test_copy_update(self):
         self.run_install('-a', 'codex', '--root', 'setup', '--copy', '-y')

@@ -15,9 +15,9 @@ MANIFEST = json.loads((SOURCE / 'scripts/skill-manifest.json').read_text())
 ROOTS = list(MANIFEST['roots'])
 PACKAGES = {name: spec.get('package', 'fudge-' + name) for name, spec in MANIFEST['roots'].items()}
 ALIASES = {name: spec['owner'] for name, spec in MANIFEST['modules'].items() if name not in ROOTS}
-ALIASES.update({'conventions': 'setup', 'delegate': 'ship', 'unslop': 'ship', 'report-deck': 'design'})
+ALIASES.update({'conventions': 'setup', 'delegate': 'ship', 'unslop': 'ship', 'report-deck': 'design', 'html-plan': 'plan'})
 RETIRED = set(ALIASES) | {'mindmap'}
-LEGACY = {'html-plan': 'html-plan'}
+LEGACY = {'html-plan': 'plan', 'fudge-html-plan': 'plan'}
 AGENTS = {'claude': '.claude/skills', 'codex': '.codex/skills', 'cursor': '.cursor/skills', 'opencode': '.config/opencode/skills'}
 
 def owned(path):
@@ -33,7 +33,8 @@ def owned(path):
 def retired_for(target, roots):
     legacy = [target / name for name, root in LEGACY.items() if root in roots and owned(target / name)]
     return legacy + [target / ('fudge-' + name) for name in sorted(RETIRED)
-            if (name == 'mindmap' or ALIASES.get(name) in roots)
+            if 'fudge-' + name not in LEGACY
+            and (name == 'mindmap' or ALIASES.get(name) in roots)
             and owned(target / ('fudge-' + name))]
 
 
@@ -71,7 +72,7 @@ def main():
     parser = argparse.ArgumentParser(description='Install public Fudge skills. Specialists are bundled internal modules.')
     parser.add_argument('command', nargs='?', choices=['install', 'list', 'remove'], default='install')
     parser.add_argument('-a', '--agent', action='append', choices=AGENTS, default=[])
-    parser.add_argument('--root', action='append', default=[], help=', '.join(ROOTS) + ' (conventions is a migration alias)')
+    parser.add_argument('--root', action='append', default=[], help=', '.join(ROOTS) + ' (conventions and html-plan are migration aliases)')
     parser.add_argument('--skill', action='append', default=[], help='public skill or legacy name; legacy modules select their owning root')
     parser.add_argument('--all', action='store_true', help='select all public roots; remove all owned entries')
     parser.add_argument('--no-roots', action='store_true', help='legacy flag, accepted only with --skill')

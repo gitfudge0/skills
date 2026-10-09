@@ -10,7 +10,7 @@ Seven public skills cover project setup, requirements discovery, implementation,
 | `fudge:ux` | Shape the experience people need | Research, content architecture, interaction design, accessibility, measurement |
 | `fudge:setup` | Establish project rules and make a project runnable | Conventions setup, audit, amendment, dependency and startup readiness |
 | `fudge:write` | Draft and revise clear software docs, tickets, and PRs | STE-inspired prose guidance with meaning, code, and uncertainty preserved |
-| `fudge:html-plan` | Create interactive HTML implementation plans | Runtime, block references, and examples; also bundled into ship |
+| `fudge:plan` | Create interactive HTML implementation plans | Runtime, block references, and examples; also bundled into ship |
 
 A narrow request goes directly to its module. Asking for button labels does not start a mock workflow; asking what's missing before building can stop at requirements analysis. Rendering a report deck is optional. Mindmap has been removed.
 
@@ -24,7 +24,7 @@ Requires Python 3.9+ and Bash. Clone this repository, then run:
 ./install.sh -a claude -a codex --all -y
 ./install.sh -a codex --root ship --copy -y
 ./install.sh -a codex --root write -y
-./install.sh -a codex --root html-plan -y
+./install.sh -a codex --root plan -y
 ./install.sh list
 ./install.sh remove -a codex --all -y
 ```
@@ -35,22 +35,22 @@ The installer offers seven public roots. Each package includes its dependency cl
 
 ### Migration
 
-`--root conventions` selects `setup`. Legacy `--skill` names select their owning root: for example, `--skill ui-mock` selects `design`, and `--skill gap-analysis` and `--skill system-decomposition` select `ship`. `--no-roots --skill NAME` remains a migration form. `--skill html-plan` selects the standalone public skill. `--skill mindmap` reports its removal.
+`--root conventions` selects `setup`. Legacy `--skill` names select their owning root: for example, `--skill ui-mock` selects `design`, and `--skill gap-analysis` and `--skill system-decomposition` select `ship`. `--no-roots --skill NAME` remains a migration form. `--skill plan` selects the standalone public skill. Legacy `html-plan` and `fudge-html-plan` selections remain migration aliases for `plan`. `--skill mindmap` reports its removal.
 
-Installation removes retired entries only when they are owned by this checkout's installer and their owning root was selected. Explicitly removed mindmap entries are also cleaned up. Selecting standalone `html-plan` migrates an owned legacy `html-plan` entry to `fudge-html-plan`; selecting `ship` preserves it. Review lists planned cleanup before confirmation. Recognized ownership is an exact installer link target (including old dangling links), or a copy marker containing this checkout's path. Foreign directories, manual copies, and unrelated dangling links are preserved. A foreign entry at a selected public destination blocks installation without overwriting it.
+Installation removes retired entries only when they are owned by this checkout's installer and their owning root was selected. Explicitly removed mindmap entries are also cleaned up. Selecting standalone `plan` migrates owned legacy `html-plan` and `fudge-html-plan` entries to `fudge-plan`; selecting `ship` preserves them. Review lists planned cleanup before confirmation. Recognized ownership is an exact installer link target (including old dangling links), or a copy marker containing this checkout's path. Foreign directories, manual copies, and unrelated dangling links are preserved. A foreign entry at a selected public destination blocks installation without overwriting it.
 
 ## Source and package layout
 
 ```text
 fudge-{ship,review,design,ux,setup,write}/SKILL.md
 modules/<capability>/guide.md
-html-plan/SKILL.md                  # standalone public skill, also bundled into ship
+plan/SKILL.md                  # standalone public skill, also bundled into ship
 shared/{execution.md,writing.md,artifacts.md,artifact_path.py}
 shared/report-deck/
 scripts/skill-manifest.json
 ```
 
-The manifest declares module ownership, optional source entry filenames, root dependencies, and optional package names. Existing Fudge roots keep their `fudge-` package names; standalone HTML planning installs to `fudge-html-plan` and is invoked with `/fudge:html-plan`. HTML planning reuses the standalone `html-plan/` source as a ship module, including its runtime, block reference, and examples; it is also available as the standalone `fudge-html-plan` package through `--root html-plan` or `--skill html-plan`. Node.js is required only to pack an HTML plan. The builder computes a closure with no recursive root copies. An installed package contains:
+The manifest declares module ownership, optional source entry filenames, root dependencies, and optional package names. Existing Fudge roots keep their `fudge-` package names; standalone HTML planning installs to `fudge-plan` and is invoked with `/fudge:plan`. HTML planning reuses the standalone `plan/` source as a ship module, including its runtime, block reference, and examples; it is also available as the standalone `fudge-plan` package through `--root plan` or `--skill plan`. Node.js is required only to pack an HTML plan. The builder computes a closure with no recursive root copies. An installed package contains:
 
 ```text
 SKILL.md

@@ -136,22 +136,22 @@ Use the actual bundled HTML plan renderer, not a review-specific imitation. Copy
 
 Resolve the shared runtime from the package root:
 
-- Source checkout: `html-plan/runtime/` beside `fudge-review/`.
-- Installed review package: `references/roots/html-plan/runtime/`.
-- Review bundled inside another root: the same package-root `references/roots/html-plan/runtime/`.
+- Source checkout: `plan/runtime/` beside `fudge-review/`.
+- Installed review package: `references/roots/plan/runtime/`.
+- Review bundled inside another root: the same package-root `references/roots/plan/runtime/`.
 
-The review root declares an `html-plan` root dependency so all three runtime files (`htmlplan.css`, `htmlplan.js`, `pack.mjs`) travel with the review package. Do not copy a fork of these files into review assets. The source template uses checkout-relative links `../../html-plan/runtime/htmlplan.css` and `../../html-plan/runtime/htmlplan.js`. For an unpacked installed preview or a source copied to a review output directory, replace only those two link paths with paths to the resolved shared runtime. The packer resolves linked basenames from its own runtime directory as a fallback, so it can also pack the unchanged bundled source inside an isolated installed package.
+The review root declares an `plan` root dependency so all three runtime files (`htmlplan.css`, `htmlplan.js`, `pack.mjs`) travel with the review package. Do not copy a fork of these files into review assets. The source template uses checkout-relative links `../../plan/runtime/htmlplan.css` and `../../plan/runtime/htmlplan.js`. For an unpacked installed preview or a source copied to a review output directory, replace only those two link paths with paths to the resolved shared runtime. The packer resolves linked basenames from its own runtime directory as a fallback, so it can also pack the unchanged bundled source inside an isolated installed package.
 
 Source-checkout example:
 
 ```sh
-node html-plan/runtime/pack.mjs fudge-review/assets/example-review.src.html -o fudge-review/assets/example-review.html
+node plan/runtime/pack.mjs fudge-review/assets/example-review.src.html -o fudge-review/assets/example-review.html
 ```
 
 Installed-package example, run from the package root:
 
 ```sh
-node references/roots/html-plan/runtime/pack.mjs assets/example-review.src.html -o /absolute/review/output/review.html
+node references/roots/plan/runtime/pack.mjs assets/example-review.src.html -o /absolute/review/output/review.html
 ```
 
 For a real report, pack the edited review source at its caller-resolved output location instead of overwriting the bundled example. The packed report inlines the exact shared CSS/JS and works offline. External PR links are navigation only. No reviewed repository files need to be available during rendering.

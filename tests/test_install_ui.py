@@ -59,12 +59,12 @@ class WizardTests(unittest.TestCase):
         screen = Screen([10, 10, 10, 10, ord('q')])
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp)
-            (target / 'fudge-html-plan').mkdir()
+            (target / 'fudge-plan').mkdir()
             with patch.object(UI.curses, 'wrapper', side_effect=lambda action: action(screen)), patch.object(UI.curses, 'curs_set'):
-                result = UI.choose(['codex'], ['html-plan'], ['codex'], ['html-plan'], False,
-                    lambda agent: target, lambda path: False, package_for=lambda root: 'fudge-html-plan')
+                result = UI.choose(['codex'], ['plan'], ['codex'], ['plan'], False,
+                    lambda agent: target, lambda path: False, package_for=lambda root: 'fudge-plan')
         self.assertIsNone(result)
-        self.assertTrue(any('conflict' in line.lower() and 'fudge:html-plan' in line for line in screen.lines))
+        self.assertTrue(any('conflict' in line.lower() and 'fudge:plan' in line for line in screen.lines))
         self.assertIn('Resolve or deselect conflicts before installing.', screen.lines)
 
     def test_terminal_support_and_fallback(self):
