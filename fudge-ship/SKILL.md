@@ -17,7 +17,7 @@ The user owns expected behavior and scope. The repository's `AGENTS.md`, `CLAUDE
 
 ## Choose the work and depth
 
-Name the work item and its boundary. Use the endpoint already requested by the user; otherwise default to **verified locally**. Other endpoints are **PR opened**, **PR integrated**, or **release/deploy** when selected. An analysis-only route ends with its requested artifact or decision. Issue tracking is a separate opt-in; a linked issue does not itself authorize updates. Read [external workflows](references/external-workflows.md) before issue, PR, or release/deploy work.
+Name the work item and its boundary. Use the endpoint already requested by the user. For implementation in a Git repository with a configured forge, default to **PR ready**: an open, pushed PR whose current diff has completed the review loop and required checks. **Verified locally** and analysis-only requests override that default. **PR opened** stops at creation; **PR integrated** and **release/deploy** require explicit selection. Missing Git, a remote, credentials, or forge access does not prevent useful local work or authorize initializing/publishing a repository; report the unavailable endpoint accurately. An analysis-only route ends with its requested artifact or decision. Issue tracking is a separate opt-in; a linked issue does not itself authorize updates. Read [PR delivery](references/pr-delivery.md) before Git implementation isolation or a PR endpoint, and [external operations](references/external-workflows.md) for issue tracking or release/deploy.
 
 Choose the smallest workflow that gives credible evidence for this change:
 
@@ -30,7 +30,7 @@ An individual uncertainty may warrant one specialist without turning the whole w
 
 ## Route only the needed stages
 
-Every work item begins with bounded requirements discovery: inspect the request, relevant behavior, dependencies, project instructions, existing checks, and acceptance signals. Settle empirical unknowns through bounded inspection or a safe, proportionate experiment before asking the user: for example, inspect actual callers or reproduce behavior rather than asking them to predict it. Stop investigation when its cost exceeds the decision it informs; report remaining uncertainty. Product intent, preferences, and consequential tradeoffs remain the user’s decisions. Resolve routine choices with existing patterns and continue independent work while consequential questions are pending.
+Every implementation begins with bounded discovery under `references/modules/engineering/guide.md`; every implementation ends with observed evidence under `references/modules/verification/guide.md`. Product intent and consequential tradeoffs remain user decisions. Analysis-only work loads only the guidance serving its requested artifact.
 
 Read `references/modules/gap-analysis/guide.md` only when missing or conflicting requirements warrant deeper reconciliation. Retain every valid gap and its evidence; summaries may be shorter than the register. “What is missing before we build?” is an analysis-only request: return the scoped gaps, concrete decisions, and next actions without starting implementation. Clear requests need a small discovery pass, not a workshop.
 
@@ -46,7 +46,13 @@ Use selected guidance only when its output serves this work item:
 | Make an interactive implementation plan | `references/modules/plan/guide.md` | The user requests an HTML plan, or a complex multi-file change needs a reviewable tree of behavior, exhibits, and decisions. |
 | Plan distinct failure cases | `references/modules/test-plan/guide.md` | Risk or an explicit request warrants a separate test plan. |
 | Make the project runnable | `references/roots/setup/guide.md` | Dependencies, environment, or startup readiness block implementation or verification; use focused run setup. |
-| Implement | `shared/execution.md` | Product or test files will change. |
+| Engineer the change | `references/modules/engineering/guide.md` | Bounded discovery, cause tracing, state modeling, or implementation is needed. |
+| Coordinate implementation | `shared/execution.md` | Product or test files will change; single owner for delegation and integration. |
+| Verify completion | `references/modules/verification/guide.md` | Any implementation needs acceptance evidence and current checks. |
+| Isolate and deliver a PR | [PR delivery and learning](references/pr-delivery.md) | Git implementation isolation or a PR endpoint. |
+| Track issues or deploy | [External operations](references/external-workflows.md) | Explicit issue tracking, deployment, or compatibility risk. |
+| Add comprehensive assurance | [Comprehensive assurance](references/comprehensive.md) | Comprehensive risk path. |
+| Recover durable work | [Run state](references/run-state.md) | Cross-session coordination or recovery. |
 | Formal review | `references/roots/review/guide.md` | The change is comprehensive or the user requests this review. |
 
 When HTML planning is selected, use the bundled guide and its adjacent runtime, block reference, and examples. The source is `plan/`; the installed directory is package-root `references/modules/plan/`. Prefer `examples/sample-plan.html` for the contents rail, grouped expand/collapse, and light/dark switch. Keep clear routine work in a concise plan. For a review-before-build request, hand over the packed page and wait for the user response before affected implementation; existing authorization and settled decisions still apply. A planning-only request ends with the page.
@@ -55,38 +61,12 @@ Read each selected skill and honor the contract for the chosen path. A named sta
 
 ## Routine path
 
-1. Establish acceptance conditions, affected contracts, and the implementation approach using the engineering loop below. Resolve only material uncertainty. Use governing rules and existing patterns; resolve consequential rule conflicts before affected work.
-2. Implement under `shared/execution.md` for decomposition, delegation, ownership, and integration. Protect pre-existing user edits; an authorized change to a file preserves unrelated edits in that file. A request to remove newly added work does not authorize deleting pre-existing files.
-3. Verify the acceptance conditions and plausible regressions using the evidence rules below. Add automated coverage when a meaningful failure mode needs durable protection and a suitable harness exists, or when requested. Multiple UI steps alone do not require a new end-to-end suite.
-4. Read the final diff and working state for correctness, contracts, scope, and unintended changes. Fix issues and recheck affected behavior. Complete the authorized endpoint and report what changed, evidence, and material gaps.
+1. Establish acceptance conditions, affected contracts, and the implementation approach using `references/modules/engineering/guide.md`. Resolve only material uncertainty. Use governing rules and existing patterns; resolve consequential rule conflicts before affected work.
+2. Check and reuse an existing linked worktree, or create an isolated task worktree from the primary checkout, under the isolation rules in [PR delivery](references/pr-delivery.md). Implement under `shared/execution.md` for decomposition, delegation, ownership, and integration. Protect pre-existing user edits; an authorized change to a file preserves unrelated edits in that file. A request to remove newly added work does not authorize deleting pre-existing files.
+3. Verify the acceptance conditions and plausible regressions using `references/modules/verification/guide.md`. Add automated coverage when a meaningful failure mode needs durable protection and a suitable harness exists, or when requested. Multiple UI steps alone do not require a new end-to-end suite.
+4. Read the final diff and working state for correctness, contracts, scope, and unintended changes. Fix issues and recheck affected behavior. For a PR-ready endpoint, complete the repeated review and learning loop in [PR delivery](references/pr-delivery.md), including a fresh final review. Complete the authorized endpoint and report what changed, evidence, and material gaps.
 
-Routine work needs no run directory, HTML matrix, separate test-case approval, blanket full-suite gates, two-pass review, or conventions audit. A direct request to commit or push remains authorization for that endpoint, subject to the repository's own safeguards. Do not re-ask a settled visual or behavior choice merely because implementation has begun.
-
-## Engineering loop
-
-The discovery, assumption-checking, state-modeling, and measurement guidance here adapts selected ideas from Cursor’s [poteto-mode](https://github.com/cursor/plugins/blob/main/pstack/skills/poteto-mode/SKILL.md); it does not import that skill’s dependencies or execution defaults.
-
-Before editing, trace the changed behavior to its owning layer, direct callers, data readers/writers, and external boundaries. Follow further dependencies only while a relevant contract or failure remains unresolved. Identify invariants that must survive the change: for example tenant isolation, unchanged response compatibility, or one effect per retried event. Use concrete source evidence; do not map unrelated parts of the repository.
-
-For stateful or branch-heavy behavior, identify the domain data shapes, valid states, transitions, and invalid combinations before adding conditionals. Use existing types or a compact sketch when sufficient; introduce explicit modeling only when it reduces ambiguity or prevents inconsistent states. A simple change needs no separate modeling artifact.
-
-Choose the smallest cohesive change that addresses the cause and preserves these contracts. Reuse an existing sound implementation rather than introducing a second mechanism. Consider alternatives when compatibility, maintenance, performance, security, or recovery materially differs. For a narrow task, a brief rationale is enough; broader work may need a short design note. Avoid speculative abstractions and unrelated cleanup. Established patterns inform the choice but do not justify copying a demonstrated defect.
-
-For a bug, establish a reproduction or an evidence-backed hypothesis before changing behavior. Trace why the failure occurs; distinguish the cause from the visible symptom. If reproduction is unavailable, state the limit and identify the evidence that would confirm or falsify the hypothesis. Do not claim an observed reproduction from inspection alone. When adding a regression test, demonstrate that it catches the original defect where feasible, using an isolated baseline or temporary change that preserves user work; then verify the fix and nearby behavior. Fix related occurrences only when they share the proven cause and fall within scope. After repeated failed fixes, pause patching and revisit the hypothesis: compare expected and observed behavior, challenge the assumed owning layer and boundary, and gather evidence that distinguishes alternative causes before another attempt. Change the approach within scope; surface a disproven premise when it requires a user decision.
-
-For recurring demonstrated failures or mechanical repetition, consider an existing harness or a proportionate deterministic check/tool within the authorized scope, and verify it against a failure and a valid case. Use setup’s rules-and-tooling guidance for detailed criteria and approval boundaries; changing authoritative rules requires its approved amendment route and does not follow automatically from an implementation fix.
-
-## Verification and completion
-
-Connect each material acceptance condition and independently failing risk to an existing test, justified new test, focused manual observation, or explicit unverified gap. Use the cheapest layer that actually exercises the risk. A build proves compilation; it does not prove authorization, persisted data, or a user flow. A mock proves the behavior exercised with that mock, not the external service contract. Observe meaningful success, rejection, and recovery paths where applicable; do not generate every test type by habit.
-
-Run required project gates and risk-relevant checks. Start with focused checks for fast feedback; coordinate expensive suites once when their coverage is needed. Apply the check provenance and coordinator verification rules in `shared/execution.md`; stronger host or project requirements to rerun checks take precedence over evidence reuse. Record the command, result, checked revision or file state, and relevant environment; concise work can report this in chat. A later edit invalidates evidence for affected behavior and dependencies. Rerun those checks and retain unaffected evidence with a reason. If the impact cannot be bounded, broaden verification.
-
-For performance claims, establish a relevant baseline and comparable workload, revision, environment, method, execution order, and repetitions. Explain what each sample measures, variability, and plausible confounds such as warm-up, caching, or external services. Use enough observations for the claimed conclusion; a single timing or changed code shape does not establish a speedup. Report uncertain or incomparable results as such and scope any claim to what was measured.
-
-Classify a failed check as introduced, pre-existing, infrastructure-blocked, or flaky only with evidence. Compare against an isolated baseline when needed; do not erase user work to establish one. Preserve failure output and investigate before retrying. A later pass does not by itself resolve an unexplained intermittent failure. Fix in-scope defects; report unrelated failures without silently expanding scope or claiming a clean gate.
-
-Finish only when the requested behavior has relevant observed evidence, no known unresolved in-scope material defect remains, and required gates for the endpoint are satisfied. If infrastructure prevents verification, report partial completion and the specific missing evidence. A material unverified risk needs a scoped decision before a consequential external step; prior explicit risk acceptance remains valid. Never describe static review, unrun cases, or accepted risks as a runtime pass. Keep the final answer proportional to the work.
+Routine work needs no run directory, HTML matrix, separate test-case approval, blanket full-suite gates, or conventions audit. PR-ready work requires initial and final review passes under its delivery guide, scaled to risk. A direct request to commit or push remains authorization for that endpoint, subject to the repository's own safeguards. Do not re-ask a settled visual or behavior choice merely because implementation has begun.
 
 ## Recovery
 

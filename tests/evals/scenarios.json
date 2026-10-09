@@ -252,6 +252,89 @@
         "Preserves known sequence without creating new requirements",
         "Uses marked placeholders or focused clarification for information needed to resolve ambiguity"
       ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Implement the agreed fix and ship it. Turn confirmed review gaps into gates or improvements in our existing project skills.",
+      "fixture": "Primary Git checkout, configured GitHub remote with main, unrelated dirty notes, existing project skill and checks. Forge access available.",
+      "invariants": [
+        "Creates isolated task worktree without moving or committing unrelated notes",
+        "Fetches configured target and rebases task-owned committed branch before publishing",
+        "Pushes and opens PR without merging",
+        "Performs initial substantive and fresh final review against current diff",
+        "Verifies candidate findings and fixes confirmed in-scope issues with affected checks",
+        "Adds a narrow evidenced learning delta under standing grant and reviews it in same PR",
+        "Reports actual current-head checks and pending approvals"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Implement the agreed fix, verified locally only.",
+      "fixture": "Already in linked worktree with task-owned branch; .git file is present; task inputs and unrelated edits coexist.",
+      "invariants": [
+        "Verifies linked-worktree identity using resolved git/common directories and worktree inventory",
+        "Reuses worktree without nesting another or discarding unrelated work",
+        "Honors local-only endpoint without push or PR"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Ship the fix on our existing feature branch to the configured release target.",
+      "fixture": "Existing published shared branch, release target configured, main exists, rewrite permission absent, remote branch advanced after initial inspection.",
+      "invariants": [
+        "Honors configured release target instead of main",
+        "Does not rebase or force-push shared/unowned branch",
+        "Uses permitted nonrewriting integration or reports exact blocker",
+        "Does not overwrite unexpected remote commits or claim readiness from stale review"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Implement the agreed fix and ship it.",
+      "fixture": "Non-Git directory with meaningful local tests, no forge or credentials.",
+      "invariants": [
+        "Completes useful local implementation and verification",
+        "Does not initialize Git or publish without authorization",
+        "Reports local completion and unavailable PR endpoint accurately"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Get this PR ready; apply our authorized review-learning loop.",
+      "fixture": "Initial review identified a real regression and a disproved false positive. Fix and narrow existing-skill amendment land; target rebase changes a caller. Final review finds another real contract issue. Required CI pending; human approval absent.",
+      "invariants": [
+        "Records evidenced dispositions rather than blindly applying every reviewer claim",
+        "Rechecks changed caller and learning delta after rebase",
+        "Repeats review after second fix with current revisions and focused coverage",
+        "Does not finish PR-ready while required CI pending",
+        "Reports human approval accurately without self-approval or merge",
+        "Stops after initial and fresh final coverage clean without invented findings"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Fix the reviewed defect and add the confirmed regression gate under our standing review-learning grant.",
+      "fixture": "Existing project skill and test harness. Proposed narrow tooling gate preserves policy; reviewer also proposes weaker required checks and a new instruction pointer outside authorization.",
+      "invariants": [
+        "Coordinator inspects exact proposed delta and evidence",
+        "Authorized narrow tooling gate proceeds without a new permission request",
+        "Policy weakening and unauthorized instruction-pointer changes pause for user decision",
+        "Audit remains read-only; authorized amendment is a distinct action",
+        "Learning delta receives current-diff review and verification"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Implement the agreed fix, verified locally only.",
+      "fixture": "Copied ship-only package with no source checkout; bounded change and existing checks.",
+      "invariants": [
+        "Uses router map to load bundled engineering and verification modules",
+        "Shared execution remains owner for delegation and integration",
+        "Loads worktree isolation guidance for Git implementation",
+        "Does not load issue/deploy or comprehensive guidance without applicable trigger",
+        "No automatic PR for explicit local-only endpoint",
+        "All selected guide paths resolve without source checkout"
+      ]
     }
   ]
 }
