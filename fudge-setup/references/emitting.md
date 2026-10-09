@@ -121,7 +121,7 @@ The description slot is the load-bearing one. Write it to fire on code-writing a
 
 ## What Phase 3 does and does not do
 
-**Tooling configs are shown before they are written.** Where Phase 0.5 found a gap, show the exact config and exactly what it would enforce, then write it **only on the user's approval**. Each concrete config change needs authorization; earlier explicit authorization for that change applies. A yes to the formatter is not a yes to the pre-commit hook.
+**Tooling configs are shown before they are written.** Where Phase 0.5 found a gap, show the exact config and exactly what it would enforce, then write it **only on the user's approval**. Each concrete config change needs authorization; earlier explicit authorization for that change applies, including the bounded standing review-learning grant described in targeted amendment guidance. A yes to the formatter is not a yes to the pre-commit hook.
 
 **Source code is never written or refactored.** This skill produces documentation of rules, not code that follows them. That holds even when a violation is one line away from fixed and even when the user would obviously want it fixed — fixing it is a separate request. Emission does not include a git commit or push unless separately authorized.
 

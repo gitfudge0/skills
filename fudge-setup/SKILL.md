@@ -20,7 +20,7 @@ Set up a usable project by reusing its existing authority and run instructions. 
 | Establish project coding rules | [Rule setup interview](references/setup-interview.md) |
 | Set up one concern, such as error handling or test conventions | Focused rule setup: inspect that concern, draft concrete rules, show the exact table, emit after applicable approval |
 | Check a change against approved rules | [Audit and amendment](references/audit-amend.md), read-only audit |
-| Change an approved rule | [Audit and amendment](references/audit-amend.md), exact-change approval |
+| Change an approved rule | [Audit and amendment](references/audit-amend.md), targeted amendment; exact-change approval or explicit standing review-learning grant |
 | Install dependencies, prepare local prerequisites, start or explain how to run | Run readiness below |
 | General project setup | Inspect both rules and readiness; address gaps within the requested scope |
 
@@ -30,7 +30,7 @@ Locate instructions, existing project skills, governing documents, tooling confi
 
 Read [writing rules](references/writing-rules.md) before proposing rules; use the [dimension bank](references/dimension-bank.md) only for relevant concerns. Inspect mechanically discoverable choices rather than asking the user to repeat them. Propose concrete alternatives for unsettled choices. A focused setup skips unrelated rounds.
 
-Before creating or amending authoritative rules, show the exact rule table or amendment and obtain approval unless the conversation already explicitly approves those contents. Approval of summaries does not approve unseen rules. Read [emitting](references/emitting.md) before emission. Record contested choices and dependencies in the rationale. Audit returns findings; rule work does not refactor application code. Use ship for requested implementation fixes.
+Before creating or amending authoritative rules, show the exact rule table or amendment and obtain approval unless already authorized. An explicit standing grant to turn confirmed review gaps into gates or project-skill improvements covers narrow additive amendments that preserve established behavior: the coordinator must inspect the concrete delta, evidence, and verification within the reviewed work. It does not authorize new product decisions, weaker gates, changed approved policy, or broad new rulebooks. Otherwise approval of summaries does not approve unseen rules. Read [emitting](references/emitting.md) before emission. Record contested choices and dependencies in the rationale. Audit returns findings; rule work does not refactor application code. Use ship for requested implementation fixes.
 
 For recurring, demonstrated mistakes, consider a deterministic check or tool that catches the actual failure instead of accumulating repeated prose. This adapts a selected idea from Cursor’s [poteto-mode](https://github.com/cursor/plugins/blob/main/pstack/skills/poteto-mode/SKILL.md). Prefer an existing harness; justify a new check by recurrence, consequence, and maintenance cost, and avoid brittle checks that merely match wording. Propose only proportionate changes within scope, validate the check against the failure and a valid case, and preserve the rule and tooling authorization boundaries above and below.
 

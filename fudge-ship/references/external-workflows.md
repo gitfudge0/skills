@@ -1,16 +1,12 @@
-# Optional issue and PR workflows
+# External operations
 
-Read this when the work item includes issue tracking, a PR endpoint, or release/deploy, or when operational compatibility is relevant. These choices do not change the routine or comprehensive path selected by `fudge:ship`; each path keeps its own approval and verification requirements.
+Read this for authorized issue tracking, release/deploy, or operational compatibility. For Git implementation isolation and PR endpoints, use [PR delivery](pr-delivery.md). These choices do not change the routine or comprehensive path selected by `fudge:ship`; each path keeps its own approval and verification requirements.
 
 ## Issue tracking
 
 Issue mode is off by default. Select it explicitly and record the tracker, project, and existing issue or authorized new-issue destination. A supplied issue link is context, not permission to edit it. When selected, create or link the scoped work item and update it at meaningful milestones: behavior agreed where needed, implementation verified, PR opened, review or integration complete, and an actionable blocker. Keep updates factual and concise, with artifact or PR links where accessible. Do not post every internal iteration or close a larger release issue because one feature finished. If a tracker field, audience, or ownership is unclear, ask before changing it; log a failed update without pretending it succeeded.
 
-## PR lifecycle
-
-`verified locally` needs no branch, commit, push, or PR unless the user separately requested one. `PR opened` authorizes the in-scope branch, commit, push, and PR creation needed for this work item; it ends with a live PR link and local verification evidence, while pending remote checks are reported as pending. `PR integrated` additionally authorizes following remote checks and review, addressing feedback, seeking required approval, and merging only when the host's rules and the selected destination allow it. Record the target branch and merge method if they matter; ask instead of guessing a consequential choice. Never self-approve, bypass branch protection, or merge with failing required checks. For reviewer feedback that changes agreed behavior, resolve the new decision before related code; update the risk plan when expected behavior or consequential coverage decisions change; version a formal matrix if one is in use.
-
-Use the repository's configured provider and available connector or CLI. Keep commits limited to work-owned files; inspect staged content before each commit so a dirty worktree cannot drag in user changes. Push only the selected branch. Once open, track the PR through checks and review as far as the selected endpoint requires; respond to actionable feedback, implement or delegate in-scope fixes, rerun relevant local checks, push updates, and recheck remote status. If approval, credentials, CI, or policy blocks integration, report the exact blocker and PR link; keep any durable run open. Do not convert a selected `PR opened` endpoint into an automatic merge.
+## Release/deploy endpoint
 
 Release/deploy is a separate explicit endpoint. Establish its target and prerequisites, then use the project's release/deployment instructions and checks. A feature may be integrated into a larger release and stop there; do not cut, tag, deploy, or announce a release merely because its feature run is complete. Stop before any irreversible or ambiguous production operation that the selected scope did not settle, and report what remains.
 

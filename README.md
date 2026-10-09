@@ -4,7 +4,7 @@ Seven public skills cover project setup, requirements discovery, implementation,
 
 | Public skill | Purpose | Internal capabilities |
 |---|---|---|
-| `fudge:ship` | Discover requirements, implement, verify, deliver | Gap analysis, system decomposition, interactive HTML planning, test planning, decision pressure-testing; routes to design, UX, review, setup |
+| `fudge:ship` | Discover requirements, implement, verify, deliver | Engineering, verification, PR delivery and review learning, gap analysis, system decomposition, interactive HTML planning, test planning, decision pressure-testing; routes to design, UX, review, setup |
 | `fudge:review` | Review a PR or local diff | Findings, re-review, conventions checks |
 | `fudge:design` | Shape and build the visual experience | Visual craft, design systems, static mocks, prototypes, design QA |
 | `fudge:ux` | Shape the experience people need | Research, content architecture, interaction design, accessibility, measurement |
@@ -12,7 +12,7 @@ Seven public skills cover project setup, requirements discovery, implementation,
 | `fudge:write` | Draft and revise clear software docs, tickets, and PRs | STE-inspired prose guidance with meaning, code, and uncertainty preserved |
 | `fudge:plan` | Create interactive HTML implementation plans | Runtime, block references, and examples; also bundled into ship |
 
-A narrow request goes directly to its module. Asking for button labels does not start a mock workflow; asking what's missing before building can stop at requirements analysis. Rendering a report deck is optional. Mindmap has been removed.
+Ship is a router with a task-to-guide map: focused engineering and verification modules, native PR delivery guidance, and conditional comprehensive/recovery references. Shared execution remains the single delegation and integration policy. Git implementation defaults to an isolated worktree and PR-ready delivery; explicit local-only and analysis endpoints remain available. A narrow request goes directly to its module. Asking for button labels does not start a mock workflow; asking what's missing before building can stop at requirements analysis. Rendering a report deck is optional. Mindmap has been removed.
 
 ## Install
 

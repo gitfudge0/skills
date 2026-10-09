@@ -3,7 +3,7 @@
   "roots": {
     "design": {"source": "fudge-design", "modules": ["design-for-recognition", "design-system", "ui-mock", "ui-prototype", "design-qa"], "roots": ["ux"]},
     "ux": {"source": "fudge-ux", "modules": ["ux-research", "content-architecture", "interaction-design", "accessible-ui", "experience-measurement"], "roots": ["design"]},
-    "ship": {"source": "fudge-ship", "modules": ["gap-analysis", "test-plan", "decision-room", "system-decomposition", "plan"], "roots": ["design", "ux", "review", "setup"]},
+    "ship": {"source": "fudge-ship", "modules": ["gap-analysis", "test-plan", "decision-room", "system-decomposition", "plan", "engineering", "verification"], "roots": ["design", "ux", "review", "setup"]},
     "review": {"source": "fudge-review", "modules": [], "roots": ["setup", "plan"]},
     "setup": {"source": "fudge-setup", "modules": [], "roots": []},
     "write": {"source": "fudge-write", "modules": [], "roots": []},
@@ -20,6 +20,8 @@
     "interaction-design": {"owner": "ux", "source": "modules/interaction-design"},
     "accessible-ui": {"owner": "ux", "source": "modules/accessible-ui"},
     "experience-measurement": {"owner": "ux", "source": "modules/experience-measurement"},
+    "engineering": {"owner": "ship", "source": "modules/engineering"},
+    "verification": {"owner": "ship", "source": "modules/verification"},
     "gap-analysis": {"owner": "ship", "source": "modules/gap-analysis"},
     "test-plan": {"owner": "ship", "source": "modules/test-plan"},
     "system-decomposition": {"owner": "ship", "source": "modules/system-decomposition"},
