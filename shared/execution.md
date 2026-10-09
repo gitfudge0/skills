@@ -1,6 +1,6 @@
 # Shared execution policy
 
-Use the host's available tools and current model choices. This policy does not assume a particular agent API, model vendor, editor, or isolation feature.
+Use the host's available tools and current model choices. This policy does not assume a particular agent API, model vendor, editor, or isolation feature. Governing host and project instructions take precedence, including stricter delegation or coordinator rerun requirements.
 
 ## Decide and scope
 
@@ -24,7 +24,7 @@ Give each worker a self-contained brief with:
 - No unauthorized publishing, history rewriting, discarding changes, or deleting unrelated files.
 - A request to report genuine blockers or false premises, deviations, check commands, exit status, and accessible raw evidence.
 
-Workers may adapt mechanical details within their scope. A false premise that invalidates the approach should be reported with evidence; do not invent a replacement scope. Resume the same worker for related corrections. Repeated failure calls for re-scoping or another approach, not indefinite retries.
+Workers may adapt mechanical details within their scope. A false premise that invalidates the approach should be reported with evidence; do not invent a replacement scope. Resume the same worker for related corrections. Repeated failure calls for an evidence-backed reassessment of assumptions and approach, not indefinite retries; preserve scope and escalate only consequential changes that require a user decision.
 
 ## Frame, fan out, and aggregate
 
@@ -40,7 +40,7 @@ Aggregate the results against acceptance conditions and the declared race rule. 
 
 ## Verify outcomes
 
-A success claim alone is not evidence. Inspect actual changed files, scope, and relevant observed outcomes before reporting success. Raw command output or recorded manual observations from a worker can count when accessible, attributable to the current revision and environment, and sufficient to verify the result. Do not rerun an expensive identical check solely to change who ran it. Rerun when evidence is missing, stale, ambiguous, or invalidated by later changes.
+A success claim alone is not evidence. Inspect actual changed files, scope, and relevant observed outcomes before reporting success. Raw command output or recorded manual observations from a worker can count when accessible, attributable to the current revision and environment, and sufficient to verify the result. When governing instructions permit reuse, do not rerun an expensive identical check solely to change who ran it. A required coordinator rerun still applies. Rerun when evidence is missing, stale, ambiguous, or invalidated by later changes.
 
 Workers may run cheap focused checks while implementing to self-correct; do not impose separate per-lane verification gates or duplicate full suites across workers. After integration, the coordinator runs the required broad build, test, lint, and other project gates once per integrated round when their coverage is needed. Later fixes require relevant rechecks for affected behavior and dependencies, while unaffected current evidence remains valid. Select checks by the failures they can catch rather than habit. Current native editor diagnostics can be evidence; confirm their file revision and scope before acting. Stale diagnostics are not proof of a current defect.
 

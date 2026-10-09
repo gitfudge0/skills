@@ -22,7 +22,7 @@ Compare the baseline with the current task-owned committed, staged, unstaged, an
 
 ## Current evidence and audits
 
-Record each check's command, exit status, raw output or manual observation, environment, checked file state or revision, and the acceptance conditions/risks it covers. Record review findings, dispositions, and any applicable conventions audit with scope, governing-source revisions, and checked snapshot. Evidence from a worker counts under the shared execution policy; do not repeat it solely to change who ran the command.
+Record each check's command, exit status, raw output or manual observation, environment, checked file state or revision, and the acceptance conditions/risks it covers. Record review findings, dispositions, and any applicable conventions audit with scope, governing-source revisions, and checked snapshot. Evidence from a worker counts under the shared execution policy when governing instructions permit reuse; mandatory coordinator reruns still apply.
 
 Identify snapshots with path/content hashes or an equivalently exact revision plus dirty-file snapshot. Recheck the current task diff and governing sources before push, merge, or finish. A changed snapshot means prior evidence needs impact assessment; it does not require throwing away all earlier coverage. Revalidate changed behavior and dependent contracts. Preserve unaffected evidence only with a stated reason; broaden verification if dependencies cannot be bounded.
 
