@@ -21,6 +21,8 @@ You write **one HTML file by hand**. It holds a tree of claims. A small runtime 
 
 Link the canonical `htmlplan.css` and `htmlplan.js`; do not add a document skin or a local theme script. The default is the compact sans layout with a near-black background and gold accents. The shared runtime adds the top-right Light mode / Dark mode control and persists the choice as `htmlplan-theme`. A saved choice wins over an explicit `data-theme`; without a saved choice, explicit light/dark is honored, otherwise dark is the default. Print uses the white/gold light palette and hides controls. Open claim rows stay in document flow rather than pinning while scrolling. Mock-specific app styles can remain in `style data-mock-shared`.
 
+Every decision with provided controls gets a final **Your own answer** field from the runtime, including radio, checkbox, select, range and ranking questions. Do not add an “Other” option just to allow free text. A nonblank own answer replaces the provided choices in the copied response; it stays quoted as reader feedback. Clearing it restores retained choices, while choosing a provided control clears the alternate answer. Text-only decisions keep their existing text field. Use stable `doc-ask` IDs; an authored final custom field can use `data-own-answer` to be reused, while ordinary notes remain notes.
+
 ## The tree
 
 Each level answers one question. The question picks the exhibit.

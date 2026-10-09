@@ -367,6 +367,10 @@ doc-ask.flash { animation: ask-flash 1.5s; } @keyframes ask-flash { 0%, 55% { bo
 doc-ask.changed::after { content: "Changed"; position: absolute; top: 14px; right: 16px; font: 550 12px/1 var(--sans); font-size:10px; color:var(--amber); }
 doc-ask > p:first-of-type { margin-bottom: 12px; font-size:14px; font-weight:550; }
 doc-ask label { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 6px; cursor: pointer; line-height: 1.4; transition: border-color .12s, background .12s; border:0; border-radius:4px; background:var(--paper); padding:9px 10px; font-size:13px; }
+doc-ask label.own-answer { display: block; cursor: text; margin-top: 12px; }
+doc-ask label.own-answer > span { display: block; margin-bottom: 7px; }
+doc-ask [data-own-answer] { display: block; width: 100%; min-height: 74px; resize: vertical; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--card); color: var(--ink); font: 13px/1.5 var(--sans); }
+doc-ask [data-own-answer]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 doc-ask label:hover { border-color: var(--ink-3); }
 doc-ask label:has(> input:checked) { border-color: var(--ink-3); background:var(--sunk); }
 doc-ask label > input[type=radio], doc-ask label > input[type=checkbox] { margin: 3px 0 0; accent-color: var(--accent); flex: 0 0 auto; width: 16px; height: 16px; }

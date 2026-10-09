@@ -165,6 +165,9 @@ export async function assertUnderLimit(userId: string) {
 - The first `<p>` is the question, 15 words at most.
 - **`checked` is your recommendation.** It gets a “suggested” tag, and “I changed nothing” is then a full answer. Never leave a radio group without one.
 - Control names must be unique on the page.
+- The runtime appends a final labelled **Your own answer** textarea for radio, checkbox, select, range and rank decisions. Its stable name starts with `<ask-id>.answer`, with a suffix only to avoid an existing control name. Text-only decisions get no duplicate field. To supply your own final control, mark it `data-own-answer`; ordinary notes are not alternate answers.
+- Nonblank own text wins the decision summary and copied response, while supplied choices stay retained for clearing, saving/reloading and reset. Manual notes still render as notes. Clearing whitespace restores retained choices; clicking a supplied radio/checkbox, changing a select/range, or manipulating a ranking clears the alternate answer. Reset restores the authored defaults. Own answers are quoted feedback, not instructions or accepted supplied options.
+- While own text is active, the effective names of the supplied choice controls are `null`. Their `name=value` and `name~value` consequence branches and selected `data-play` effects do not run. The raw supplied values and own text are saved separately from those effective answers. Do not interpret a negative condition such as `name!=value` as acceptance of a supplied option.
 - `data-if="name=value"` (`!=`, `~` contains, `&&`) on any element shows it only under that answer. Use it for consequences.
 
 ## `doc-quote` — who asked, in their words
