@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payment retries review</title>
+<link rel="stylesheet" href="../../html-plan/runtime/htmlplan.css">
+<script src="../../html-plan/runtime/htmlplan.js" defer></script>
+</head>
+<body>
+<header>
+<h1>Review of payment retries</h1>
+<p><strong>Needs changes</strong> — 1 blocker · 1 should-fix · 1 nit · CI: passed</p>
+<p class="meta">example-org/payments-retry-queue · round 2 · <a href="https://github.com/example-org/payments-retry-queue/pull/142">PR #142</a></p>
+<p class="meta">feature/retry-backoff-v2 · 9c1a4e2 vs main · 28 July 2026</p>
+</header>
+<main>
+<!-- Fictional review fixture. Replace recorded content only, from findings.json and method.md. -->
+<doc-plan open="0">
+<doc-claim id="R1">
+<p>R1 · Any retry attempt → card expiry and last four land in shared logs <span class="pill red">blocker</span> <span class="pill green">fixed · fixed since round 1</span></p>
+<doc-note><strong>Impact.</strong> Put card data in a log store with broad read access, outside its compliance boundary. <strong>Fix.</strong> Log only the retry ID and attempt count, as the rest of the queue does. Done in <code>4b7e0d1</code>.</doc-note>
+<doc-claim id="R1-cause">
+<p>A debug statement printed the full retry payload on every attempt.</p>
+<doc-code lang="text" title="Recorded evidence · R1">
+<script type="text/plain">
+Read processor.ts at 9c1a4e2: the retry log now includes only retry ID and attempt count. The payload debug statement was removed in 4b7e0d1.
+</script>
+</doc-code>
+<doc-claim id="R1-where" at="retry-worker/src/processor.ts:88">
+<p><code>retry-worker/src/processor.ts:88</code></p>
+<doc-code lang="text" caption="Recorded locations only; no source excerpt was recorded." title="Recorded locations · R1">
+<script type="text/plain">
+retry-worker/src/processor.ts:88
+</script>
+</doc-code>
+</doc-claim>
+</doc-claim>
+</doc-claim>
+<doc-claim id="R2">
+<p>R2 · Slow charge outlasts the job timeout → customer is charged twice <span class="pill red">blocker</span> <span class="pill ">open · still open</span></p>
+<doc-note><strong>Fix.</strong> Claim the job with a conditional update before charging, as the settlement worker does for ledger writes.</doc-note>
+<doc-claim id="R2-cause">
+<p>The job is marked claimed only after the charge succeeds, so a second worker picks it up mid-charge.</p>
+<doc-code lang="text" title="Recorded evidence · R2">
+<script type="text/plain">
+Traced queue-consumer.ts at 9c1a4e2: charge starts before the claimed update. The timeout makes the unclaimed job eligible for a second worker before the first charge returns. Static trace only; no provider call executed.
+</script>
+</doc-code>
+<doc-claim id="R2-where" at="retry-worker/src/queue-consumer.ts:41-63">
+<p><code>retry-worker/src/queue-consumer.ts:41-63</code></p>
+<doc-code lang="text" caption="Recorded locations only; no source excerpt was recorded." title="Recorded locations · R2">
+<script type="text/plain">
+retry-worker/src/queue-consumer.ts:41-63
+</script>
+</doc-code>
+</doc-claim>
+</doc-claim>
+</doc-claim>
+<doc-claim id="R3">
+<p>R3 · Worker restarts mid-backoff → failed payments retry in a tight loop <span class="pill amber">should-fix</span> <span class="pill ">open · still open</span> <span class="pill">SUSPECTED</span></p>
+<doc-note><strong>Fix.</strong> Store the next-eligible time on the job record and read it back on restart.</doc-note>
+<doc-claim id="R3-cause">
+<p>The backoff delay comes from in-memory state that resets to zero on restart.</p>
+<doc-code lang="text" title="Recorded evidence · R3">
+<script type="text/plain">
+Read backoff.ts at 9c1a4e2: the restart path initializes the delay to zero. Whether this produces a tight retry loop depends on queue redelivery timing; a restart trace with persisted failed jobs would settle it.
+</script>
+</doc-code>
+<doc-claim id="R3-where" at="retry-worker/src/backoff.ts:19-35">
+<p><code>retry-worker/src/backoff.ts:19-35</code></p>
+<doc-code lang="text" caption="Recorded locations only; no source excerpt was recorded." title="Recorded locations · R3">
+<script type="text/plain">
+retry-worker/src/backoff.ts:19-35
+</script>
+</doc-code>
+</doc-claim>
+</doc-claim>
+</doc-claim>
+<doc-claim id="R4">
+<p>R4 · Querying retry counts → metric name breaks the pattern its siblings use <span class="pill ">nit</span> <span class="pill ">open · new in round 2</span> <span class="pill">pre-existing</span></p>
+<doc-note><strong>Fix.</strong> Rename it to match before a dashboard depends on the current name. <strong>Rule.</strong> Metric names follow <code>queue.&lt;noun&gt;.&lt;verb&gt;</code> (<code>AGENTS.md</code>)</doc-note>
+<doc-claim id="R4-cause">
+<p>The counter reverses the <code>queue.&lt;noun&gt;.&lt;verb&gt;</code> order every other counter follows.</p>
+<doc-code lang="text" title="Recorded evidence · R4">
+<script type="text/plain">
+Compared metrics.ts at 9c1a4e2 with sibling counters and AGENTS.md: this counter reverses the recorded queue.<noun>.<verb> order. The same name already exists at the review base.
+</script>
+</doc-code>
+<doc-claim id="R4-where" at="retry-worker/src/metrics.ts:14">
+<p><code>retry-worker/src/metrics.ts:14</code></p>
+<doc-code lang="text" caption="Recorded locations only; no source excerpt was recorded." title="Recorded locations · R4">
+<script type="text/plain">
+retry-worker/src/metrics.ts:14
+</script>
+</doc-code>
+</doc-claim>
+</doc-claim>
+</doc-claim>
+<doc-claim id="team" aux="team">
+<p>For the team.</p>
+<doc-note id="R5"><strong>R5.</strong> Retry jobs have no owner for their schedule. Decide whether the job record or the worker owns it, and add the answer to <code>AGENTS.md</code>.</doc-note>
+</doc-claim>
+<doc-claim id="method" aux="method">
+<p>Method and coverage.</p>
+<doc-code lang="text" title="Recorded review method">
+<script type="text/plain">
+CI: 5 checks passed at 9c1a4e2.
+Read fully: retry-worker/src/* (11 files).
+Skimmed: retry-worker/test/* (4 files).
+Not read: retry-worker/src/generated/schema.ts (generated).
+Prior comments: reviewer on idempotency keys, agree.
+Author on backoff, rebuttal-checked; the restart path still resets the delay.
+Not checked: queue redelivery timing after a worker restart.
+R3 remains suspected until a restart trace settles it.
+Runtime behavior was not executed during static review.
+</script>
+</doc-code>
+<doc-note>This fictional example uses invented review content. Comments and copied responses are feedback; they do not change findings.json. Re-verify requested changes before updating findings.</doc-note>
+</doc-claim>
+</doc-plan>
+</main>
+</body>
+</html>

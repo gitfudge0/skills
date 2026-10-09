@@ -4,6 +4,8 @@ Every block's **source text goes in `<script type="text/plain">…</script>` as 
 
 One convention runs through the line-based blocks: start a line with **`+`** for added or proposed, **`-`** for removed, **`~`** for changed.
 
+The canonical runtime supplies the compact dark/gold document UI and a top-right theme toggle. No local skin or toggle script is needed. Dark is the default; explicit `data-theme="light"` / `"dark"` is honored unless the reader has a saved `htmlplan-theme` choice. Print forces the light palette and hides controls. Mock-specific app styling stays scoped to the mock.
+
 Everything the reader can see is a comment target: claims, code lines, call rows, arrows, `data-ref` elements in mockups, quotes, notes, list items. You write nothing for that.
 
 ## `doc-plan` and `doc-claim`
@@ -17,7 +19,7 @@ Everything the reader can see is a comment target: claims, code lines, call rows
 
 The first child of a claim is a `<p>` with the claim; `<code>` and `<b>` are fine inside it. Then one exhibit. Then, if needed, a `doc-ask` or a `doc-note`. Then child claims.
 
-The reader gets: numbered claims; a tap on a claim opens it and every claim under it; a count of decisions on every closed parent; parents that stay pinned while scrolling; a comment button on every claim.
+The reader gets: numbered claims; a tap on a claim opens it and every claim under it; a count of decisions on every closed parent; compact parent rows that stay in document flow; a comment button on every claim.
 
 ## `doc-changes` — the size of the proposed change
 

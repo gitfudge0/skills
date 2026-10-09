@@ -5,7 +5,7 @@ description: "Review a PR or local diff, re-review changed code, and render or s
 
 # Review
 
-fudge:review reviews a change, verifies every finding itself, stores the result in `findings.json`, and renders it for the chosen medium. The reader sees the verdict first and opens detail only when they want it.
+fudge:review reviews a change, verifies every finding itself, stores the result in `findings.json`, and renders it for the chosen medium. The reader sees the verdict immediately and opens detail only when they want it.
 
 ## Locate guidance
 
@@ -71,7 +71,7 @@ Identifiers go in Cause, Fix, or Where, and only when needed. Three tags print b
 | 🟠 should-fix | A bug users would see, a broken API or cross-repo contract, or a broken repo rule with real consequences. |
 | ⚪ nit | Everything else. |
 
-HTML shows severity as pills: filled for blocker, outlined for should-fix, muted outline for nit. The difference in form keeps severity readable in greyscale.
+HTML uses the shared HTML plan runtime pills, with explicit severity text. See the HTML design guidance; do not create a separate review skin.
 
 The verdict line:
 
@@ -89,4 +89,4 @@ Use package-root `shared/artifacts.md`, with skill `review` and the PR head bran
 
 - `references/findings.md`: the `findings.json` schema, what goes in `method.md`, re-review status rules, and two worked findings. Read it before step 6.
 - `references/rendering.md`: depth rules and the chat, Slack, GitHub, and HTML renderers, with examples. Read it before step 8.
-- `assets/design-system.md` and `assets/example-review.html`: the HTML design. Build HTML output by copying the example.
+- `assets/design-system.md`, `assets/example-review.src.html`, and generated `assets/example-review.html`: the HTML design using the actual shared HTML plan runtime. Copy the source, replace recorded review content, and pack with the bundled shared runtime.

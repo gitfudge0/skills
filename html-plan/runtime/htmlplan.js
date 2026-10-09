@@ -1017,7 +1017,7 @@ define('doc-machine', (el) => {
     m.order.forEach((id) => { const st = m.states[id]; const [x, y] = pos[id]; const g = svg('g', { class: 'st' + (st.final ? ' final' : '') + (st.mark ? ' ' + st.mark : ''), 'data-state': id, tabindex: 0 });
       g.append(svg('rect', { x, y, width: NWID, height: NH, rx: NH / 2 }), svg('text', { x: x + NWID / 2, y: y + NH / 2 }, st.label)); if (st.bind.say) g.append(svg('title', null, st.bind.say)); nodeG.append(g); nodeEls[id] = g;
       const key = `machine:${name}:${id}`; if (S.comments[key]) g.classList.add('has-comment'); g.addEventListener('click', () => { if (id === cur) return; const e = m.events.find((x) => x.from === cur && x.to === id && x.mark !== 'gone'); if (e) api.fire(e.ev); else api.goto(id); }); });
-    frame.innerHTML = ''; frame.append(root); root.style.width = ''; 
+    frame.innerHTML = ''; frame.append(root); root.style.width = '';
   };
   // ── chrome ──
   const head = h('div', { class: 'mc-head' }, h('span', { class: 'mc-kind' }, 'state machine'), h('span', { class: 'mc-title' }, title), h('span', { class: 'mc-meta' }), h('span', { class: 'mc-sp' }));
@@ -1263,8 +1263,46 @@ define('doc-ask', (el) => {
 /* ── generic: [data-ref] outside mocks, tables ── */
 function upgradeWithin(root) { $$('doc-code, doc-flow, doc-seq, doc-schema, doc-tree, doc-calls, doc-mock, doc-shot, doc-quote', root).forEach((el) => { const d = defs.find(([t]) => t === el.tagName.toLowerCase()); if (d && !el._nw) { el._nw = true; d[1](el); } }); }
 
+/* ───────────────────────── shared document theme ───────────────────────── */
+function initTheme() {
+  const explicit = document.documentElement.dataset.theme;
+  let theme = explicit === 'light' || explicit === 'dark' ? explicit : 'dark';
+  try {
+    const saved = localStorage.getItem('htmlplan-theme');
+    if (saved === 'light' || saved === 'dark') theme = saved;
+  } catch {}
+  document.documentElement.dataset.theme = theme;
+}
+function setupThemeToggle() {
+  let button = document.querySelector('.document-tools .theme-toggle, #theme-toggle');
+  if (!button) {
+    let tools = document.querySelector('.document-tools');
+    if (!tools) { tools = h('div', { class: 'document-tools' }); document.body.prepend(tools); }
+    button = h('button', { type: 'button', id: 'theme-toggle', class: 'theme-toggle' });
+    tools.append(button);
+  }
+  const label = () => {
+    const dark = document.documentElement.dataset.theme !== 'light';
+    button.setAttribute('aria-pressed', String(dark));
+    button.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+    button.textContent = dark ? 'Light mode' : 'Dark mode';
+  };
+  if (!button._htmlPlanTheme) {
+    button._htmlPlanTheme = true;
+    button.addEventListener('click', () => {
+      const theme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+      document.documentElement.dataset.theme = theme;
+      try { localStorage.setItem('htmlplan-theme', theme); } catch {}
+      label();
+    });
+  }
+  label();
+}
+initTheme();
+
 /* ───────────────────────── boot ───────────────────────── */
 function boot() {
+  setupThemeToggle();
   if (!$('meta[name=viewport]')) document.head.append(h('meta', { name: 'viewport', content: 'width=device-width, initial-scale=1' }));
   $$('body table').forEach((t) => { if (!t.closest('.table-wrap, doc-code, .sc-ent, doc-mock, template, .nw-sheet, doc-ask')) { const w = h('div', { class: 'table-wrap' }); t.replaceWith(w); w.append(t); } });
   prepPlans();

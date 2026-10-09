@@ -17,6 +17,10 @@ You write **one HTML file by hand**. It holds a tree of claims. A small runtime 
   examples/scheduled-send.html        ← a full plan. Copy its shape.
 ```
 
+## Shared default UI
+
+Link the canonical `htmlplan.css` and `htmlplan.js`; do not add a document skin or a local theme script. The default is the compact sans layout with a near-black background and gold accents. The shared runtime adds the top-right Light mode / Dark mode control and persists the choice as `htmlplan-theme`. A saved choice wins over an explicit `data-theme`; without a saved choice, explicit light/dark is honored, otherwise dark is the default. Print uses the white/gold light palette and hides controls. Open claim rows stay in document flow rather than pinning while scrolling. Mock-specific app styles can remain in `style data-mock-shared`.
+
 ## The tree
 
 Each level answers one question. The question picks the exhibit.

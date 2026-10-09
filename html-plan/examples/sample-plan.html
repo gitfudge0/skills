@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,79 +21,8 @@
 </style>
 
 
-<style>
-:root[data-theme="dark"] { --paper:#101010; --card:#161616; --sunk:#1b1b1b; --ink:#ededed; --ink-2:#b4b4b4; --ink-3:#919191; --line:#292929; --line-2:#222; --accent:#dfb96c; --accent-soft:#302819; --blue:#91b3df; --blue-soft:#1c2837; --green:#9bbd91; --green-soft:#202b20; --amber:#dfb96c; --amber-soft:#302819; --purple:#b3a0cc; --purple-soft:#282231; --red:#e28a87; --red-soft:#37201f; --col:900px; color-scheme:dark; }
-:root[data-theme="light"] { --paper:#fff; --card:#fff; --sunk:#f7f7f7; --ink:#222; --ink-2:#555; --ink-3:#6d6d6d; --line:#e7e7e7; --line-2:#eee; --accent:#8d6522; --accent-soft:#fff4dd; --blue:#3c659d; --blue-soft:#eef3fa; --green:#527d48; --green-soft:#f0f6ed; --amber:#8d6522; --amber-soft:#fff4dd; --purple:#7c5da1; --purple-soft:#f4eff9; --red:#b7524d; --red-soft:#fff0ee; --col:900px; color-scheme:light; }
-html {background:var(--paper);font-size:14px;}
-body,body.has-toc {padding:28px 30px 110px;}
-.document-tools {max-width:900px;margin:0 auto 26px;display:flex;justify-content:flex-end;}
-.theme-toggle {font:500 12px var(--sans);border:0;padding:7px 9px;border-radius:4px;background:var(--sunk);color:var(--ink-2);cursor:pointer;}
-body > header {margin-bottom:25px;}
-h1 {font:600 clamp(24px,3vw,30px)/1.25 var(--sans);letter-spacing:-.5px;margin:0 0 12px;}
-.plan-subtitle {display:inline-block;font:500 11px var(--sans);color:var(--amber);background:var(--amber-soft);padding:4px 7px;border-radius:4px;margin-bottom:15px;}
-details.thread {border:0;background:transparent;margin-bottom:0;max-width:640px;}
-details.thread > summary {padding-top:6px;padding-bottom:6px;font-size:12px;}
-details.thread > summary::before {top:6px;}
-@media(min-width:1180px){body.has-toc {padding-left:290px;} .nw-toc.rail {left:24px;top:84px;bottom:90px;width:230px;}}
-.nw-toc {font-size:12px;}
-.nw-toc .ttl {font-size:11px;color:var(--ink-3);}
-.nw-toc a {padding:7px 10px;color:var(--ink-2);border-left:0;border-radius:4px;}
-.nw-toc a.on {background:var(--sunk);color:var(--ink);}
-.nw-toc a.ask {font-size:11px;padding-left:24px;color:var(--amber);}
-.nw-toc a:hover {background:var(--sunk);color:var(--ink);}
-.nw-toc-btn {background:var(--sunk);color:var(--ink-2);border:0;border-radius:4px;}
-doc-plan {margin-bottom:0;}
-doc-claim[data-l="1"] {margin-bottom:0;}
-doc-claim.open[data-l="1"] {margin-bottom:20px;}
-doc-claim[data-l="1"] > .pl-row {border-top:1px solid var(--line);padding:14px 0;}
-doc-claim[data-l="1"]:last-child > .pl-row {border-bottom:1px solid var(--line);}
-doc-claim.open[data-l="1"]:last-child > .pl-row {border-bottom:0;}
-doc-claim.open > .pl-row {position:relative;top:auto;box-shadow:none!important;}
-.pl-row {column-gap:7px;}
-.pl-claim {font-family:var(--sans)!important;}
-doc-claim[data-l="1"] > .pl-row > .pl-claim {font-size:15px;font-weight:550;}
-doc-claim[data-l="2"] > .pl-row > .pl-claim {font-size:13px;font-weight:500;}
-.pl-num {color:var(--ink-3);}
-.pl-bdg {font-size:10px;font-weight:500;border-radius:4px;padding:3px 6px;color:var(--amber);background:var(--amber-soft);}
-.pl-body {border:0;padding-left:27px;margin-left:0;}
-doc-claim[data-l="2"] > .pl-body {padding-left:28px;}
-.pl-row > .nw-cbtn {opacity:.45;}
-.pl-row > .nw-cbtn:hover {opacity:1;}
-.mk-stage {margin:10px 0;}
-doc-code,doc-ask,doc-schema,doc-quote,.fig-frame,.mk-frame,.nw-pop,.nw-bar,.nw-btn,.mc-btn {border:0;border-radius:5px;box-shadow:none;}
-doc-code,.fig-frame,doc-ask {background:var(--card);}
-.c-head,.c-cap {background:var(--sunk);border-color:var(--line-2);font-size:11px;}
-.c-body {font-size:11px;}
-.c-body td.ln {background:var(--card);}
-.mk-frame.none {border:0;}
-.mk-cap,.fig-cap {font-size:11px;color:var(--ink-3);}
-doc-ask {max-width:700px;padding:14px;}
-doc-ask::before {font-size:10px;color:var(--amber);}
-doc-ask > p:first-of-type {font-size:14px;font-weight:550;}
-doc-ask label {border:0;border-radius:4px;background:var(--paper);padding:9px 10px;font-size:13px;}
-doc-ask label:has(> input:checked) {background:var(--sunk);}
-doc-ask label small {font-size:11px;color:var(--ink-3);}
-doc-ask.todo {border:0;}
-doc-ask.changed::after {font-size:10px;color:var(--amber);}
-.nw-bar {right:22px;bottom:22px;background:var(--paper);padding:5px;gap:6px;}
-.nw-bar .nw-respond,.nw-btn.primary {background:var(--ink);color:var(--paper);border:0;}
-.nw-bar .nw-respond,.nw-bar .nw-next {border-radius:5px;font-size:12px;padding:10px 13px;box-shadow:none;}
-.nw-bar .nw-next {background:var(--sunk);color:var(--ink-2);}
-.nw-bar .nw-respond .n {background:var(--red-soft);color:var(--red);border-radius:3px;}
-.nw-sheet {--r-sm:6px;}
-.nw-sheet header h3 {font-size:15px;}
-.nw-sheet .nw-askrow {font-size:13px;}
-.nw-btn {border-radius:4px;background:var(--sunk);}
-.nw-pop {background:var(--card);box-shadow:0 8px 28px #0004;}
-.nw-pop textarea,.nw-pop .ref {font-size:12px;}
-.nw-cbtn {border-radius:4px;}
-button:focus-visible,[role="button"]:focus-visible {outline:2px solid var(--blue);outline-offset:3px;}
-@media(max-width:640px){body,body.has-toc{padding:20px 18px 110px;}.document-tools {margin-bottom:22px;}h1 {font-size:25px;}.pl-body {padding-left:12px!important;}.nw-bar {left:13px;right:13px;bottom:13px;justify-content:flex-end;}}
-@media print {.document-tools {display:none;}body,body.has-toc {padding:0;}}
-</style>
 </head>
 <body>
-<div class="document-tools"><button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="true" aria-label="Switch to light theme">Light mode</button></div>
 <header>
   <h1>A reading list in BookShelf</h1>
   <p class="plan-subtitle">Sample plan · 2 decisions</p>
@@ -217,27 +146,5 @@ type Book = {
   </doc-claim>
 </doc-plan>
 </main>
-<script>
-// Sample-only workspace adapter. The shared HTML Plan runtime stays unchanged.
-window.addEventListener('load', () => {
-  const themeButton = document.getElementById('theme-toggle');
-  function setTheme(theme) {
-    document.documentElement.dataset.theme = theme;
-    const dark = theme === 'dark';
-    themeButton.setAttribute('aria-pressed', String(dark));
-    themeButton.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-    themeButton.textContent = dark ? 'Light mode' : 'Dark mode';
-  }
-  let preference = 'dark';
-  try { const saved = localStorage.getItem('htmlplan-sample-theme'); if (saved === 'light' || saved === 'dark') preference = saved; } catch {}
-  setTheme(preference);
-  themeButton.addEventListener('click', () => {
-    const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    setTheme(theme);
-    try { localStorage.setItem('htmlplan-sample-theme', theme); } catch {}
-  });
-
-});
-</script>
 </body>
 </html>
