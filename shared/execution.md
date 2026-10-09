@@ -26,6 +26,18 @@ Give each worker a self-contained brief with:
 
 Workers may adapt mechanical details within their scope. A false premise that invalidates the approach should be reported with evidence; do not invent a replacement scope. Resume the same worker for related corrections. Repeated failure calls for re-scoping or another approach, not indefinite retries.
 
+## Frame, fan out, and aggregate
+
+Adapted from Cursor's [swarm skill](https://github.com/cursor/plugins/blob/main/pstack/skills/swarm/SKILL.md). Apply this loop to delegated implementation using the active host's tools and limits.
+
+Before dispatch, state the done condition and the artifact or report to return. Prefer independent slices for ordinary implementation. Use identical-brief races or a mix of slices and races only when comparing alternatives is useful or requested. Declare the race rule before launching: **first pass** selects the first candidate meeting acceptance conditions, **rank all** compares every completed candidate against stated criteria, and **best-of** selects the strongest candidate against those criteria. Assign each writing worker distinct owned files or isolated writable outputs; racing implementations must not edit the same working files.
+
+Choose the total worker count from the useful slices or race arms, separately from the host's concurrency limit. Dispatch ready independent work up to that limit, queue the rest, and keep dependent work ordered. Each self-contained brief identifies its slice or race arm and the evidence required. For commit verification or comparisons, name exact revisions; for measurements, also define the method, sample count, what one sample measures, and execution order. Workers must record those details with their observations.
+
+Drain every launched worker to a terminal result before aggregating; a first-pass winner does not leave other workers running unmanaged. Collect `PASS`, `ISSUES`, or `BLOCKED`, accessible evidence, all proven in-scope issues, and any deviations. A dropout is an explicit gap. If a result omits mandated evidence such as revisions or measurement method, exclude it from passing coverage and ask the same worker once to supply the missing evidence. A second miss remains a gap; do not retry indefinitely.
+
+Aggregate the results against acceptance conditions and the declared race rule. Every required slice needs sufficient evidence; worker agreement and missing slices do not count as passes. Inspect and integrate the chosen outputs under the coordinator's verification gates. Return one concise report of evidenced outcomes, issues, and gaps or dropouts, including the race rule when used; use a compact result table when it aids comparison rather than pasting worker transcripts.
+
 ## Verify outcomes
 
 A success claim alone is not evidence. Inspect actual changed files, scope, and relevant observed outcomes before reporting success. Raw command output or recorded manual observations from a worker can count when accessible, attributable to the current revision and environment, and sufficient to verify the result. Do not rerun an expensive identical check solely to change who ran it. Rerun when evidence is missing, stale, ambiguous, or invalidated by later changes.
