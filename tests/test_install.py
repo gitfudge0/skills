@@ -29,7 +29,7 @@ class InstallerTests(unittest.TestCase):
         return result
     def test_defaults_and_standalone_navigation(self):
         self.run_install('install', '-a', 'codex')
-        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'write']} | {'fudge-plan'})
+        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup']} | {'fudge-plan'})
         spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
         builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
@@ -43,42 +43,100 @@ class InstallerTests(unittest.TestCase):
         self.run_install('remove', '-a', 'codex', '--all', '-y')
         self.run_install('-a', 'codex', '--root', 'setup', '-y')
         self.assertEqual([p.name for p in self.skills.iterdir()], ['fudge-setup'])
-    def test_write_standalone_copy_and_symlink(self):
-        spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
-        builder = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(builder)
-        for copy in (False, True):
-            with self.subTest(copy=copy):
-                args = ['-a', 'codex', '--root', 'write', '-y']
-                if copy:
-                    args.append('--copy')
-                self.run_install(*args)
-                installed = self.skills / 'fudge-write'
-                self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-write'})
-                self.assertEqual(installed.is_symlink(), not copy)
-                builder.validate_package(installed)
-                marker = json.loads((installed / '.fudge-package.json').read_text())
-                self.assertEqual(marker['root'], 'write')
-                self.assertFalse((installed / 'references/roots').exists())
-                self.assertFalse((installed / 'references/modules').exists())
-                source_references = self.repo / 'fudge-write/references'
-                self.assertTrue(source_references.is_dir())
-                for source in source_references.rglob('*'):
-                    if source.is_file():
-                        packaged = installed / 'references' / source.relative_to(source_references)
-                        self.assertEqual(packaged.read_bytes(), source.read_bytes())
-                source = self.repo / 'fudge-write/SKILL.md'
-                source.write_text(source.read_text() + '\nStandalone update fixture.\n')
-                self.run_install(*args)
-                self.assertIn('Standalone update fixture.', (installed / 'SKILL.md').read_text())
-                foreign = self.skills / 'fudge-manual'
-                foreign.mkdir()
-                (foreign / 'manual.txt').write_text('keep')
-                self.run_install('remove', '-a', 'codex', '--root', 'write', '-y')
-                self.assertFalse(installed.exists())
-                self.assertFalse(installed.is_symlink())
-                self.assertEqual((foreign / 'manual.txt').read_text(), 'keep')
-                shutil.rmtree(foreign)
+    def test_removed_write_rejected_without_mutation(self):
+        self.skills.mkdir(parents=True)
+        old = self.skills / 'fudge-write'
+        old.symlink_to(self.repo / 'fudge-write')
+        for flag in ('--root', '--skill'):
+            result = self.run_install('-a', 'codex', flag, 'fudge-write', '-y', success=False)
+            self.assertIn('write has been removed', result.stderr)
+            self.assertTrue(old.is_symlink())
+
+    def test_write_retirement_all_hosts_and_package_closure(self):
+        targets = ['.codex/skills', '.claude/skills', '.cursor/skills', '.config/opencode/skills']
+        for target, mode in zip(targets, ['source', 'build', 'copy', 'foreign']):
+            old = self.home / target / 'fudge-write'
+            old.parent.mkdir(parents=True)
+            if mode in ('source', 'build'):
+                old.symlink_to(self.repo / ('fudge-write' if mode == 'source' else '.fudge-build/fudge-write'))
+            else:
+                old.mkdir()
+                (old / ('manual.txt' if mode == 'foreign' else '.fudge-installer')).write_text('keep' if mode == 'foreign' else str(self.repo))
+        self.run_install('-a', 'codex', '--root', 'setup', '-y')
+        self.assertTrue((self.home / targets[0] / 'fudge-write').is_symlink())
+        result = self.run_install('-a', 'codex', '-a', 'claude', '-a', 'cursor', '-a', 'opencode', '--all', '-y')
+        manifest = json.loads((self.repo / 'scripts/skill-manifest.json').read_text())
+        for index, target in enumerate(targets):
+            directory = self.home / target
+            old = directory / 'fudge-write'
+            if index == 3:
+                self.assertEqual((old / 'manual.txt').read_text(), 'keep')
+            else:
+                self.assertFalse(old.exists())
+                self.assertFalse(old.is_symlink())
+            for root in manifest['roots']:
+                package = directory / ('fudge-' + root)
+                metadata = json.loads((package / '.fudge-package.json').read_text())
+                self.assertEqual(metadata['root'], root)
+                for module in metadata['modules']:
+                    self.assertTrue((package / 'references/modules' / module / 'guide.md').is_file())
+            self.assertTrue((directory / 'fudge-ship/references/roots/setup/references/project-verification.md').is_file())
+            self.assertTrue((directory / 'fudge-ship/references/modules/engineering/references/refactoring.md').is_file())
+            self.assertTrue((directory / 'fudge-review/shared/test-effectiveness.md').is_file())
+        self.assertIn('Installed 6 public skills for 4 agents', result.stdout)
+        # Noninteractive default selection has the same retirement behavior.
+        old = self.home / targets[0] / 'fudge-write'
+        old.symlink_to(self.repo / 'fudge-write')
+        self.run_install('-a', 'codex', '-y')
+        self.assertFalse(old.exists() or old.is_symlink())
+
+    def test_write_remove_all_owned_and_preserve_foreign(self):
+        self.skills.mkdir(parents=True)
+        old = self.skills / 'fudge-write'
+        for mode in ('source', 'build', 'copy', 'foreign-link', 'foreign-copy'):
+            if mode in ('source', 'build', 'foreign-link'):
+                destination = self.base / 'foreign' if mode == 'foreign-link' else self.repo / ('fudge-write' if mode == 'source' else '.fudge-build/fudge-write')
+                old.symlink_to(destination)
+            else:
+                old.mkdir()
+                (old / '.fudge-installer').write_text(str(self.repo) if mode == 'copy' else str(self.base / 'elsewhere'))
+            self.run_install('remove', '-a', 'codex', '--all', '-y')
+            if mode.startswith('foreign'):
+                self.assertTrue(old.exists() or old.is_symlink())
+                if old.is_symlink():
+                    old.unlink()
+                else:
+                    shutil.rmtree(old)
+            else:
+                self.assertFalse(old.exists() or old.is_symlink())
+
+    def test_build_retires_only_marked_write_and_preserves_assets(self):
+        output = self.base / 'build'
+        output.mkdir()
+        retired = output / 'fudge-write'
+        retired.mkdir()
+        (retired / '.fudge-build-generated').touch()
+        unrelated = output / 'user-asset'
+        unrelated.write_text('keep')
+        def build():
+            result = subprocess.run(['bash', str(self.repo / 'scripts/build-root-skills.sh'), str(output)], text=True, capture_output=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        build()
+        self.assertFalse(retired.exists())
+        self.assertEqual(unrelated.read_text(), 'keep')
+        retired.mkdir()
+        (retired / 'manual.txt').write_text('keep')
+        build()
+        self.assertEqual((retired / 'manual.txt').read_text(), 'keep')
+        shutil.rmtree(retired)
+        foreign = self.base / 'foreign-build'
+        foreign.mkdir()
+        (foreign / '.fudge-build-generated').touch()
+        retired.symlink_to(foreign)
+        build()
+        self.assertTrue(retired.is_symlink())
+        self.assertTrue((foreign / '.fudge-build-generated').exists())
+
     def test_ship_plan_packs_without_source_checkout(self):
         self.run_install('-a', 'codex', '--root', 'ship', '--copy', '-y')
         installed = self.skills / 'fudge-ship'

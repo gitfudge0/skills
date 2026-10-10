@@ -87,6 +87,10 @@ def build(output):
         if target.exists() or target.is_symlink():
             if target.is_symlink() or not (target / '.fudge-build-generated').is_file():
                 raise ValueError(f'Refusing to replace unmarked directory: {target}')
+    # Retire only the former generated package, after validating new packages.
+    retired = output / 'fudge-write'
+    retire_write = (not retired.is_symlink() and retired.is_dir()
+                    and (retired / '.fudge-build-generated').is_file())
     with tempfile.TemporaryDirectory(prefix='.fudge-stage.', dir=output) as stage:
         stage = Path(stage)
         for name, spec in manifest['roots'].items():
@@ -121,6 +125,8 @@ def build(output):
             (package / '.fudge-package.json').write_text(json.dumps({'version': manifest['version'], 'root': name, 'roots': sorted(included), 'modules': sorted(modules)}, indent=2) + '\n')
             (package / '.fudge-build-generated').touch()
             validate_package(package)
+        if retire_write:
+            shutil.rmtree(retired)
         for name in names:
             destination = output / name
             if destination.exists():

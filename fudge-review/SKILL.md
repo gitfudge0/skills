@@ -63,6 +63,8 @@ Direct, with as few words as the point needs. A finding says how the problem sho
 
 Identifiers go in Cause, Fix, or Where, and only when needed. Three tags print by exception: `SUSPECTED` when the finding is unverified, `pre-existing` when the PR didn't introduce it, and the rule citation when the topic is conventions.
 
+For changed tests, read package-root `shared/test-effectiveness.md` for a bounded test-oracle check; distinguish static reasoning from executed evidence and assess material coverage for the changed contract.
+
 ## Severity
 
 | Label | Means |
