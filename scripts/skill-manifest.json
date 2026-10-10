@@ -6,7 +6,6 @@
     "ship": {"source": "fudge-ship", "modules": ["gap-analysis", "test-plan", "decision-room", "system-decomposition", "plan", "engineering", "verification"], "roots": ["design", "ux", "review", "setup"]},
     "review": {"source": "fudge-review", "modules": [], "roots": ["setup", "plan"]},
     "setup": {"source": "fudge-setup", "modules": [], "roots": []},
-    "write": {"source": "fudge-write", "modules": [], "roots": []},
     "plan": {"source": "plan", "modules": [], "roots": []}
   },
   "modules": {

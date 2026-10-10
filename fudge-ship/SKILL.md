@@ -45,14 +45,14 @@ Use selected guidance only when its output serves this work item:
 | Shape the interface | `references/roots/design/guide.md` | Visual expression, UI guidance, a reviewable mock, or component direction is needed. |
 | Make an interactive implementation plan | `references/modules/plan/guide.md` | The user requests an HTML plan, or a complex multi-file change needs a reviewable tree of behavior, exhibits, and decisions. |
 | Plan distinct failure cases | `references/modules/test-plan/guide.md` | Risk or an explicit request warrants a separate test plan. |
-| Make the project runnable | `references/roots/setup/guide.md` | Dependencies, environment, or startup readiness block implementation or verification; use focused run setup. |
+| Make the project runnable | `references/roots/setup/guide.md` | Dependencies, environment, startup readiness, or a reusable project-verification recipe needs setup; use the focused mode. |
 | Engineer the change | `references/modules/engineering/guide.md` | Bounded discovery, cause tracing, state modeling, or implementation is needed. |
 | Coordinate implementation | `shared/execution.md` | Product or test files will change; single owner for delegation and integration. |
 | Verify completion | `references/modules/verification/guide.md` | Any implementation needs acceptance evidence and current checks. |
 | Isolate and deliver a PR | [PR delivery and learning](references/pr-delivery.md) | Git implementation isolation or a PR endpoint. |
 | Track issues or deploy | [External operations](references/external-workflows.md) | Explicit issue tracking, deployment, or compatibility risk. |
 | Add comprehensive assurance | [Comprehensive assurance](references/comprehensive.md) | Comprehensive risk path. |
-| Recover durable work | [Run state](references/run-state.md) | Cross-session coordination or recovery. |
+| Recover durable work | [Run state](references/run-state.md) | Cross-session coordination, long uncertain/unattended attempts, or recovery. |
 | Formal review | `references/roots/review/guide.md` | The change is comprehensive or the user requests this review. |
 
 When HTML planning is selected, use the bundled guide and its adjacent runtime, block reference, and examples. The source is `plan/`; the installed directory is package-root `references/modules/plan/`. Prefer `examples/sample-plan.html` for the contents rail, grouped expand/collapse, and light/dark switch. Keep clear routine work in a concise plan. For a review-before-build request, hand over the packed page and wait for the user response before affected implementation; existing authorization and settled decisions still apply. A planning-only request ends with the page.
