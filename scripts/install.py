@@ -16,7 +16,7 @@ ROOTS = list(MANIFEST['roots'])
 PACKAGES = {name: spec.get('package', 'fudge-' + name) for name, spec in MANIFEST['roots'].items()}
 ALIASES = {name: spec['owner'] for name, spec in MANIFEST['modules'].items() if name not in ROOTS}
 ALIASES.update({'conventions': 'setup', 'delegate': 'ship', 'unslop': 'ship', 'report-deck': 'design', 'html-plan': 'plan'})
-RETIRED = set(ALIASES) | {'mindmap'}
+RETIRED = set(ALIASES) | {'mindmap', 'write'}
 LEGACY = {'html-plan': 'plan', 'fudge-html-plan': 'plan'}
 AGENTS = {'claude': '.claude/skills', 'codex': '.codex/skills', 'cursor': '.cursor/skills', 'opencode': '.config/opencode/skills'}
 
@@ -34,7 +34,7 @@ def retired_for(target, roots):
     legacy = [target / name for name, root in LEGACY.items() if root in roots and owned(target / name)]
     return legacy + [target / ('fudge-' + name) for name in sorted(RETIRED)
             if 'fudge-' + name not in LEGACY
-            and (name == 'mindmap' or ALIASES.get(name) in roots)
+            and (name == 'mindmap' or (name == 'write' and set(roots) == set(ROOTS)) or ALIASES.get(name) in roots)
             and owned(target / ('fudge-' + name))]
 
 
@@ -86,8 +86,8 @@ def main():
     roots = []
     for name in args.root + args.skill:
         name = name.removeprefix('fudge-')
-        if name == 'mindmap':
-            raise ValueError('mindmap has been removed; it has no replacement public skill')
+        if name in {'mindmap', 'write'}:
+            raise ValueError(f'{name} has been removed; it has no replacement public skill')
         root = ALIASES.get(name, name)
         if root not in ROOTS:
             raise ValueError(f'Unknown skill: {name}')

@@ -224,36 +224,6 @@
       ]
     },
     {
-      "root": "write",
-      "prompt": "Rewrite this policy for clarity: Operators may retry the export if the first attempt fails. Operators should check the log before retrying. Operators must stop retries after three failed attempts unless an incident commander authorizes another attempt.",
-      "fixture": "Only the supplied policy; no additional retry rules.",
-      "invariants": [
-        "Preserves may as permission, should as recommendation, and must as obligation",
-        "Preserves the failure condition, three-attempt limit, and authorization exception",
-        "Does not add retry timing, actors, or policy requirements"
-      ]
-    },
-    {
-      "root": "write",
-      "prompt": "Make this release note clearer while preserving literal content: Use `fetchUser(user_id)` with `CACHE_TTL=60`. The API returns `HTTP 429` with the message \"Too many requests\". Example: ```sh\nexport CACHE_TTL=60\ncurl /api/v1/users\n```",
-      "fixture": "Only supplied release note; code, identifiers, error strings and quoted text are exact contracts.",
-      "invariants": [
-        "Improves surrounding prose without changing code, commands, identifiers, paths, numbers, or quoted strings",
-        "Keeps fenced code intact",
-        "Does not invent API behavior or claim verified execution"
-      ]
-    },
-    {
-      "root": "write",
-      "prompt": "Clarify this ticket: After validation, it updates the record and notifies them. Failures are handled automatically.",
-      "fixture": "No actor, recipient, validation rules, failure handling, or system behavior supplied.",
-      "invariants": [
-        "Identifies unresolved actors, recipients, or failure behavior instead of inventing them",
-        "Preserves known sequence without creating new requirements",
-        "Uses marked placeholders or focused clarification for information needed to resolve ambiguity"
-      ]
-    },
-    {
       "root": "ship",
       "prompt": "Implement the agreed fix and ship it. Turn confirmed review gaps into gates or improvements in our existing project skills.",
       "fixture": "Primary Git checkout, configured GitHub remote with main, unrelated dirty notes, existing project skill and checks. Forge access available.",
@@ -334,6 +304,99 @@
         "Does not load issue/deploy or comprehensive guidance without applicable trigger",
         "No automatic PR for explicit local-only endpoint",
         "All selected guide paths resolve without source checkout"
+      ]
+    },
+    {
+      "root": "setup",
+      "prompt": "Create reusable verification instructions for checkout and verify them locally.",
+      "fixture": "Existing local app launch/health scripts and checkout API, project verification skill, unrelated running service, disposable fixtures.",
+      "invariants": [
+        "Maintains existing project recipe rather than introducing a competing harness",
+        "Maps only checkout to real product operations and observable outcomes",
+        "Captures observed launch, doctor, drive, evidence and cleanup steps",
+        "Exercises changed recipe end to end and confirms evidence survives cleanup",
+        "Preserves pre-existing services/data and never records secret values"
+      ]
+    },
+    {
+      "root": "setup",
+      "prompt": "The checkout verification recipe fails. Diagnose and fix the recipe within scope.",
+      "fixture": "Recipe uses a renamed launch command; supported new command works. A second fixture has a genuine failed checkout operation despite healthy harness.",
+      "invariants": [
+        "Distinguishes documentation drift from harness gap and product regression using observed evidence",
+        "Repairs only the stale recipe in the drift fixture",
+        "Reports or routes product regression to ship instead of changing expected results",
+        "Keeps unexecuted steps explicitly unverified"
+      ]
+    },
+    {
+      "root": "setup",
+      "prompt": "Our agents keep ignoring the existing retry guidance; improve it.",
+      "fixture": "Authoritative rule already describes retry identity; instruction is buried behind an unrelated trigger. Loading evidence available; product behavior unchanged.",
+      "invariants": [
+        "Diagnoses placement/routing before adding another rule",
+        "Repairs the authoritative trigger/pointer within applicable authorization",
+        "Distinguishes missing guidance, buried/conflicting guidance, missed trigger and noncompliance",
+        "Does not infer noncompliance when loading evidence is absent",
+        "Does not create broad new policy or competing rulebook"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Refactor the export implementation without changing behavior.",
+      "fixture": "Internal callers and configuration references, exported external API with staged deprecation, baseline tests and representative error outputs.",
+      "invariants": [
+        "Pins baseline and captures material unprotected behavior before restructuring",
+        "Inventories relevant callers and uses realistic caller usage to assess interfaces",
+        "Compares old/new observable results including errors",
+        "Removes obsolete owned internal references while preserving supported external/staged compatibility",
+        "Does not silently fix known behavior quirks or require unrelated architecture changes"
+      ]
+    },
+    {
+      "root": "review",
+      "prompt": "Review these changed checkout tests.",
+      "fixture": "Test asserts only a configured mock success; implementation can return success without persisting order. No mutation infrastructure.",
+      "invariants": [
+        "Identifies a realistic broken implementation that passes the test",
+        "Explains missing observable persistence assertion at an appropriate boundary",
+        "Does not claim executed mutation evidence from static reasoning",
+        "Does not require mutation tooling or mirror incidental structure"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Make this batch exporter faster without losing work; stop after the agreed time budget.",
+      "fixture": "Benchmark reports speed but ignores errors; baseline revision available; user edits outside task; representative workload and useful target given.",
+      "invariants": [
+        "Validates benchmark sensitivity and counts completed work/errors before optimization",
+        "Freezes comparable workload and method or establishes new baseline after harness changes",
+        "Tries one hypothesis at a time and records measured correctness plus keep/revert decisions",
+        "Reverts only owned attempt delta preserving user edits",
+        "Stops at target or cost boundary without minimum attempts or invented speedup"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Fix job recovery so interrupted reruns do not duplicate deliveries.",
+      "fixture": "Local durable job fixture with partial persisted progress and effect counter; unrelated existing records.",
+      "invariants": [
+        "Identifies identity and meaningful interruption boundaries",
+        "Exercises partial failure then restart and duplicate completion with same identity",
+        "Checks persisted effect counts and recovery state rather than identical response alone",
+        "Checks valid new identities still proceed and unrelated records survive",
+        "Reports any unexercised recovery boundary as a gap"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Continue this long unattended run and give an accurate handoff.",
+      "fixture": "Durable run record lists proposed checks as passed but raw output shows one never ran; checkpoint and actual task files available; host has no background scheduler.",
+      "invariants": [
+        "Audits attempt history against actual revisions/output and corrects unsupported claims",
+        "Retains hypothesis/change/observation/decision records and rejected attempts",
+        "Preserves prior authorization and unaffected evidence on resume",
+        "Checkpoints remaining work without implying automatic background continuation"
       ]
     }
   ]

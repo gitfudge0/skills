@@ -1,6 +1,6 @@
 ---
 name: fudge:setup
-description: "Set up a project’s coding rules and local run readiness, audit convention drift, or amend approved rules. Use for project setup, running an existing project, focused tooling setup, and project-rule changes."
+description: "Set up a project’s coding rules and local run readiness, audit convention drift, or amend approved rules. Use for project setup, running an existing project, focused tooling setup, project verification recipes, diagnosing failed project guidance, and project-rule changes."
 ---
 
 # fudge:setup
@@ -22,6 +22,8 @@ Set up a usable project by reusing its existing authority and run instructions. 
 | Check a change against approved rules | [Audit and amendment](references/audit-amend.md), read-only audit |
 | Change an approved rule | [Audit and amendment](references/audit-amend.md), targeted amendment; exact-change approval or explicit standing review-learning grant |
 | Install dependencies, prepare local prerequisites, start or explain how to run | Run readiness below |
+| Create or maintain feature verification recipes | [Project verification](references/project-verification.md); reuse existing harnesses |
+| Diagnose recurring failures of project guidance | [Guidance diagnosis](references/guidance-diagnosis.md), then targeted amendment if authorized |
 | General project setup | Inspect both rules and readiness; address gaps within the requested scope |
 
 Locate instructions, existing project skills, governing documents, tooling configs, and run documentation before acting. Ordinary patterns support a draft; they do not become approved rules by inference. If authority conflicts, surface the specific conflict before affected work. Prefer an existing project-skill directory or caller-supplied path; otherwise use the active host’s project location (`.codex/skills/` for Codex, `.claude/skills/` for Claude). For an unknown host, use its documented location or ask only if the choice affects loading.

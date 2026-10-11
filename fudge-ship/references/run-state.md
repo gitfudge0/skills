@@ -12,6 +12,10 @@ Record actionable governing sources and their revisions or hashes. Resolve conse
 
 Keep a concise risk plan and its observed outcomes in the run record or a linked Markdown file unless formal HTML is selected. Record unsettled behavior or consequential coverage decisions, their resolution, and any prior authorization that applies. Do not label an engineering plan as awaiting approval when no user decision is needed. For a formal plan, save immutable versions such as `test-matrix-v1.html`, their hashes, agreed expected outcomes, and decision history. Save results separately. Only changed behavior or a consequential tradeoff reopens its decision; mechanical changes do not.
 
+For long, uncertain, or unattended work, keep a compact attempt record: hypothesis, attributable change, observation/evidence, and keep/revert/next-step decision. Preserve rejected attempts and material decisions rather than reconstructing a success narrative. Before handoff, audit the record against actual files, revisions, command output, and review dispositions; correct unsupported claims and distinguish planned from executed checks. Adapted from [show-me-your-work](https://github.com/cursor/plugins/tree/main/pstack/skills/show-me-your-work).
+
+Durable records support recovery; they do not create a background worker or scheduler. Use only host-supported execution/goal facilities, within their limits and authorization. If the host stops, checkpoint and report pending work; do not promise automatic continuation.
+
 ## Protect the starting state
 
 Before implementation, enumerate the planned touch set and ownership. In Git, record `HEAD`, status, and scoped staged/unstaged binary patches; copy and hash relevant untracked files. Outside Git, snapshot the affected existing files and record missing paths. Capture only what is needed for attribution and recovery; do not copy unrelated or sensitive data. If a necessary snapshot cannot be taken safely, use isolation or resolve a narrower snapshot policy.

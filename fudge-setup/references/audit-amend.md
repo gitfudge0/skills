@@ -14,6 +14,8 @@ Use this reference only for audit or targeted amendment. The authoritative proje
 
 The audit changes neither code nor conventions nor tooling. Return it in chat. Write a report only when the user requests one or an authorized calling workflow supplies a run-local path; default to the setup artifact location resolved through package-root `shared/artifacts.md` unless the user or a calling workflow names another path. `fudge:ship` may supply that path without a second user approval. Keep the same read-only result and do not touch project rule files. When called by `fudge:ship`, send violations to its implementation/review loop. Send proposals to the user unless the targeted amendment route is already authorized; an audit itself remains read-only. Do not silently waive a violation, patch code, or amend a rule to make the change pass.
 
+For recurring guidance failures, first use [guidance diagnosis](guidance-diagnosis.md) to distinguish missing instructions from placement, routing, or noncompliance before proposing another rule.
+
 ## Make a targeted amendment
 
 Resolve the authoritative file first. If rules are split across `.claude/skills/`, `.codex/skills/`, `AGENTS.md`, `CLAUDE.md`, or other project documents, follow the project pointer and amend the actual rule source. If two sources conflict or the target is unclear, show that conflict and obtain the user's choice before editing. Never create a parallel conventions file as a shortcut.
