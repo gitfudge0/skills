@@ -1,6 +1,6 @@
 # PR delivery and review learning
 
-Read for Git implementation isolation or a PR endpoint. The ship router selects scope and depth; this guide owns worktree, synchronization, review-learning, and PR completion. Use package-root `shared/execution.md` for delegation and coordinator verification, and `references/modules/verification/guide.md` for evidence.
+Read for Git implementation isolation or a PR endpoint. The calling workflow selects scope and depth; this guide owns worktree, synchronization, review-learning, and PR completion. Use package-root `shared/execution.md` for delegation and coordinator verification, and `references/modules/verification/guide.md` for evidence.
 
 ## Worktree isolation
 

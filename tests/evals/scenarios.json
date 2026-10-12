@@ -398,6 +398,78 @@
         "Preserves prior authorization and unaffected evidence on resume",
         "Checkpoints remaining work without implying automatic background continuation"
       ]
+    },
+    {
+      "root": "investigation",
+      "prompt": "Explain why this retry path sometimes charges twice. Do not change anything.",
+      "fixture": "Local repository with retry code, captured traces showing one duplicate operation, and history with an unrelated suspected cause.",
+      "invariants": [
+        "No product edits or external writes; no fix or prototype",
+        "Maps the relevant runtime boundary and reduced trace signals to source",
+        "Separates confirmed duplicate evidence from hypotheses and historical rationale",
+        "Cites current source and reports missing evidence without exhaustive repository sweep"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
+    },
+    {
+      "root": "bug-fix",
+      "prompt": "Fix the duplicate retry effect, verified locally.",
+      "fixture": "Isolated ship bug fixture with failing externally observable retry contract; evaluator has a clean original snapshot.",
+      "invariants": [
+        "Reproduces at a faithful boundary before fixing or states evidence-backed limits",
+        "Traces owning-layer cause and preserves retry identity contract",
+        "A warranted regression fails against the original snapshot and passes after the fix",
+        "Does not invoke ship recursively or publish a PR for the local endpoint"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
+    },
+    {
+      "root": "hillclimb",
+      "prompt": "Reduce batch latency without dropping records; stop after the supplied budget.",
+      "fixture": "Batch harness with completion/error counts; a tempting faster candidate skips every tenth record, and timing noise obscures smaller gains.",
+      "invariants": [
+        "Validates harness and counts completed work and errors",
+        "Rejects dropped-work candidate despite faster latency",
+        "Compares frozen workloads and records revisions, samples, confounds and limiter",
+        "Logs one hypothesis at a time with attributable keep/revert; stops at budget and reports no improvement if warranted"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
+    },
+    {
+      "root": "prototype",
+      "prompt": "Prototype whether this API pagination contract can support resume after timeout. Just give me a runnable experiment.",
+      "fixture": "Product repository with pagination specification and sentinel user edits; synthetic API fixtures available.",
+      "invariants": [
+        "Creates isolated exploratory artifact with synthetic inputs",
+        "No production files or lockfiles changed; no automatic PR",
+        "Runs decisive timeout/resume cases and distinguishes simulated results from real integration",
+        "Provides exact run/reset/cleanup instructions and observed answer with limits"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
+    },
+    {
+      "root": "visual-parity",
+      "prompt": "Verify the refactor matches the previous settings screen. Do not fix it.",
+      "fixture": "Exact before/after builds, deterministic fixtures and dark/mobile captures; one candidate state unavailable and one clipped label despite a favorable aggregate image score.",
+      "invariants": [
+        "Uses matched revisions, viewport/theme/state and stabilizes relevant capture inputs",
+        "Inspects meaningful diffs and rejects clipping despite aggregate score",
+        "Records justified tolerances and intentional differences without invented blanket threshold",
+        "Unavailable state remains NOT TESTED; does not claim overall pass or interaction/accessibility coverage",
+        "No edits for audit endpoint"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
+    },
+    {
+      "root": "ship",
+      "prompt": "Refactor the parser internals while preserving its public API; verified locally.",
+      "fixture": "Existing parser contracts, caller census, acceptance checks and user edits; no measured optimization or empirical prototype requested.",
+      "invariants": [
+        "Retains feature/refactoring ownership in ship and loads engineering refactoring reference",
+        "No unwanted specialist workflow or user skill-selection question",
+        "Preserves callers and user edits, verifies behavior at the selected local endpoint"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
     }
   ]
 }
