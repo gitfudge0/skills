@@ -69,7 +69,7 @@ def select(title, choices, defaults):
     return result
 
 def main():
-    parser = argparse.ArgumentParser(description='Install public Fudge skills. Specialists are bundled internal modules.')
+    parser = argparse.ArgumentParser(description='Install public Fudge skills. Each root bundles its selected dependencies.')
     parser.add_argument('command', nargs='?', choices=['install', 'list', 'remove'], default='install')
     parser.add_argument('-a', '--agent', action='append', choices=AGENTS, default=[])
     parser.add_argument('--root', action='append', default=[], help=', '.join(ROOTS) + ' (conventions and html-plan are migration aliases)')

@@ -30,6 +30,16 @@ An individual uncertainty may warrant one specialist without turning the whole w
 
 ## Route only the needed stages
 
+Ship remains the natural-language general entry point. Select the matching specialist directly from the work requested, without asking users to choose a skill. Feature implementation and behavior-preserving refactoring stay in this ship workflow (refactoring uses engineering's adjacent reference). A specialist owns its selected endpoint and uses shared machinery selectively; it does not delegate back through this router. Bundled dependency cycles are package closure only, never runtime calls.
+
+| Focused work | Specialist |
+|---|---|
+| Explain behavior, cause or rationale without edits | `references/roots/investigation/guide.md` |
+| Repair a bounded defect | `references/roots/bug-fix/guide.md` |
+| Improve a measured metric within a budget | `references/roots/hillclimb/guide.md` |
+| Answer one empirical question with a disposable runnable artifact | `references/roots/prototype/guide.md` |
+| Match existing appearance or verify before/after renderings | `references/roots/visual-parity/guide.md` |
+
 Every implementation begins with bounded discovery under `references/modules/engineering/guide.md`; every implementation ends with observed evidence under `references/modules/verification/guide.md`. Product intent and consequential tradeoffs remain user decisions. Analysis-only work loads only the guidance serving its requested artifact.
 
 Read `references/modules/gap-analysis/guide.md` only when missing or conflicting requirements warrant deeper reconciliation. Retain every valid gap and its evidence; summaries may be shorter than the register. “What is missing before we build?” is an analysis-only request: return the scoped gaps, concrete decisions, and next actions without starting implementation. Clear requests need a small discovery pass, not a workshop.

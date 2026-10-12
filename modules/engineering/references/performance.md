@@ -1,6 +1,6 @@
 # Measured optimization
 
-Read for requested measurable performance improvement. Adapted from poteto-mode's [hillclimb playbook](https://github.com/cursor/plugins/blob/main/pstack/skills/poteto-mode/playbooks/hillclimb.md).
+Authoritative measured optimization loop for `fudge:hillclimb` and selected engineering or prototype callers. Read for requested measurable performance improvement. Adapted from poteto-mode's [hillclimb playbook](https://github.com/cursor/plugins/blob/main/pstack/skills/poteto-mode/playbooks/hillclimb.md).
 
 Define the metric, representative workload, correctness constraints, useful target, and task time/cost boundary. Validate the measurement harness before optimizing: establish its sensitivity to a known relevant change and confirm it counts completed work and errors. Faster failures, dropped work, or a benchmark dominated by unrelated overhead are not improvements. Freeze the validated workload and measurement method during comparisons; if the harness must change, establish a new comparable baseline.
 

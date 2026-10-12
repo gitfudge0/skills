@@ -29,7 +29,7 @@ class InstallerTests(unittest.TestCase):
         return result
     def test_defaults_and_standalone_navigation(self):
         self.run_install('install', '-a', 'codex')
-        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup']} | {'fudge-plan'})
+        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'investigation', 'bug-fix', 'hillclimb', 'prototype', 'visual-parity']} | {'fudge-plan'})
         spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
         builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
@@ -43,6 +43,43 @@ class InstallerTests(unittest.TestCase):
         self.run_install('remove', '-a', 'codex', '--all', '-y')
         self.run_install('-a', 'codex', '--root', 'setup', '-y')
         self.assertEqual([p.name for p in self.skills.iterdir()], ['fudge-setup'])
+    def test_specialists_install_alone_as_portable_copies(self):
+        required = {
+            'investigation': [],
+            'bug-fix': ['references/modules/engineering/guide.md',
+                        'references/modules/verification/guide.md',
+                        'references/roots/ship/references/pr-delivery.md'],
+            'hillclimb': ['references/modules/engineering/references/performance.md',
+                         'references/modules/verification/guide.md'],
+            'prototype': ['references/modules/ui-prototype/guide.md',
+                          'references/modules/engineering/references/performance.md'],
+            'visual-parity': ['references/modules/design-qa/guide.md',
+                             'references/modules/verification/guide.md'],
+        }
+        spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
+        builder = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(builder)
+        for root, resources in required.items():
+            with self.subTest(root=root):
+                self.run_install('-a', 'codex', '--root', root, '--copy', '-y')
+                package = self.skills / ('fudge-' + root)
+                self.assertFalse(package.is_symlink())
+                self.assertEqual([p.name for p in self.skills.iterdir()], [package.name])
+                for address in resources:
+                    self.assertTrue((package / address).is_file(), address)
+                # Move the install away from its source/build: concrete links must
+                # still resolve, including routes rewritten to the primary root.
+                portable = self.base / ('portable-' + root)
+                shutil.copytree(package, portable)
+                builder.validate_package(portable)
+                marker = json.loads((portable / '.fudge-package.json').read_text())
+                self.assertEqual(marker['root'], root)
+                self.assertFalse((portable / 'references/roots' / root).exists())
+                self.assertEqual(len(list(portable.rglob('SKILL.md'))), 1)
+                self.run_install('remove', '-a', 'codex', '--root', root, '-y')
+        self.run_install('-a', 'codex', '--all', '-y')
+        self.assertTrue(all((self.skills / ('fudge-' + root)).is_dir() for root in required))
+
     def test_removed_write_rejected_without_mutation(self):
         self.skills.mkdir(parents=True)
         old = self.skills / 'fudge-write'
@@ -83,7 +120,7 @@ class InstallerTests(unittest.TestCase):
             self.assertTrue((directory / 'fudge-ship/references/roots/setup/references/project-verification.md').is_file())
             self.assertTrue((directory / 'fudge-ship/references/modules/engineering/references/refactoring.md').is_file())
             self.assertTrue((directory / 'fudge-review/shared/test-effectiveness.md').is_file())
-        self.assertIn('Installed 6 public skills for 4 agents', result.stdout)
+        self.assertIn('Installed 11 public skills for 4 agents', result.stdout)
         # Noninteractive default selection has the same retirement behavior.
         old = self.home / targets[0] / 'fudge-write'
         old.symlink_to(self.repo / 'fudge-write')

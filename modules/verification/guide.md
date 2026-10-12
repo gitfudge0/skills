@@ -1,6 +1,6 @@
 # Verification and completion
 
-Internal capability: enter through `fudge:ship`. Resolve package-root `references/modules/`, `references/roots/`, and `shared/` addresses from the nearest `.fudge-package.json`; in source, use the manifest root and `modules/<name>/guide.md`, `fudge-<name>/SKILL.md`, and `shared/`. Read only the selected guidance.
+Internal capability: selected by `fudge:ship` or a standalone specialist; retain the caller's scope and endpoint. Resolve package-root `references/modules/`, `references/roots/`, and `shared/` addresses from the nearest `.fudge-package.json`; in source, use the manifest root and `modules/<name>/guide.md`, `fudge-<name>/SKILL.md`, and `shared/`. Read only the selected guidance.
 
 Connect each material acceptance condition and independently failing risk to an existing test, justified new test, focused manual observation, or explicit unverified gap. Use the cheapest layer that actually exercises the risk. A build proves compilation; it does not prove authorization, persisted data, or a user flow. A mock proves the behavior exercised with that mock, not the external service contract. Observe meaningful success, rejection, and recovery paths where applicable; do not generate every test type by habit.
 
