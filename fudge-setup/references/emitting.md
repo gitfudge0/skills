@@ -108,6 +108,10 @@ Read `references/testing.md` for shape, doubles, and determinism; `references/to
 - [ ] `<command>` passes locally, output read, not assumed.
 - [ ] Rules touched by this change are still true; if one had to bend, say so rather than bending it silently.
 
+## Working defaults
+
+<Only if the interview set any: the keys and values in the format of `shared/working-defaults.md` from the fudge package. Omit the section when none were set.>
+
 ## When this file doesn't cover it
 
 Name the ambiguity and ask. Do not improvise a rule, and do not treat silence as permission. An uncovered case permits bounded implementation judgment using established patterns. Escalate consequential unresolved choices; do not invent a new authoritative rule.

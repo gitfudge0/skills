@@ -26,6 +26,18 @@ Give each worker a self-contained brief with:
 
 Workers may adapt mechanical details within their scope. A false premise that invalidates the approach should be reported with evidence; do not invent a replacement scope. Resume the same worker for related corrections. Repeated failure calls for an evidence-backed reassessment of assumptions and approach, not indefinite retries; preserve scope and escalate only consequential changes that require a user decision.
 
+## Model and effort per stage
+
+Apply only where the host lets the coordinator choose a worker's model or reasoning effort; otherwise inherit. Name capability tiers, never vendor model IDs. Governing host or project instructions win.
+
+| Stage | Tier | Effort |
+|---|---|---|
+| Mechanical edits, discovery, search, file mapping | Fastest capable tier | Low |
+| Implementation | Inherited model | Inherited |
+| Review, verification of consequential findings, user-facing decisions and recommendations | Strongest available tier | High |
+
+Escalate a lane's tier when its output is wrong or thin, not by default. A cheaper tier never lowers the evidence a stage must return.
+
 ## Frame, fan out, and aggregate
 
 Adapted from Cursor's [swarm skill](https://github.com/cursor/plugins/blob/main/pstack/skills/swarm/SKILL.md). Apply this loop to delegated implementation using the active host's tools and limits.

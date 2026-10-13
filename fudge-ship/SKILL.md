@@ -7,78 +7,122 @@ description: Take an idea, issue, feature, story, or task through implementation
 
 ## Locate guidance
 
-Resolve the package root before opening shared or bundled guidance: walk ancestors of this file to `.fudge-package.json`. All `references/modules/`, `references/roots/`, and `shared/` paths below are relative to that package root, even when this guide is nested. In the source checkout, the root is the ancestor containing `scripts/skill-manifest.json`; module guides are `modules/<name>/guide.md` unless the manifest declares another source and entry (HTML planning uses `plan/SKILL.md`), root guides are `fudge-<name>/SKILL.md`, and shared paths are unchanged. The primary installed root is package-root `SKILL.md`; other root guides are under `references/roots/<name>/guide.md`. Bundling rewrites a reference to the primary root to `SKILL.md`. Links to this guide's own references remain relative to this file. Read only the selected guidance.
+Paths under `references/modules/`, `references/roots/` and `shared/` resolve from the package root: the nearest ancestor containing `.fudge-package.json`, or in a source checkout the ancestor containing `scripts/skill-manifest.json` (mapping in `shared/locate.md`). Links to this guide's own references stay relative to this file. Read only the selected guidance.
 
-For worktree tasks, use the Grove role and launch contract in [PR delivery](references/pr-delivery.md#grove-worktree-and-worker-coordination). Use package-root `shared/execution.md` for implementation/delegation policy, including the swarm loop of framing completion, dispatching owned slices, draining workers, and aggregating evidence; use `shared/writing.md` for prose and `shared/artifacts.md` before writing review artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read optional package-root `shared/report-deck/guide.md`; concise chat is the default.
+- Delegation and integration: package-root `shared/execution.md`, including the swarm loop (frame completion, dispatch owned slices, drain workers, aggregate evidence) and its model-and-effort-per-stage section where the host allows choosing.
+- Project working defaults (endpoint, commit/push, external writes, runtime): `shared/working-defaults.md`. Precedence: this conversation > working defaults > skill defaults.
+- Worktrees: [worktree coordination](references/pr-delivery.md#worktree-and-worker-coordination).
+- Prose: `shared/writing.md`; review artifacts: `shared/artifacts.md`; a requested durable HTML report: optional `shared/report-deck/guide.md` (concise chat is the default).
 
-Build one work item to its chosen endpoint. A finished feature may be one part of a larger release. Finishing this work never implies that a release was cut.
+Build one work item to its chosen endpoint; finishing a feature never implies a release was cut. The user owns behavior and scope; `AGENTS.md`, `CLAUDE.md`, project skills and conventions own implementation details. Architecture is not a user approval gate. Prior decisions and authorization carry across handoffs; ask only about unsettled consequential choices.
 
-The user owns expected behavior and scope. The repository's `AGENTS.md`, `CLAUDE.md`, project-level skills, and existing conventions own implementation details. Use decisions and authorization already given in the conversation; ask only when a consequential choice remains unsettled. Do not make architecture or code structure a user approval gate.
+## 1. Classify the request
 
-## Choose the work and depth
+Do this before choosing depth.
 
-Name the work item and its boundary. Use the endpoint already requested by the user. For implementation in a Git repository with a configured forge, default to **PR ready**: an open, pushed PR whose current diff has completed the review loop and required checks. **Verified locally** and analysis-only requests override that default. **PR opened** stops at creation; **PR integrated** and **release/deploy** require explicit selection. Missing Git, a remote, credentials, or forge access does not prevent useful local work or authorize initializing/publishing a repository; report the unavailable endpoint accurately. An analysis-only route ends with its requested artifact or decision. Issue tracking is a separate opt-in; a linked issue does not itself authorize updates. Read [PR delivery](references/pr-delivery.md) before Git implementation isolation or a PR endpoint, and [external operations](references/external-workflows.md) for issue tracking or release/deploy.
+| Request | Route |
+|---|---|
+| Question or explanation ("what does X do", "what happens if…") | `references/roots/investigation/guide.md`; no ship run |
+| Review a PR or diff | `fudge:review`, else `references/roots/review/guide.md` standalone mode; no ship run |
+| Issue-tracker work | `references/roots/ticket/guide.md`; no ship run |
+| Run locally, manual testing, containers, a one-off task | `references/roots/setup/guide.md` run readiness; no ship run |
+| Rebase or restack only | [Restack check](references/pr-delivery.md#restack-check) as its own endpoint |
+| Build, fix, refactor or deliver a change | Continue below |
 
-Choose the smallest workflow that gives credible evidence for this change:
+"Pull latest main and <X>" means: run the restack check, then route X. It does not start an implementation run by itself.
 
-- **Routine:** bounded, reversible work with clear behavior and limited blast radius. A focused bug fix, UI change, documentation, or skill edit usually fits, unless its actual consequences warrant comprehensive assurance.
-- **Comprehensive:** material security, privacy, financial, permission, migration, data-loss, or production-release risk; broad cross-system changes with unsettled contracts; or an explicit request for a full audit. A small diff can still have high consequences. Read [comprehensive assurance](references/comprehensive.md) before affected implementation.
+## 2. Endpoint and depth
 
-Choose reporting and recovery needs separately from engineering risk. Use a concise risk-based plan by default, including for a narrow comprehensive change. Generate a formal HTML matrix only when requested or needed by an established project process. Use durable run state when work spans sessions, has multiple coordinated stages, needs recovery, or the user requests it; higher risk alone does not require HTML or a run directory. An explicit test-plan request selects that capability without automatically adding every comprehensive stage.
+| Endpoint | When |
+|---|---|
+| Analysis only | Requested; ends with the artifact or decision |
+| Verified locally | Requested, or no forge configured |
+| PR opened | Requested; stops at creation |
+| **PR ready** | Default with a configured forge: pushed PR whose current diff passed the review loop and required checks |
+| PR integrated, release/deploy | Explicit selection only; deploy via [external operations](references/external-workflows.md) |
 
-An individual uncertainty may warrant one specialist without turning the whole work item into a comprehensive run. If scope or risk grows, switch paths and explain why. Preserve completed decisions and evidence rather than restarting or asking for the same approval again. A user correction narrows or changes the requested work; address that correction directly. For example, “we didn't need new tests” stops unnecessary test work but does not authorize deleting existing tests or other assets.
+- Use the user's endpoint, else the `endpoint` working default, else the table. Commit, push and external writes follow `commit-push` and `external-writes`; a direct request to commit or push authorizes it, subject to repository safeguards.
+- Missing Git, remote, credentials or forge never authorizes initializing or publishing a repository; do the local work and report the unavailable endpoint.
+- Issue tracking is a separate opt-in; a linked issue is not permission to update it.
+- Read [PR delivery](references/pr-delivery.md) before Git isolation or a PR endpoint.
 
-## Route only the needed stages
+| Depth | Fits |
+|---|---|
+| Routine | Bounded, reversible, clear behavior, limited blast radius (focused fix, UI change, docs, skill edit) |
+| Comprehensive | Material security, privacy, financial, permission, migration, data-loss or release risk; broad cross-system work with unsettled contracts; a full-audit request. Small diffs can qualify. Read [comprehensive assurance](references/comprehensive.md) before affected work. |
 
-Ship remains the natural-language general entry point. Select the matching specialist directly from the work requested, without asking users to choose a skill. Feature implementation and behavior-preserving refactoring stay in this ship workflow (refactoring uses engineering's adjacent reference). A specialist owns its selected endpoint and uses shared machinery selectively; it does not delegate back through this router. Bundled dependency cycles are package closure only, never runtime calls.
+Reporting and recovery are separate from risk:
+
+- Concise risk-based plan by default, even for narrow comprehensive changes. Formal HTML matrix only when requested or required by project process.
+- Durable [run state](references/run-state.md) only for multi-session or multi-stage work, recovery, or on request.
+- An explicit test-plan request adds that capability, not every comprehensive stage.
+
+Adjusting course: one uncertainty may need one specialist, not a comprehensive run. If scope or risk grows, switch paths, say why, and keep completed decisions and evidence. A user correction narrows the work: "we didn't need new tests" stops new test work but does not authorize deleting existing tests or assets.
+
+## 3. Keep it small
+
+Every concise plan has a **smallest version** line: the minimum change that satisfies the request, and what is deliberately left out.
+
+| Asked for | Over-built | Smallest version |
+|---|---|---|
+| Add an error-monitoring SDK whose docs show a one-file setup | Custom wrappers and config layers | The vendor's documented minimal setup first |
+| A planning tab listing database changes | Rationale, risks and diagrams | Exactly the requested list |
+| User stories | Stories split by backend and frontend | User-facing stories; platform splits are subtasks |
+| A focused change | New abstractions, extra tests or docs "for completeness" | Leave out; one-line optional follow-up |
+
+## 4. Route stages
+
+Pick specialists from the work itself; never ask the user to choose a skill. Feature work and behavior-preserving refactoring stay in ship (refactoring uses engineering's adjacent reference). A specialist owns its endpoint and does not route back here; bundled dependency cycles are packaging only.
 
 | Focused work | Specialist |
 |---|---|
 | Explain behavior, cause or rationale without edits | `references/roots/investigation/guide.md` |
 | Repair a bounded defect | `references/roots/bug-fix/guide.md` |
 | Improve a measured metric within a budget | `references/roots/hillclimb/guide.md` |
-| Answer one empirical question with a disposable runnable artifact | `references/roots/prototype/guide.md` |
-| Match existing appearance or verify before/after renderings | `references/roots/visual-parity/guide.md` |
+| Answer one empirical question with a disposable artifact | `references/roots/prototype/guide.md` |
+| Match appearance or verify before/after renderings | `references/roots/visual-parity/guide.md` |
+| Create or update tracker issues | `references/roots/ticket/guide.md` |
 
-Every implementation begins with bounded discovery under `references/modules/engineering/guide.md`; every implementation ends with observed evidence under `references/modules/verification/guide.md`. Product intent and consequential tradeoffs remain user decisions. Analysis-only work loads only the guidance serving its requested artifact.
+Every implementation starts with discovery under `references/modules/engineering/guide.md` and ends with observed evidence under `references/modules/verification/guide.md`. Analysis-only work loads only what its artifact needs.
 
-Read `references/modules/gap-analysis/guide.md` only when missing or conflicting requirements warrant deeper reconciliation. Retain every valid gap and its evidence; summaries may be shorter than the register. “What is missing before we build?” is an analysis-only request: return the scoped gaps, concrete decisions, and next actions without starting implementation. Clear requests need a small discovery pass, not a workshop.
-
-Use selected guidance only when its output serves this work item:
-
-| Need | Owning skill | Trigger |
+| Need | Guidance | Trigger |
 |---|---|---|
-| Reconcile requirements | `references/modules/gap-analysis/guide.md` | Documents conflict or leave a material gap. |
-| Decompose a system | `references/modules/system-decomposition/guide.md` | A broad brief needs responsibilities, contracts, or candidate work before implementation; decomposition-only requests stop at analysis. |
-| Pressure-test a decision | `references/modules/decision-room/guide.md` | A consequential choice remains unsettled. |
-| Shape the experience | `references/roots/ux/guide.md` | User needs, content structure, task flow, state behavior, or usability needs a decision. |
-| Shape the interface | `references/roots/design/guide.md` | Visual expression, UI guidance, a reviewable mock, or component direction is needed. |
-| Make an interactive implementation plan | `references/modules/plan/guide.md` | The user requests an HTML plan, or a complex multi-file change needs a reviewable tree of behavior, exhibits, and decisions. |
-| Plan distinct failure cases | `references/modules/test-plan/guide.md` | Risk or an explicit request warrants a separate test plan. |
-| Make the project runnable | `references/roots/setup/guide.md` | Dependencies, environment, startup readiness, or a reusable project-verification recipe needs setup; use the focused mode. |
-| Engineer the change | `references/modules/engineering/guide.md` | Bounded discovery, cause tracing, state modeling, or implementation is needed. |
-| Coordinate implementation | `shared/execution.md` | Product or test files will change; single owner for delegation and integration. |
-| Verify completion | `references/modules/verification/guide.md` | Any implementation needs acceptance evidence and current checks. |
-| Isolate and deliver a PR | [PR delivery and learning](references/pr-delivery.md) | Git implementation isolation or a PR endpoint. |
-| Coordinate worktree implementation through Grove | Available `grove` skill, via [PR delivery](references/pr-delivery.md#grove-worktree-and-worker-coordination) | The task requires a worktree, including Git implementation isolation; Grove is required for worktree creation and implementation-worker sessions. |
-| Track issues or deploy | [External operations](references/external-workflows.md) | Explicit issue tracking, deployment, or compatibility risk. |
-| Add comprehensive assurance | [Comprehensive assurance](references/comprehensive.md) | Comprehensive risk path. |
-| Recover durable work | [Run state](references/run-state.md) | Cross-session coordination, long uncertain/unattended attempts, or recovery. |
-| Formal review | `references/roots/review/guide.md` | The change is comprehensive or the user requests this review. |
+| Reconcile requirements | `references/modules/gap-analysis/guide.md` | Material gap or conflict |
+| Decompose a system | `references/modules/system-decomposition/guide.md` | Broad brief needs responsibilities or contracts; decomposition-only stops at analysis |
+| Pressure-test a decision | `references/modules/decision-room/guide.md` | Consequential choice unsettled |
+| Shape the experience | `references/roots/ux/guide.md` | Needs, content, flow, states or usability need a decision |
+| Shape the interface | `references/roots/design/guide.md` | Visual direction, UI guidance, a mock or components |
+| Interactive plan | `references/modules/plan/guide.md` | HTML plan requested, or a complex multi-file change needs a reviewable tree |
+| Plan failure cases | `references/modules/test-plan/guide.md` | Risk or request warrants a test plan |
+| Make it runnable | `references/roots/setup/guide.md` | Dependencies, environment, startup or a verification recipe (focused mode) |
+| Engineer the change | `references/modules/engineering/guide.md` | Discovery, cause tracing, state modeling, implementation |
+| Coordinate implementation | `shared/execution.md` | Product or test files change |
+| Verify completion | `references/modules/verification/guide.md` | Any implementation |
+| Deliver a PR | [PR delivery](references/pr-delivery.md) | Git isolation or a PR endpoint |
+| Restack branches | [Restack check](references/pr-delivery.md#restack-check) | Existing branch before work, before publishing, after a base PR merges, on request |
+| Worktree implementation | [Worktree coordination](references/pr-delivery.md#worktree-and-worker-coordination) | Task needs a worktree (Grove preferred, native fallback) |
+| Deploy or compatibility | [External operations](references/external-workflows.md) | Explicit deploy, stored data, shared contracts, rollout order |
+| Comprehensive assurance | [Comprehensive assurance](references/comprehensive.md) | Comprehensive path |
+| Recover durable work | [Run state](references/run-state.md) | Cross-session work, long unattended attempts, recovery |
+| Formal review | `references/roots/review/guide.md` | Comprehensive change or request |
 
-When HTML planning is selected, use the bundled guide and its adjacent runtime, block reference, and examples. The source is `plan/`; the installed directory is package-root `references/modules/plan/`. Prefer `examples/sample-plan.html` for the contents rail, grouped expand/collapse, and light/dark switch. Keep clear routine work in a concise plan. For a review-before-build request, hand over the packed page and wait for the user response before affected implementation; existing authorization and settled decisions still apply. A planning-only request ends with the page.
+- Gap analysis keeps every valid gap with evidence. "What is missing before we build?" is analysis-only: return gaps, decisions and next actions. Clear requests need a small discovery pass, not a workshop.
+- A named stage sets membership, not order; UX and design inform each other either way and carry settled decisions across.
+- A pressure-test simulates perspectives; judge arguments by evidence, not persona agreement.
+- Read each selected guide and honor its contract for the chosen path.
+- Unknown stage names need clarification. A missing required skill is a reported blocker, not a silent substitute.
 
-Read each selected skill and honor the contract for the chosen path. A named stage selects membership, not order; UX and design can inform each other in either direction. Use one or both when the task calls for them, carrying settled decisions across the guides without restating their rules. For standalone code review, use the `fudge:review` root without starting a ship run. If that root is unavailable, read package-root `references/roots/review/guide.md` and follow its standalone mode. A pressure-test supplies simulated perspectives and arguments, not independent corroboration. Judge the arguments against evidence; agreement between personas is not stronger evidence. Unknown stage names require clarification. If a required skill is unavailable, report the blocker instead of silently replacing it.
+**HTML planning.** Use the bundled guide, runtime, block reference and examples (source `plan/`, installed `references/modules/plan/`); prefer `examples/sample-plan.html` (contents rail, grouped expand/collapse, light/dark switch). Routine clear work stays in a concise plan. For review-before-build, hand over the packed page and wait for the user before affected implementation (existing authorization and settled decisions still apply); planning-only ends with the page.
 
-## Routine path
+## 5. Routine path
 
-1. Establish acceptance conditions, affected contracts, and the implementation approach using `references/modules/engineering/guide.md`. Resolve only material uncertainty. Use governing rules and existing patterns; resolve consequential rule conflicts before affected work.
-2. For a worktree task, the user-facing coordinator reuses a task-owned linked worktree or creates one through Grove, then starts or resumes the main implementation worker there through Grove under [PR delivery](references/pr-delivery.md#grove-worktree-and-worker-coordination). The coordinator owns scope, user decisions, observation, and independent verification; the main worker owns implementation and integration and delegates useful subtasks within the agreed concurrency. A worker loading this skill continues its assigned role instead of launching another main worker. Apply `shared/execution.md` for decomposition and ownership within this contract. Tasks that do not require a worktree retain that shared policy. Protect pre-existing user edits; an authorized change to a file preserves unrelated edits in that file. A request to remove newly added work does not authorize deleting pre-existing files.
-3. Verify the acceptance conditions and plausible regressions using `references/modules/verification/guide.md`. Add automated coverage when a meaningful failure mode needs durable protection and a suitable harness exists, or when requested. Multiple UI steps alone do not require a new end-to-end suite.
-4. Read the final diff and working state for correctness, contracts, scope, and unintended changes. Fix issues and recheck affected behavior. For a PR-ready endpoint, complete the repeated review and learning loop in [PR delivery](references/pr-delivery.md), including a fresh final review. Complete the authorized endpoint, clean up task-created disposable worktrees and sessions under that guide after the selected PR endpoint, and report what changed, evidence, and material gaps.
+1. **Frame** acceptance conditions, contracts, approach and the smallest-version line under engineering. Resolve only material uncertainty and consequential rule conflicts. In an existing branch or worktree, run the [restack check](references/pr-delivery.md#restack-check) first.
+2. **Implement.** For a worktree task the coordinator reuses a task-owned worktree or creates one, then starts or resumes one main worker there per [worktree coordination](references/pr-delivery.md#worktree-and-worker-coordination): Grove when available, else native `git worktree add` plus the host's subagent (or direct implementation without subagents), telling the user once why Grove was not used. The coordinator owns scope, decisions and independent verification; the worker owns implementation and integration and may delegate within agreed concurrency. A worker loading this skill keeps its role. Non-worktree tasks follow `shared/execution.md`. Authorized edits preserve unrelated user edits in the same file; removing new work never authorizes deleting pre-existing files.
+3. **Verify** acceptance and plausible regressions under verification, in Docker when `runtime: docker-only` is set. Add automated coverage only for a meaningful failure mode with a suitable harness, or on request; several UI steps alone do not need a new end-to-end suite.
+4. **Review and finish.** Read the final diff for correctness, contracts, scope and stray changes; fix and recheck. For PR ready, run the [review loop](references/pr-delivery.md#review-fix-and-learn) through a fresh final review. Reach the endpoint, [clean up](references/pr-delivery.md#clean-up-after-the-pr-endpoint) task-created resources, and report changes, evidence and gaps.
 
-Routine work needs no run directory, HTML matrix, separate test-case approval, blanket full-suite gates, or conventions audit. PR-ready work requires initial and final review passes under its delivery guide, scaled to risk. A direct request to commit or push remains authorization for that endpoint, subject to the repository's own safeguards. Do not re-ask a settled visual or behavior choice merely because implementation has begun.
+Routine work needs no run directory, HTML matrix, test-case approval, blanket full-suite gates or conventions audit. Never re-ask a settled visual or behavior choice once implementation starts.
 
 ## Recovery
 
-On `resume`, inspect open runs and saved state. If several match, let the user choose. Re-present only an awaiting or changed decision; retain prior approvals and verification evidence. Recheck the baseline and governing sources before retrying an interrupted stage. A resume reports the recorded blocker and continues authorized work when the blocking condition is resolved; do not invent a new approval gate for recovery.
+On `resume`: inspect open runs (let the user choose among several), recheck baseline and governing sources before retrying, re-present only awaiting or changed decisions, keep prior approvals and evidence, and continue authorized work once the recorded blocker clears. Recovery adds no approval gate.

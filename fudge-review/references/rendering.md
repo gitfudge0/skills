@@ -93,7 +93,7 @@ Method: CI passed · 6 read fully, 3 skimmed · 2 prior comments checked
 
 ## GitHub (`pr`)
 
-Show the summary comment and every inline comment to the user and wait for a yes before posting.
+Interactive: show the summary comment and every inline comment, and wait for a yes before posting, unless the user already asked to post this content (working defaults in package-root `shared/working-defaults.md`; under `draft-first`, show the exact comments first unless the user said in this conversation to post without a draft). CI mode posts without asking and follows `ci.md` for markers, inline scope and re-runs.
 
 Post one summary comment. It holds the verdict as a heading, the one-line list as a table, one `<details>` block per finding, the team section, and Method in its own `<details>` block. Then post one inline review comment per blocker, anchored to its line. The inline comment is one sentence plus a pointer to the summary. Never copy the full finding inline.
 

@@ -1,0 +1,83 @@
+# Sample: run fudge:review in CI mode on every PR.
+# Copy to .github/workflows/fudge-review.yml in the project repo.
+#
+# Requires the repository secret ANTHROPIC_API_KEY.
+# Set FUDGE_SKILLS_REPO and FUDGE_SKILLS_REF to the fudge skills repository
+# and an exact commit SHA of it.
+#
+# anthropics/claude-code-action is pinned to v1.0.235
+# (commit 756cc22e19660d20e8cc9496b4f242475a7f7790). Inputs checked against
+# that tag's action.yml and the action's docs/solutions.md "Automatic PR Code
+# Review" example. Re-check both before bumping the pin.
+
+name: fudge review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# One review per PR at a time; a newer push cancels the older run.
+concurrency:
+  group: fudge-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+# Minimal. Optional additions: `checks: read` and `statuses: read` let the
+# review read CI status (otherwise it reports "CI status not read");
+# `actions: read` lets re-runs load the previous findings.json artifact
+# (otherwise they use the state marker in the bot's summary comment).
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  FUDGE_SKILLS_REPO: <owner>/<fudge-skills-repo>
+  FUDGE_SKILLS_REF: <exact-commit-sha>
+  FUDGE_REVIEW_OUT: fudge-review-out
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the PR head
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0 # the review diffs base...head
+
+      - name: Check out the fudge skills
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: ${{ env.FUDGE_SKILLS_REPO }}
+          ref: ${{ env.FUDGE_SKILLS_REF }}
+          path: .fudge-skills
+
+      - name: Install fudge:review for Claude Code
+        run: ./.fudge-skills/install.sh -a claude --root review --copy -y
+
+      - name: Review
+        uses: anthropics/claude-code-action@756cc22e19660d20e8cc9496b4f242475a7f7790 # v1.0.235
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            BASE SHA: ${{ github.event.pull_request.base.sha }}
+            HEAD SHA: ${{ github.event.pull_request.head.sha }}
+            OUTPUT DIR: ${{ env.FUDGE_REVIEW_OUT }}
+
+            Use the fudge:review skill in CI mode (its references/ci.md).
+            The PR head is already checked out in the current directory.
+            Do not ask questions. Write findings.json and method.md to OUTPUT DIR.
+            Post or update the summary and inline comments as ci.md describes.
+          claude_args: |
+            --allowedTools "Skill,Read,Grep,Glob,Write(${{ env.FUDGE_REVIEW_OUT }}/**),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(git grep:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr checks:*),Bash(gh pr comment:*),Bash(gh api:*),mcp__github_inline_comment__create_inline_comment"
+
+      - name: Upload review artifacts
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: fudge-review-pr-${{ github.event.pull_request.number }}
+          path: ${{ env.FUDGE_REVIEW_OUT }}
+          if-no-files-found: warn

@@ -3,7 +3,7 @@
   "roots": {
     "design": {"source": "fudge-design", "modules": ["design-for-recognition", "design-system", "ui-mock", "ui-prototype", "design-qa"], "roots": ["ux"]},
     "ux": {"source": "fudge-ux", "modules": ["ux-research", "content-architecture", "interaction-design", "accessible-ui", "experience-measurement"], "roots": ["design"]},
-    "ship": {"source": "fudge-ship", "modules": ["gap-analysis", "test-plan", "decision-room", "system-decomposition", "plan", "engineering", "verification"], "roots": ["design", "ux", "review", "setup", "investigation", "bug-fix", "hillclimb", "prototype", "visual-parity"]},
+    "ship": {"source": "fudge-ship", "modules": ["gap-analysis", "test-plan", "decision-room", "system-decomposition", "plan", "engineering", "verification"], "roots": ["design", "ux", "review", "setup", "investigation", "bug-fix", "hillclimb", "prototype", "visual-parity", "ticket"]},
     "review": {"source": "fudge-review", "modules": [], "roots": ["setup", "plan"]},
     "setup": {"source": "fudge-setup", "modules": [], "roots": []},
     "plan": {"source": "plan", "modules": [], "roots": []},
@@ -11,7 +11,8 @@
     "bug-fix": {"source": "fudge-bug-fix", "modules": [], "roots": ["ship"]},
     "hillclimb": {"source": "fudge-hillclimb", "modules": [], "roots": ["ship"]},
     "prototype": {"source": "fudge-prototype", "modules": [], "roots": ["ship"]},
-    "visual-parity": {"source": "fudge-visual-parity", "modules": [], "roots": ["ship"]}
+    "visual-parity": {"source": "fudge-visual-parity", "modules": [], "roots": ["ship"]},
+    "ticket": {"source": "fudge-ticket", "modules": [], "roots": []}
   },
   "modules": {
     "design-for-recognition": {"owner": "design", "source": "modules/design-for-recognition"},
