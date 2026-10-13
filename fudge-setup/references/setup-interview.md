@@ -57,6 +57,8 @@ Write `<project>-conventions` into the existing project-skill location, the call
 
 Where Phase 0.5 found tooling gaps, show the exact config that would be added and what it would enforce, and write it **only with explicit authorization for that concrete config, including prior authorization**. A blanket approval of the rule table is not approval of a config file.
 
+If the workflow round settled any working defaults, they appear in the Phase 2 table and are emitted as a `## Working defaults` section in the conventions `SKILL.md`, in the format of package-root `shared/working-defaults.md`. Unset keys are omitted. They are proposed with a stance like any other row, not a separate approval gate.
+
 On a **start-clean** run, finish with a conformance report: where existing code does not match the rules just agreed. That was promised in the Phase 0 question and it is a report, not a work order — no file is edited to close a gap. Write it to this skill's Output location below unless the user or a calling workflow names another path.
 
 Show the exact pointer in the active host instruction file (`AGENTS.md` for Codex, `CLAUDE.md` for Claude). Add it when that exact change is authorized; prior authorization applies. Preserve existing instructions.
@@ -71,7 +73,7 @@ Six rounds baseline. Groups in the dimension bank do not map one-to-one onto rou
 | 2 | architecture | Error model, trust boundaries, abstraction threshold, DI posture, state and mutation, domain types vs. primitives, plus the archetype-gated rows (concurrency, persistence, SDK wrapping, versioning) |
 | — | observability | **Inserted after architecture only for long-running service, web app, or data pipeline.** Logging, what must never be logged, metrics and tracing, health checks and rollback discipline. Pruned entirely for every other archetype |
 | 3 | testing | Framework and location, test floor, shape, doubles, determinism, coverage stance, test-first or tests-with, flaky test policy |
-| 4 | workflow | Branching, commits, PR discipline, what blocks merge, definition of done, release process — **plus tooling's two asked rows**: pre-commit hooks, and the one command that checks everything. Both are about the loop around writing code, not the code itself |
+| 4 | workflow | Branching, commits, PR discipline, what blocks merge, definition of done, release process — **plus tooling's two asked rows**: pre-commit hooks, and the one command that checks everything. Both are about the loop around writing code, not the code itself. **Also the working defaults, asked once**: `endpoint`, `commit-push`, `external-writes`, `runtime` (package-root `shared/working-defaults.md`) |
 | 5 | docs | Comment density and what earns one, doc comments on public API, whether decisions are recorded as ADRs |
 | 6 | security | Secret handling, where authn/authz checks live, input sanitization at trust boundaries, vulnerability response |
 

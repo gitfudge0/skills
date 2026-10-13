@@ -1,59 +1,134 @@
 # PR delivery and review learning
 
-Read for Git implementation isolation or a PR endpoint. The calling workflow selects scope and depth; this guide owns worktree, synchronization, review-learning, and PR completion. Use package-root `shared/execution.md` for delegation and coordinator verification, and `references/modules/verification/guide.md` for evidence.
+Read for Git implementation isolation, a restack, or a PR endpoint. The caller picks scope and depth; this guide owns worktrees, restacking, review learning and PR completion. Delegation and coordinator verification: package-root `shared/execution.md`. Evidence: `references/modules/verification/guide.md`. Project defaults: `shared/working-defaults.md`.
 
 ## Worktree isolation
 
-Before Git implementation, inspect the canonical checkout root, `git rev-parse --git-dir --git-common-dir`, and `git worktree list --porcelain`. Compare resolved paths: a `.git` file alone does not prove a linked worktree. Record root, branch/HEAD, dirty state, and task ownership. Reuse an existing linked worktree rather than nesting another; verify the current branch and changes belong to this task. From the primary checkout, create an isolated task branch/worktree through Grove with a collision-free path and branch, honoring stronger host/project isolation rules.
+1. Inspect the checkout root, `git rev-parse --git-dir --git-common-dir` and `git worktree list --porcelain`; compare resolved paths (a `.git` file alone does not prove a linked worktree).
+2. Record root, branch/HEAD, dirty state and task ownership.
+3. Reuse an existing task-owned linked worktree (verify its branch and changes); never nest or duplicate one.
+4. Otherwise, from the primary checkout, create a collision-free task branch and worktree per [coordination](#worktree-and-worker-coordination), honoring stronger host or project rules. Record its starting SHA and location.
 
-An occupied branch or unrelated edits do not authorize switching, resetting, stashing, or discarding work. Preserve task inputs: a new worktree lacks uncommitted changes, so inspect required inputs and transfer only scoped, attributable, non-sensitive material with authorization already applicable to those edits. Never copy credentials or unrelated data. Resolve inseparable ownership or missing inputs before affected work; continue independent work. No Git repository means bounded local snapshots, not automatic `git init`. Record the worktree location for handoffs and recovery; do not remove it while work or review remains pending.
+Protect existing work:
 
-### Grove worktree and worker coordination
+- An occupied branch or unrelated edits never authorize switching, resetting, stashing or discarding.
+- New worktrees lack uncommitted changes: transfer only scoped, attributable, non-sensitive inputs already covered by authorization. Never copy credentials or unrelated data.
+- Resolve inseparable ownership or missing inputs before affected work; continue independent work.
+- No Git repository means bounded local snapshots, not `git init`.
+- Keep a worktree while work or review is pending.
 
-For any ship task requiring a worktree, Grove is the required coordination mechanism. The user-facing agent remains the coordinator: it frames scope, carries user decisions, launches and observes work, reviews the integrated diff, and independently runs the required checks before reporting success. It delegates implementation and integration to one main implementation worker in the task worktree, launched as a Grove session with a prompt and tracked task. Coordinator check runs do not transfer implementation ownership. A worker loading ship retains its explicitly assigned role and worktree; it does not recursively launch another main implementation worker.
+### Worktree and worker coordination
 
-Before launch, locate and read the available `grove` skill for current commands, registration, session/task creation, observation, result submission, recovery, and removal. Read CLI help and use its read-only discovery to confirm connectivity and resource ownership; check exit status and the JSON envelope. Reuse the registered project, its workspace, and any task-owned linked worktree or active main-worker session. Register the existing repository when needed for this requested Grove workflow, using its established workspace or the user's selected workspace. Create a workspace only when requested; do not invent a workspace, move an existing project, initialize Git, install Grove or its skill, automatically launch the desktop, or edit saved Grove state. If a necessary workspace choice is unresolved, ask for that choice while continuing independent discovery.
+| Role | Owns |
+|---|---|
+| Coordinator (user-facing agent) | Scope, user decisions, launching and observing work, reviewing the integrated diff, rerunning required checks itself before reporting success |
+| Main implementation worker (one per task worktree) | Implementation, subtask coordination, integration |
 
-If the CLI, skill, running desktop, or required project/worktree registration is unavailable, report the specific blocker and preserve existing work. Do not substitute direct implementation, `git worktree add`, host writing subagents, or unmanaged sessions. An existing linked task worktree still needs Grove to manage its implementation session; if Grove cannot address it, report that blocker rather than creating a duplicate. Record the starting commit SHA for each new worktree, use returned paths and opaque IDs, and preserve scoped uncommitted task inputs under the isolation rules above.
+Coordinator check runs do not transfer ownership. A worker that loads ship keeps its assigned role and does not launch another main worker. A worker's claim or task status never establishes success.
 
-Prepare a self-contained UTF-8 prompt outside worker-owned editable paths. Include:
+| Situation | Mechanism |
+|---|---|
+| Grove CLI, `grove` skill and desktop available | **Grove (preferred)** for worktree and worker sessions |
+| Grove not installed, not running, or unsupported host (e.g. Codex, Cursor, OpenCode) | **Native fallback:** `git worktree add` plus the host's own subagent as main worker; direct implementation if subagents are unavailable |
 
-- Explicit main-implementation-worker role, task scope, acceptance conditions, exact ownership and off-limits paths, and responsibility for integration and preserving others' edits.
-- Settled user decisions, governing instructions, relevant ship guidance, base SHA, target branch, and selected delivery endpoint with its publishing and cleanup limits.
-- Permission to delegate useful subtasks, the agreed total concurrency, lane ownership, and the requirement to use Grove for each additional writing worker's separate worktree and session. Native read-only subagents may investigate or review; respect host limits and avoid unnecessary recursive delegation.
-- Required checks, accessible raw evidence and revision information, result location, blockers to report, and instructions to submit the result through Grove's task-result workflow.
+On fallback, tell the user once that Grove was not used and why. Roles, endpoint, publishing, verification and cleanup rules do not change with the mechanism. Never switch mechanisms silently mid-task; a Grove-managed worktree stays with Grove while Grove is reachable.
 
-The main worker owns implementation, subtask coordination, and integration into the task worktree. Follow `shared/execution.md` for decomposition, dependency ordering, one writer per worktree, and collecting every launched worker's terminal result. Link child tasks to their parent through Grove as described by its skill. The coordinator retains user-facing consequential decisions and reruns the required build, test, lint, and other checks on the integrated state itself; a worker's completion claim or task status does not establish success.
+**Grove setup.**
 
-Record worktree, session, task, and request IDs for recovery. On a failed or ambiguous operation, inspect the corresponding state before retrying; follow the Grove skill's idempotent launch rules to avoid duplicate workers. Recover through Grove rather than silently changing launch mechanisms. Keep worktrees and evidence while work or review remains pending, and apply the cleanup policy below only after the authorized endpoint. Grove changes the coordination mechanism, not endpoint, publishing, or cleanup authorization.
+1. Read the `grove` skill for current commands (registration, sessions, tasks, observation, results, recovery, removal) and CLI help.
+2. Confirm connectivity and ownership with read-only discovery; check exit status and the JSON envelope.
+3. Reuse the registered project, workspace, task worktree and active main-worker session. Register the repository when needed, in its established or the user's selected workspace.
+4. Never create a workspace unasked, move a project, initialize Git, install Grove or its skill, auto-launch the desktop, or edit saved Grove state. Ask about an unresolved workspace choice while continuing discovery.
+5. Use returned paths and opaque IDs; record worktree, session, task and request IDs.
+
+**Worker prompt** (self-contained UTF-8, written outside worker-owned paths):
+
+- Role, scope, acceptance conditions, owned and off-limits paths, integration duty, preserving others' edits.
+- Settled decisions, governing instructions, relevant ship guidance, base SHA, target branch, endpoint with its publishing and cleanup limits.
+- Delegation allowance: total concurrency and lane ownership; each extra writing worker gets its own worktree and session via the same mechanism. Read-only subagents may investigate or review; respect host limits and avoid needless recursion.
+- Required checks, raw evidence and revisions to return, blockers to report, and the return path (Grove task result, or the subagent's final report).
+
+**During the run.** Follow `shared/execution.md` (decomposition, dependency order, one writer per worktree, collect every worker's terminal result); with Grove, link child tasks to the parent. The coordinator keeps consequential decisions and reruns build, test, lint and other required checks on the integrated state. After a failed or ambiguous operation, inspect state before retrying; with Grove, follow its idempotent launch rules.
+
+## Restack check
+
+Part of ship, run whenever needed. A standalone restack request is its own small endpoint.
+
+**Runs:** before implementation in an existing branch or worktree; before publishing; after a base PR merges; when the user asks to "pull latest main and rebase" (then route the rest of the request).
+
+1. Fetch and record the target's remote SHA.
+2. Find branches behind their target, and stacks: branches or worktrees based on another task branch. Order each stack base-first.
+3. Rebase each clean, committed, task-owned branch in order onto the fetched SHA of its parent; after a base PR merges, rebase its child onto the target with `git rebase --onto`, dropping merged commits.
+4. Resolve conflicts against agreed contracts; inspect the integrated diff.
+5. Rerun affected checks and review.
+6. Push only with history-rewrite authorization and verified ownership, using `--force-with-lease=<branch>:<expected sha>`, never plain force. A user's request to rebase and push a branch they own counts.
+7. Report the new head per branch, the target SHA and any blocker.
+
+Never rewrite a shared or unowned branch; without rewrite authorization, use a permitted non-rewriting integration or report the blocker.
 
 ## PR lifecycle and endpoints
 
-`verified locally` needs no commit, push, or PR unless separately requested. `PR opened` authorizes the scoped branch, commit, push, and creation, ending with a live link and accurate pending checks. The default `PR ready` additionally follows remote checks and repeated review until the current head meets the completion conditions below. `PR integrated` additionally authorizes merging only when applicable approvals, checks, protection, and host rules allow it. None authorizes automatic release/deploy, self-approval, bypassing protection, or changing agreed product behavior. Issue updates and external messages remain separate opt-ins.
+| Endpoint | Adds | Ends with |
+|---|---|---|
+| Verified locally | Nothing published unless requested | Observed evidence |
+| PR opened | Scoped branch, commit, push, PR | Live link and accurate pending checks |
+| PR ready (default) | Remote checks and repeated review | [Finish conditions](#finish-pr-ready) on the current head |
+| PR integrated | Merge when approvals, checks, protection and host rules allow | Merged |
 
-Use the configured forge and available connector/CLI. Resolve the target from the user's request, repository configuration, or stack parent; use `main` only when it exists and no more specific target applies. Record target, remote, and task branch ownership. Inspect staged content before each commit; commit only task-owned changes. Push only the selected branch and create/update a PR whose title and description reflect the final behavior, verification, and remaining limitations.
+None authorizes release/deploy, self-approval, bypassing protection or changing agreed behavior. Issue updates and external messages are separate opt-ins.
+
+1. Use the configured forge and available connector or CLI.
+2. Target: the user's request, repository configuration or stack parent; `main` only if it exists and nothing more specific applies. Record target, remote and branch ownership.
+3. Inspect staged content before each commit; commit only task-owned changes.
+4. Push only the selected branch; the PR title and description reflect final behavior, verification and limitations.
 
 ### Synchronize the target
 
-The integration owner fetches the configured target and captures its remote SHA before publishing. Rebase the clean, committed, task-owned branch onto that revision. Resolve scoped conflicts against agreed contracts, inspect the integrated diff, and rerun affected checks and review. Do not rewrite a shared or unowned branch. For an already published branch, rebase only with applicable history-rewrite authorization and verified ownership; push using an explicit expected remote SHA lease, never unconditional force. If rewrite is unavailable, use a permitted nonrewriting integration method or report the specific blocker.
-
-Recheck target drift before declaring readiness. Synchronize again when meaningful drift, conflicts, or project freshness policy requires it; record the checked target revision and readiness time rather than chasing every unrelated moving-target commit indefinitely. Distinguish unrelated baseline failures with evidence; do not fix them silently or call their gates green.
+- Run the [restack check](#restack-check) before publishing and again before declaring readiness.
+- Resync on meaningful drift, conflicts or project freshness policy; record the checked target revision and time instead of chasing unrelated commits.
+- Separate unrelated baseline failures with evidence; do not fix them silently or call them green.
 
 ### Review, fix, and learn
 
-Run an initial substantive review of the full task diff and a fresh final review of the final current diff, including any rebase or learning changes. Use independent reviewers when available and useful, under host delegation requirements; use distinct direct passes when unavailable. Comprehensive changes retain the formal orchestrated `fudge:review` contract. Routine PRs use risk-relevant correctness, contracts, security, scope, and regression review without unnecessary formal artifacts. Review existing remote feedback as well.
+**Passes.** An initial substantive review of the full task diff and a fresh final review of the final diff (including rebase or learning changes). Use independent reviewers when available and useful, else distinct direct passes. Comprehensive changes keep the formal orchestrated `fudge:review` contract; routine PRs get risk-relevant correctness, contracts, security, scope and regression review without formal artifacts. Include existing remote feedback.
 
-Reviewer findings are candidates. The coordinator verifies each against source, agreed behavior, governing instructions, and raw check evidence. Fix every confirmed actionable in-scope issue, rerun affected checks, push updates, and review again. Dismiss false positives with evidence; distinguish accepted risks, duplicates, and out-of-scope findings instead of inventing work to satisfy “all issues.” A consequential new product decision goes to the user. After repeated failed fixes, reassess the hypothesis. Give later reviews current revisions, prior dispositions, and a useful focus (changed risks, interactions, or uncovered contracts), not the same blind prompt endlessly. Clean reviews need no manufactured findings or arbitrary further rounds.
+**Findings loop.**
 
-For each confirmed reusable review gap, use setup’s guidance-diagnosis reference (adjacent to `references/roots/setup/guide.md`) before proposing prevention. Prefer eliminating the structural cause, then suitable types, a narrow existing-harness check or meaningful regression test, then residual judgment guidance. Diagnose missing, buried/conflicting, missed-trigger, or noncompliant instructions before adding text; improve the authoritative source or its routing rather than duplicating it. Record `finding → cause → gate or skill delta → verification`, including a failing and valid case where a check is added. Avoid duplicate rulebooks, generic prose accumulation, or a new broad project-rules setup. Apply only within authorization: an explicit standing review-learning grant covers additive evidence-backed changes preserving established behavior, with the coordinator reviewing concrete deltas in this same PR. Use setup's targeted amendment guidance; changing product decisions, weakening gates, or changing approved policy still needs the user's decision. Without a grant, present the concrete improvement rather than silently changing authority.
+1. Verify each candidate finding against source, agreed behavior, governing instructions and raw check output.
+2. Fix confirmed actionable in-scope issues, rerun affected checks, push, review again.
+3. Dismiss false positives with evidence; label accepted risks, duplicates and out-of-scope items rather than inventing work.
+4. Consequential new product decisions go to the user.
+5. After repeated failed fixes, reassess the hypothesis. Later reviews get current revisions, prior dispositions and a focus, not the same blind prompt.
+6. A clean review needs no manufactured findings or extra rounds.
 
-Finish `PR ready` only when the pushed current head and full task diff have independently verified review evidence, no unresolved confirmed actionable in-scope issues, and all required checks are green for that head. At least the initial substantive and final fresh reviews must be recorded, repeating after fixes that affect their evidence. Confirm remote/local head agreement and report the checked target SHA. Required human approvals or mergeability conditions may remain pending: name them accurately and do not claim approved or mergeable. Blocked credentials, CI, or policy produce a precise partial state and live PR link when available; preserve recovery state. Never convert PR readiness into automatic merge.
+**Learning from reusable gaps.**
 
+1. Diagnose first with setup's guidance-diagnosis reference (adjacent to `references/roots/setup/guide.md`): missing, buried/conflicting, missed-trigger or noncompliant instructions.
+2. Prefer: remove the structural cause > suitable types > a narrow existing-harness check or regression test > residual judgment guidance. Fix the authoritative source or routing; no duplicate rulebooks or generic prose.
+3. Record `finding → cause → gate or skill delta → verification`, with a failing and a valid case for any new check.
+4. An explicit standing review-learning grant covers additive, evidence-backed changes that keep established behavior; apply via setup's targeted amendment guidance and review the deltas in this PR. Product decisions, weaker gates or policy changes need the user. Without a grant, propose the improvement.
+
+### Finish PR ready
+
+For the pushed current head:
+
+- [ ] Verified initial and fresh final reviews recorded for the full diff, repeated after fixes that affect them.
+- [ ] No unresolved confirmed actionable in-scope issues.
+- [ ] All required checks green.
+- [ ] Local and remote heads agree; checked target SHA reported.
+
+Name pending human approvals or mergeability; never claim approved or mergeable. If credentials, CI or policy block, report the precise partial state, the PR link when available, and keep recovery state. Never merge automatically.
 
 ### Clean up after the PR endpoint
 
-After the selected PR endpoint is achieved, clean up this task's disposable worktrees and designated sessions. For `PR opened`, creation of the PR completes the endpoint; for `PR ready`, complete the required checks and review loop first. Preserve worktrees needed for active review, unresolved work, or recovery. This cleanup applies to task-created resources, not pre-existing or reused user worktrees and sessions; retain the published branch backing the PR.
+After the endpoint (PR opened: on creation; PR ready: after checks and review), clean up only task-created worktrees and designated sessions, from Grove or the fallback. Keep pre-existing or reused user resources, anything needed for active review, unresolved work or recovery, and the branch backing the PR.
 
-Before removal, confirm task ownership, that each worktree's required commits are integrated into the pushed PR branch, and current local/remote head agreement. Inspect uncommitted changes and relevant untracked or ignored files; preserve unresolved, dirty, or unpushed work and report the cleanup blocker rather than discarding it. Save result evidence and recovery details outside the checkout being removed. Stop only the task's designated sessions once their work and evidence are collected.
+1. Confirm ownership, that required commits are in the pushed branch, and local/remote head agreement.
+2. Inspect uncommitted, relevant untracked and ignored files; preserve dirty or unpushed work and report the blocker.
+3. Save evidence and recovery details outside the checkout being removed.
+4. Stop only the task's sessions or subagents, after collecting their results.
+5. Remove:
+   - **Grove:** inspect any teardown script, then follow the `grove` skill's `worktrees remove` confirmation and poll `removal-status` to completion. Never bypass teardown or treat an accepted request as done; after failures inspect state and keep recovery IDs.
+   - **Fallback:** `git worktree remove <path>` (no `--force` over dirty state), then `git worktree prune`.
 
-For Grove resources, inspect any configured teardown script before removal, then follow the `grove` skill's `worktrees remove` confirmation and `removal-status` polling until completion. Removal can stop sessions and run teardown; do not bypass teardown or assume an accepted request means cleanup succeeded. Inspect state after failures and retain the recovery IDs. Report which resources were removed and any retained resources or cleanup failures accurately; cleanup does not authorize extra publishing or deleting unrelated resources.
+Report removed and retained resources and any failures. Cleanup never authorizes extra publishing or deleting unrelated resources.

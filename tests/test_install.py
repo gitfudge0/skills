@@ -16,7 +16,7 @@ class InstallerTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.base = Path(self.temp.name).resolve()
         self.repo = self.base / 'repository'
-        shutil.copytree(REPO, self.repo, ignore=shutil.ignore_patterns('.git', '.fudge-build', '__pycache__'))
+        shutil.copytree(REPO, self.repo, ignore=shutil.ignore_patterns('.git', '.fudge-build', '.fudge-evals', '__pycache__'))
         self.home = self.base / 'home'
         self.home.mkdir()
         self.skills = self.home / '.codex/skills'
@@ -29,7 +29,7 @@ class InstallerTests(unittest.TestCase):
         return result
     def test_defaults_and_standalone_navigation(self):
         self.run_install('install', '-a', 'codex')
-        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'investigation', 'bug-fix', 'hillclimb', 'prototype', 'visual-parity']} | {'fudge-plan'})
+        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'investigation', 'bug-fix', 'hillclimb', 'prototype', 'visual-parity', 'ticket']} | {'fudge-plan'})
         spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
         builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
@@ -120,7 +120,7 @@ class InstallerTests(unittest.TestCase):
             self.assertTrue((directory / 'fudge-ship/references/roots/setup/references/project-verification.md').is_file())
             self.assertTrue((directory / 'fudge-ship/references/modules/engineering/references/refactoring.md').is_file())
             self.assertTrue((directory / 'fudge-review/shared/test-effectiveness.md').is_file())
-        self.assertIn('Installed 11 public skills for 4 agents', result.stdout)
+        self.assertIn('Installed 12 public skills for 4 agents', result.stdout)
         # Noninteractive default selection has the same retirement behavior.
         old = self.home / targets[0] / 'fudge-write'
         old.symlink_to(self.repo / 'fudge-write')

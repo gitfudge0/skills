@@ -1,10 +1,10 @@
 # Fudge skills
 
-Eleven public skills cover setup, shipping, design, UX, review, planning and focused specialist workflows. Each installed root bundles its dependency closure and works independently; bundled guidance is loaded only when needed.
+Twelve public skills cover setup, shipping, design, UX, review, planning, issue tracking and focused specialist workflows. Each installed root bundles its dependency closure and works independently; bundled guidance is loaded only when needed.
 
 | Public skill | Purpose | Internal capabilities |
 |---|---|---|
-| `fudge:ship` | Discover requirements, implement, verify, deliver | Engineering, verification, PR delivery and review learning, gap analysis, system decomposition, interactive HTML planning, test planning, decision pressure-testing; routes to design, UX, review, setup |
+| `fudge:ship` | Discover requirements, implement, verify, deliver | Engineering, verification, PR delivery and review learning, gap analysis, system decomposition, interactive HTML planning, test planning, decision pressure-testing; routes to design, UX, review, setup, ticket |
 | `fudge:review` | Review a PR or local diff | Findings, re-review, conventions checks |
 | `fudge:design` | Shape and build the visual experience | Visual craft, design systems, static mocks, prototypes, design QA |
 | `fudge:ux` | Shape the experience people need | Research, content architecture, interaction design, accessibility, measurement |
@@ -15,6 +15,7 @@ Eleven public skills cover setup, shipping, design, UX, review, planning and foc
 | `fudge:hillclimb` | Improve a measured metric within a budget | Authoritative performance loop and correctness evidence |
 | `fudge:prototype` | Answer one empirical question with a disposable experiment | UI prototype machinery, API/algorithm harnesses, measurement |
 | `fudge:visual-parity` | Preserve appearance or verify matched renderings | Controlled before/after captures, design QA and scoped verification |
+| `fudge:ticket` | Draft, reconcile and update issue-tracker tickets, drafts first | User-facing story splits with platform subtasks, ticket-vs-implementation reconciliation, post-merge comments and transitions; also routed from ship |
 
 Ship is a router with a task-to-guide map: focused engineering and verification modules, native PR delivery guidance, and conditional comprehensive/recovery references. Shared execution remains the single delegation and integration policy. Git implementation defaults to an isolated worktree and PR-ready delivery; explicit local-only and analysis endpoints remain available. Ship routes focused requests directly to their specialist without asking users to choose. Features and refactoring remain in ship. Specialists retain their analysis, artifact or selected production endpoint and never re-enter the ship router. A narrow request loads only its selected guidance. Asking for button labels does not start a mock workflow; asking what's missing before building can stop at requirements analysis. Rendering a report deck is optional. Mindmap has been removed.
 
@@ -33,9 +34,9 @@ Requires Python 3.9+ and Bash. Clone this repository, then run:
 ./install.sh remove -a codex --all -y
 ```
 
-Supported terminals use a four-step keyboard installer: agents → roots → method → review. Use arrows to move, Space to select, Enter to continue, Esc to go back, and q to cancel. Back preserves selections. Narrow or unsupported terminals use numbered choices. Conflicts appear before applying changes. Defaults select all eleven roots. Supported targets: Claude, Codex, Cursor, OpenCode. Non-interactive installation requires an explicit target (`-a`); it applies without a prompt. `-y` bypasses interactive confirmation. Non-interactive removal requires `-y`.
+Supported terminals use a four-step keyboard installer: agents → roots → method → review. Use arrows to move, Space to select, Enter to continue, Esc to go back, and q to cancel. Back preserves selections. Narrow or unsupported terminals use numbered choices. Conflicts appear before applying changes. Defaults select all twelve roots. Supported targets: Claude, Codex, Cursor, OpenCode. Non-interactive installation requires an explicit target (`-a`); it applies without a prompt. `-y` bypasses interactive confirmation. Non-interactive removal requires `-y`.
 
-The installer offers eleven public roots. Each package includes its dependency closure, internal guides, and shared policies. Symlinks point to generated `.fudge-build` packages; copies include an installer ownership marker and can be updated by rerunning the installer.
+The installer offers twelve public roots. Each package includes its dependency closure, internal guides, and shared policies. Symlinks point to generated `.fudge-build` packages; copies include an installer ownership marker and can be updated by rerunning the installer.
 
 ### Migration
 
@@ -47,10 +48,10 @@ Installation removes retired entries only when they are owned by this checkout's
 
 ```text
 fudge-{ship,review,design,ux,setup}/SKILL.md
-fudge-{investigation,bug-fix,hillclimb,prototype,visual-parity}/SKILL.md
+fudge-{investigation,bug-fix,hillclimb,prototype,visual-parity,ticket}/SKILL.md
 modules/<capability>/guide.md
 plan/SKILL.md                  # standalone public skill, also bundled into ship
-shared/{execution.md,writing.md,artifacts.md,artifact_path.py}
+shared/{execution.md,writing.md,artifacts.md,locate.md,working-defaults.md,artifact_path.py}
 shared/report-deck/
 scripts/skill-manifest.json
 ```
@@ -84,3 +85,14 @@ Write is retired as a public skill. Shared prose guidance remains bundled for ev
 Conditional capabilities stay with their owners: setup maintains project verification recipes and diagnoses failed guidance; ship engineering handles behavior-preserving refactors; hillclimb reuses the authoritative engineering performance reference; verification and review check test effectiveness; verification exercises relevant retry/restart risks; durable ship runs preserve auditable attempts. These references load only for the applicable work, not for every task. Behavioral scenarios describe expected decisions; they are not executed agent evaluation results.
 
 Standalone specialist behavior cases and their evidence protocol are in [tests/evals/specialist-behavior.md](tests/evals/specialist-behavior.md). Dependency closure may include other public guides for shared references; installation does not imply running those workflows.
+
+### Running scenarios with `claude plugin eval`
+
+```sh
+bash scripts/build-root-skills.sh .fudge-build
+bash scripts/run-evals.sh --validate                      # generate + schema-check, no agent runs
+bash scripts/run-evals.sh --generate-only --root ticket   # write suites only
+bash scripts/run-evals.sh --root ship --case 'correction-*' -- --allow-tools Bash Edit Write --max-cost-usd 5
+```
+
+`scripts/run-evals.sh` converts `tests/evals/scenarios.json` into one plugin wrapper per selected root under the gitignored `.fudge-evals/<package>/`: a copy of `.fudge-build/<package>` as the plugin's only skill plus `evals/<case>/case.yaml`. The scenario `id` (or `<root>-<index>-<prompt slug>`) is the case name for `--case`; `--root` repeats. Each invariant becomes one LLM grader over the run trace, the fixture description is appended to the agent's system prompt, and cases with a `fixture_id` get a scaffold that generates the ship fixture repository (it runs only with `--scaffold`). Arguments after `--` go to `claude plugin eval`. Running cases spends model credit (default three runs per case plus a no-plugin baseline arm); `--validate` and `--generate-only` never start an agent. Cases tagged `user-correction` encode lessons from real user corrections, anonymized.

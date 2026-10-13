@@ -1,13 +1,13 @@
 ---
 name: fudge:setup
-description: "Set up a project’s coding rules and local run readiness, audit convention drift, or amend approved rules. Use for project setup, running an existing project, focused tooling setup, project verification recipes, diagnosing failed project guidance, and project-rule changes."
+description: "Set up a project’s coding rules and local run readiness, audit convention drift, or amend approved rules. Use for project setup, running an existing project, focused tooling setup, project verification recipes, diagnosing failed project guidance, project-rule changes, working defaults, and everyday local stack operations (branch or worktree stacks, one-off tasks, dump restores, startup failures)."
 ---
 
 # fudge:setup
 
 ## Locate guidance
 
-Resolve the package root before opening shared or bundled guidance: walk ancestors of this file to `.fudge-package.json`. All `references/modules/`, `references/roots/`, and `shared/` paths below are relative to that package root, even when this guide is nested. In the source checkout, the root is the ancestor containing `scripts/skill-manifest.json`; module guides are `modules/<name>/guide.md`, root guides are `fudge-<name>/SKILL.md`, and shared paths are unchanged. The primary installed root is package-root `SKILL.md`; other root guides are under `references/roots/<name>/guide.md`. Bundling rewrites a reference to the primary root to `SKILL.md`. Links to this guide's own references remain relative to this file. Read only the selected guidance.
+Paths under `references/modules/`, `references/roots/` and `shared/` resolve from the package root: the nearest ancestor containing `.fudge-package.json`, or in a source checkout the ancestor containing `scripts/skill-manifest.json` (mapping in `shared/locate.md`). Links to this guide's own references stay relative to this file. Read only the selected guidance.
 
 Use package-root `shared/execution.md` for implementation/delegation policy, `shared/writing.md` for prose, and `shared/artifacts.md` before writing review artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read optional package-root `shared/report-deck/guide.md`; concise chat is the default.
 
@@ -21,7 +21,9 @@ Set up a usable project by reusing its existing authority and run instructions. 
 | Set up one concern, such as error handling or test conventions | Focused rule setup: inspect that concern, draft concrete rules, show the exact table, emit after applicable approval |
 | Check a change against approved rules | [Audit and amendment](references/audit-amend.md), read-only audit |
 | Change an approved rule | [Audit and amendment](references/audit-amend.md), targeted amendment; exact-change approval or explicit standing review-learning grant |
-| Install dependencies, prepare local prerequisites, start or explain how to run | Run readiness below |
+| Set or change working defaults | [Working defaults](#working-defaults) below; show the exact section, write after approval |
+| Install dependencies, prepare local prerequisites, start or explain how to run | [Run readiness](#run-readiness) below |
+| Bring up a branch or worktree stack, stop or prune containers, run a one-off task, load a dump, fix a failing startup | [Environment operations](references/environment.md) |
 | Create or maintain feature verification recipes | [Project verification](references/project-verification.md); reuse existing harnesses |
 | Diagnose recurring failures of project guidance | [Guidance diagnosis](references/guidance-diagnosis.md), then targeted amendment if authorized |
 | General project setup | Inspect both rules and readiness; address gaps within the requested scope |
@@ -38,12 +40,24 @@ For recurring, demonstrated mistakes, consider a deterministic check or tool tha
 
 Tooling configs and instruction-file pointers require authorization for their concrete changes; reuse prior authorization rather than asking again. Use `AGENTS.md` for Codex or `CLAUDE.md` for Claude, respecting existing host instructions. Do not assume creating rules authorizes a commit, push, or deployment.
 
+## Working defaults
+
+Setup records and amends the project's working defaults (`endpoint`, `commit-push`, `external-writes`, `runtime`). Format, values, absent-key behavior and precedence live in package-root `shared/working-defaults.md`; follow it rather than restating it.
+
+1. Find the governing rules: the `<project>-conventions` skill if one exists, else `AGENTS.md` or `CLAUDE.md`. Read any existing `## Working defaults` section.
+2. Show the exact `## Working defaults` section as it will be written (full replacement text, or old and new lines for an amendment). Omit keys the user leaves unset.
+3. Write only that section after approval, preserving everything else in the file. Prior approval of the exact contents applies.
+
+The full rule interview asks about these once, in the workflow round ([setup interview](references/setup-interview.md)). Recording defaults is not a gate for routine work: absent keys fall back to skill defaults.
+
 ## Run readiness
 
 1. Detect the stack and intended local target from manifests, lockfiles, runtime/version files, scripts, README, environment samples, containers, and service configs. Prefer the existing documented commands. Identify prerequisites, dependencies, required variable names, local services, ports, start/check/stop commands, and unresolved requirements. Do not print secret values or copy real credentials into artifacts.
-2. “How do I run it?” requests instructions and gap diagnosis. “Set it up and run it” authorizes the necessary local dependency installation and startup within this project. Use the declared package manager and lockfile; reuse existing environments and services where appropriate. Do not silently change package versions or invent missing credentials. Install global/system prerequisites only when they are within explicit scope; otherwise report the concrete missing prerequisite while completing independent work.
+2. “How do I run it?” requests instructions and gap diagnosis. “Set it up and run it” authorizes the necessary local dependency installation and startup within this project. Use the declared package manager and lockfile; reuse existing environments and services where appropriate. Do not silently change package versions or invent missing credentials. Install global/system prerequisites only when they are within explicit scope; otherwise report the concrete missing prerequisite while completing independent work. Under `runtime: docker-only` (working defaults), run toolchains and services in the project's containers and install nothing on the host.
 3. Start only the requested local target. Avoid production endpoints and destructive migrations, resets, data deletion, or deployment unless specifically authorized. Inspect commands before running them so a misleading script name does not hide those effects. Apply ordinary local preparation already authorized by the request.
 4. Capture process/session identity, exit status, relevant logs, local URL or entry point, and the actual readiness signal. A listening port alone may not establish application readiness: check the documented health endpoint or a representative page/operation when available. Redact sensitive logs. Report startup failures and what remains missing; never equate command launch with run success.
 5. For an interactive app the user wants running, leave the healthy process available and give the URL and exact stop command or session control. For temporary verification, stop only processes you started and remove only temporary resources you created. Preserve pre-existing services and data. Document any installed dependencies or config changes and the observed verification.
+
+Everyday stack operations beyond first run (branch or multi-repo stacks, one-off tasks, dumps, pruning) follow [environment operations](references/environment.md).
 
 Examples: “Set up testing conventions” uses a focused rule draft. “Run this repo” checks instructions, installs missing local dependencies, starts the target, verifies readiness, and reports its URL. “Audit this diff” changes no rules or application code.

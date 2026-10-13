@@ -1,10 +1,10 @@
 # External operations
 
-Read this for authorized issue tracking, release/deploy, or operational compatibility. For Git implementation isolation and PR endpoints, use [PR delivery](pr-delivery.md). These choices do not change the routine or comprehensive path selected by `fudge:ship`; each path keeps its own approval and verification requirements.
+Read this for release/deploy or operational compatibility; issue tracking routes to the ticket root. For Git implementation isolation and PR endpoints, use [PR delivery](pr-delivery.md). These choices do not change the routine or comprehensive path selected by `fudge:ship`; each path keeps its own approval and verification requirements.
 
 ## Issue tracking
 
-Issue mode is off by default. Select it explicitly and record the tracker, project, and existing issue or authorized new-issue destination. A supplied issue link is context, not permission to edit it. When selected, create or link the scoped work item and update it at meaningful milestones: behavior agreed where needed, implementation verified, PR opened, review or integration complete, and an actionable blocker. Keep updates factual and concise, with artifact or PR links where accessible. Do not post every internal iteration or close a larger release issue because one feature finished. If a tracker field, audience, or ownership is unclear, ask before changing it; log a failed update without pretending it succeeded.
+Issue-tracker operations (create, link, update, groom, transition) belong to the ticket root: package-root `references/roots/ticket/guide.md`. Issue mode stays off by default; a supplied issue link is context, not permission to edit it. When the user selects issue tracking for this work item, hand the tracker, project, issue or destination, and milestone updates (behavior agreed, implementation verified, PR opened, review or integration complete, actionable blocker) to that guide, which applies the `external-writes` working default from package-root `shared/working-defaults.md`. Do not close a larger release issue because one feature finished.
 
 ## Release/deploy endpoint
 

@@ -1,3 +1,4 @@
 .fudge-build/
+.fudge-evals/
 
 __pycache__/

@@ -11,7 +11,7 @@ Both files live in the output location from SKILL.md. `findings.json` is the onl
   "pr": { "repo": "owner/name", "number": 61, "url": "", "base": "main", "head_branch": "", "head": "<sha reviewed>" },
   "round": 1,
   "reviewed_at": "<ISO-8601>",
-  "ci": "passed | failed | pending | none",
+  "ci": "passed | failed | pending | none | unread",
   "verdict": "needs-changes | mergeable-after-fixes | no-blocking-findings | mergeable",
   "findings": [{
     "id": "R1", "severity": "blocker | should-fix | nit",
@@ -30,7 +30,7 @@ Field notes:
 
 - `pr` is null for local reviews. `subject` records the exact comparison, scope, attribution, and a bounded content snapshot including tracked and in-scope untracked files. The snapshot must support old/new comparison after rewritten history. Hash the canonical snapshot. Legacy PR records remain readable; capture their missing snapshot when possible and state any limit.
 - `pr.head` is the SHA this round reviewed. An incremental commit range is valid only with unchanged scope/base and verified ancestry.
-- `ci` value `none` renders as "No CI ran".
+- `ci` value `none` renders as "No CI ran". `unread` (CI mode only, when the token can't read checks) renders as "CI status not read".
 - `verdict` and the counts in the verdict line come from open findings with audience `author`. Team findings don't change the verdict. For `subject.kind: local`, any open blocker or should-fix sets `verdict: needs-changes`; otherwise use `no-blocking-findings`. Local reviews never use `mergeable` or `mergeable-after-fixes`. For PRs, severity and the root's CI qualifications govern the verdict.
 - `title`, `cause`, `impact`, and `fix` follow the word caps in SKILL.md. `impact` stays `null` unless the harm isn't visible in the title.
 - `where` lists one or more locations. The first is the main one.
