@@ -9,7 +9,7 @@ description: "Resolve user needs, research, navigation, content, interaction sta
 
 Paths under `references/modules/`, `references/roots/` and `shared/` resolve from the package root: the nearest ancestor containing `.fudge-package.json`, or in a source checkout the ancestor containing `scripts/skill-manifest.json` (mapping in `shared/locate.md`). Links to this guide's own references stay relative to this file. Read only the selected guidance.
 
-Use package-root `shared/execution.md` for implementation/delegation policy, `shared/writing.md` for prose, and `shared/artifacts.md` before writing review artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read optional package-root `shared/report-deck/guide.md`; concise chat is the default.
+Use package-root `shared/execution.md` for implementation/delegation policy, `shared/writing.md` for prose, and `shared/artifacts.md` before writing review artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read package-root `shared/report-deck/guide.md` for the shared plan runtime UI; concise chat is the default.
 
 Own the experience question through a usable decision. Read existing behavior, language, research, product rules, and instructions. Separate participant observations, source facts, expert inference, and hypotheses. Select the smallest output that resolves the request; a label decision may need three lines, while a multi-role flow may need a durable contract.
 

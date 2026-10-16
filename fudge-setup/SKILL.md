@@ -9,7 +9,7 @@ description: "Set up a project’s coding rules and local run readiness, audit c
 
 Package addresses (`shared/`, `references/modules/`, `references/roots/`) resolve from the nearest ancestor with `.fudge-package.json`, or `scripts/skill-manifest.json` in source. Read `shared/locate.md` when resolving a source address or nested guide; this guide’s own references remain relative.
 
-Use package-root `shared/execution.md` for implementation/delegation policy, `shared/writing.md` for prose, and `shared/artifacts.md` before writing run artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read optional package-root `shared/report-deck/guide.md`; concise chat is the default.
+Use package-root `shared/execution.md` for implementation/delegation policy, `shared/writing.md` for prose, and `shared/artifacts.md` before writing run artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read package-root `shared/report-deck/guide.md` for the shared plan runtime UI; concise chat is the default.
 
 Set up a usable project by reusing its existing authority and run instructions. `fudge:setup` is this public skill; `<project>-conventions` is the project-specific rule artifact it may create. Preserve that distinction and never create competing sources of authority.
 

@@ -12,7 +12,7 @@ Paths under `references/modules/`, `references/roots/` and `shared/` resolve fro
 - Delegation and integration: package-root `shared/execution.md`, including the swarm loop (frame completion, dispatch owned slices, drain workers, aggregate evidence) and its model-and-effort-per-stage section where the host allows choosing.
 - Project working defaults (endpoint, commit/push, external writes, runtime): `shared/working-defaults.md`. Precedence: this conversation > working defaults > skill defaults.
 - Worktrees: [worktree coordination](references/pr-delivery.md#worktree-and-worker-coordination).
-- Prose: `shared/writing.md`; review artifacts: `shared/artifacts.md`; a requested durable HTML report: optional `shared/report-deck/guide.md` (concise chat is the default).
+- Prose: `shared/writing.md`; review artifacts: `shared/artifacts.md`; a requested durable HTML report: `shared/report-deck/guide.md` for the shared plan runtime UI (concise chat is the default).
 
 Build one work item to its chosen endpoint; finishing a feature never implies a release was cut. The user owns behavior and scope; `AGENTS.md`, `CLAUDE.md`, project skills and conventions own implementation details. Architecture is not a user approval gate. Prior decisions and authorization carry across handoffs; ask only about unsettled consequential choices.
 

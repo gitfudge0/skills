@@ -26,7 +26,7 @@ The table sorts important-and-unevidenced to the top. That block is the output t
 
 ## Report payload
 
-Stage 8 builds one JSON object and substitutes it for the literal string `__GAP_ANALYSIS_DATA__` in `assets/report-template.html`, writing the result to `<output root>/report.html`.
+Stage 8 builds one JSON object and substitutes it for the literal string `__GAP_ANALYSIS_DATA__` in `assets/report-template.html`, writing `<output root>/report.src.html`, then packs it into `<output root>/report.html`.
 
 ```json
 {
@@ -105,13 +105,24 @@ tpl = pathlib.Path("<skill>/assets/report-template.html").read_text()
 data = json.loads(pathlib.Path("<output root>/payload.json").read_text())
 payload = json.dumps(data, ensure_ascii=False).replace("<", "\\u003c")
 out = tpl.replace("__GAP_ANALYSIS_DATA__", payload)
-pathlib.Path("<output root>/report.html").write_text(out)
+runtime = pathlib.Path("<package root>/shared/report-deck/runtime").resolve()
+# Source checkout: use <checkout>/plan/runtime instead.
+out = out.replace("../../../plan/runtime/", str(runtime) + "/")
+pathlib.Path("<output root>/report.src.html").write_text(out)
 PY
+```
+
+The template links the canonical source runtime at `../../../plan/runtime/`. When generating a report elsewhere, rewrite those CSS/JS links to absolute filesystem paths (not `file:` URLs) for the selected runtime, then pack:
+
+```bash
+node "<runtime>/pack.mjs" "<output root>/report.src.html" -o "<output root>/report.html" --root "<output root>"
 ```
 
 Use `json.dumps`, never string concatenation. Escape each literal `<` in the serialized payload as `\u003c` before inserting it into an inline script: source text such as `</script>` must not terminate the script element. This script-context escaping preserves the JSON value after parsing. It is distinct from HTML escaping at rendering time; keep the template’s HTML/SVG escaping for values inserted into markup.
 
-The template is fully self-contained: no network requests, no web fonts, works offline, prints sensibly. Keep it that way. A report needing a CDN is a report that stops working when it is emailed to the one person who most needed to read it.
+The packed report is fully self-contained: no network requests, no web fonts, works offline, prints sensibly. Keep it that way. A report needing a CDN is a report that stops working when it is emailed to the one person who most needed to read it.
+
+The payload renderer runs before the deferred runtime initializes the native `doc-plan`/`doc-claim` tree. Keep plan typography, pills, comments, copied responses, theme and print controls; comments are feedback and never mutate `register.yaml`. Only diagram layout uses scoped CSS.
 
 The flow diagrams are generated as SVG by the template at render time from the sentence data — you supply structure, never coordinates. Layout is deterministic, so two runs of the same flow produce the same picture and a visual diff means something changed.
 

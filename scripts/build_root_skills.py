@@ -118,6 +118,11 @@ def build(output):
                 destination = package / path
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(SOURCE / path, destination)
+            # Every root can render optional reports without bundling a plan workflow.
+            runtime = package / 'shared/report-deck/runtime'
+            runtime.mkdir(parents=True, exist_ok=True)
+            for asset in ('htmlplan.css', 'htmlplan.js', 'pack.mjs'):
+                shutil.copy2(SOURCE / 'plan/runtime' / asset, runtime / asset)
             # Canonical routes to the primary root use its public entry rather
             # than creating a duplicate root guide inside its own package.
             for markdown in package.rglob('*.md'):

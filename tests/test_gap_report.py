@@ -3,6 +3,7 @@ from html.parser import HTMLParser
 import pathlib
 import re
 import subprocess
+import tempfile
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -56,6 +57,31 @@ def render(answers=None, gap_status="open", gap_fields=None):
 
 
 class GapReportTests(unittest.TestCase):
+    def test_native_runtime_packs_without_external_assets(self):
+        source = TEMPLATE.read_text()
+        self.assertIn('<doc-plan id="app"', source)
+        self.assertIn('doc-claim id=', source)
+        self.assertNotIn('<nav>', source)
+        self.assertIn('htmlplan.js" defer', source)
+        self.assertLess(source.index('htmlplan.js" defer'), source.index('const DATA'))
+        payload = {'meta': {'project': '</script><img src=x>'}}
+        source = source.replace('__GAP_ANALYSIS_DATA__',
+                                json.dumps(payload).replace('<', r'\u003c'))
+        source = source.replace('../../../plan/runtime/', str(ROOT / 'plan/runtime') + '/')
+        with tempfile.TemporaryDirectory() as directory:
+            src = pathlib.Path(directory) / 'gap.src.html'
+            packed = pathlib.Path(directory) / 'gap.html'
+            src.write_text(source)
+            result = subprocess.run(['node', str(ROOT / 'plan/runtime/pack.mjs'), str(src),
+                                     '-o', str(packed), '--artifact'],
+                                    text=True, capture_output=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            html = packed.read_text()
+            self.assertIn('data-htmlplan', html)
+            self.assertNotRegex(html, r'<script[^>]+src=')
+            self.assertNotRegex(html, r'<link[^>]+href=')
+            self.assertIn(r'\u003c/script>', html)
+
     def test_closed_and_accepted_gaps_are_not_counted_as_open(self):
         for status in ["closed", "accepted"]:
             with self.subTest(status=status):
@@ -79,8 +105,8 @@ class GapReportTests(unittest.TestCase):
                                        'sdk:p.3', 'supported'])
 
         # A closed target must fail even when report text still mentions open items.
-        closed = html.replace('<span class="tag ">open</span>',
-                              '<span class="tag ">closed</span>')
+        closed = html.replace('<span class="pill ">open</span>',
+                              '<span class="pill ">closed</span>')
         with self.assertRaises(AssertionError):
             self.assert_open_answer(closed, ['Supported via SDK'])
 

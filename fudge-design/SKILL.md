@@ -9,7 +9,7 @@ description: "Shape visual hierarchy, screens, components, design systems, stati
 
 Paths under `references/modules/`, `references/roots/` and `shared/` resolve from the package root: the nearest ancestor containing `.fudge-package.json`, or in a source checkout the ancestor containing `scripts/skill-manifest.json` (mapping in `shared/locate.md`). Links to this guide's own references stay relative to this file. Read only the selected guidance.
 
-Use package-root `shared/execution.md` for implementation/delegation policy, `shared/writing.md` for prose, and `shared/artifacts.md` before writing review artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read optional package-root `shared/report-deck/guide.md`; concise chat is the default.
+Use package-root `shared/execution.md` for implementation/delegation policy, `shared/writing.md` for prose, and `shared/artifacts.md` before writing review artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read package-root `shared/report-deck/guide.md` for the shared plan runtime UI; concise chat is the default.
 
 Own the visual question through its requested endpoint. Inspect existing UI, project instructions, vocabulary, authoritative design documents, tokens, and components. Use established patterns for routine choices; resolve only consequential unsettled product choices with the user. Read `references/modules/design-for-recognition/guide.md` for task-specific hierarchy, typography, color, surfaces, controls, and feedback.
 

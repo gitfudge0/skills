@@ -56,7 +56,7 @@ shared/report-deck/
 scripts/skill-manifest.json
 ```
 
-The manifest declares module ownership, optional source entry filenames, root dependencies, and optional package names. Existing Fudge roots keep their `fudge-` package names; standalone HTML planning installs to `fudge-plan` and is invoked with `/fudge:plan`. HTML planning reuses the standalone `plan/` source as a ship module, including its runtime, block reference, and examples; it is also available as the standalone `fudge-plan` package through `--root plan` or `--skill plan`. Node.js is required only to pack an HTML plan. The builder computes a closure with no recursive root copies. An installed package contains:
+The manifest declares module ownership, optional source entry filenames, root dependencies, and optional package names. Existing Fudge roots keep their `fudge-` package names; standalone HTML planning installs to `fudge-plan` and is invoked with `/fudge:plan`. HTML planning reuses the standalone `plan/` source as a ship module, including its runtime, block reference, and examples; it is also available as the standalone `fudge-plan` package through `--root plan` or `--skill plan`. Node.js is required to pack HTML plans and reports. Every built root includes byte-identical canonical plan runtime assets in `shared/report-deck/runtime/`, so optional HTML reports work without a plan workflow dependency. `shared/report-deck/guide.md` routes report composition to that UI; the former independent slide styles and runtime are retired. The builder computes a closure with no recursive root copies. An installed package contains:
 
 ```text
 SKILL.md

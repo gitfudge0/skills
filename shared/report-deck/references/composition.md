@@ -1,196 +1,29 @@
-# Deck shell and composition
+# Report composition
 
-Assets in example output use `assets/`; the guide resources below use `../assets/` relative to this reference. Copy assets to the output bundle or inline them for a single-file deliverable.
+`../assets/example-report.src.html` is the editable native-runtime example; `../assets/example-report.html` is its generated offline counterpart. Copy the source rather than editing packed runtime bytes.
 
-## Deck shell
+## Shell
 
-A deck needs: a `.deck` of `.slide` sections, the nav chrome, the theme toggle, and `deck.js`. Include the Mermaid `<script>` only if the deck has diagrams.
+Use `html lang`, UTF-8, viewport, a short document title, canonical `htmlplan.css` and deferred `htmlplan.js`. The source example links checkout assets at `../../../plan/runtime/`; installed runtime resolution is in the parent guide.
 
-```html
-<!DOCTYPE html>
-<!-- data-style is the user's chosen visual style (see Visual styles); omit it for the default editorial look. -->
-<html lang="en" data-style="[chosen-style]">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>[Report title]</title>
-  <link rel="stylesheet" href="assets/report.css">
-  <!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script> -->
-</head>
-<body>
-<button class="theme-toggle" aria-label="Toggle dark mode"></button>
-<div class="deck-progress"></div>
+Place the title and result in `header`, followed by `p.meta` source/date/coverage information. Put one `doc-plan open="0"` in `main`. Each `doc-claim id="stable-id"` starts with a short claim in `p`. Nest supporting claims beneath it, preserving stable IDs across refreshes. Use auxiliary claims (`aux="method"`, for example) for methodology that is separate from conclusions.
 
-<div class="deck">
+## Evidence and decisions
 
-  <!-- REQUIRED: cover slide (slide 1) -->
-  <section class="slide slide-cover">
-    <div class="slide-inner">
-      <div class="report-header-meta">
-        <span class="badge badge-accent">[Report type]</span>
-        <span class="badge badge-success">[Status]</span>
-        <span class="report-header-date">[Date]</span>
-      </div>
-      <h1>[Title]</h1>
-      <p class="lead">[One or two sentences on what this deck covers and why.]</p>
-    </div>
-  </section>
+Choose exhibits that prove the claim: `doc-code` for recorded text/code, `doc-flow` for flows, `doc-schema` for structure, `doc-quote` for attributed source text, and `doc-shot`/`doc-mock` for visual evidence. Plain tables can sit inside a claim when row/column comparison is the evidence. `doc-note` holds explanation beside that exhibit. Use the runtime's own components rather than adding report-specific cards, filters or slide navigation.
 
-  <!-- CONTENT SLIDES — one per major idea. -->
-  <section class="slide">
-    <div class="slide-inner">
-      <h2 class="slide-title">[Slide title]</h2>
-      <!-- components, see below -->
-    </div>
-  </section>
+`span.pill` gives status with explicit text: neutral for information, `green` for completed/passed, `amber` for caution/pending and `red` for failed/blocking. The word carries meaning as well as color. Keep uncertainty labels visible while claims are closed.
 
-  <!-- REQUIRED: closing slide carrying the footer -->
-  <section class="slide">
-    <div class="slide-inner">
-      <h2 class="slide-title">[Closing / summary title]</h2>
-      <footer class="report-footer">
-        <span>[Report title — short form]</span>
-        <span class="report-footer-brand">[Author or project]</span>
-      </footer>
-    </div>
-  </section>
+Preserve recorded text as inert content. Escape prose/attributes. For `doc-code`, use `script type="text/plain"`; when text contains a closing script tag, use HTML-escaped `textarea class="src"` instead. Never execute report evidence as JavaScript. Avoid external resource dependencies in offline output.
 
-</div>
+When a genuine decision is requested, place `doc-ask id="stable-id"` at the claim it changes, with named native controls and a recommendation where supported by evidence. Leave settled decisions as recorded prose. Native comments and the copied response collect feedback without modifying the report's source of truth.
 
-<!-- REQUIRED: deck navigation -->
-<nav class="deck-nav" aria-label="Slide navigation">
-  <button class="deck-prev" aria-label="Previous slide">‹</button>
-  <button class="deck-next" aria-label="Next slide">›</button>
-</nav>
+## Generation and fidelity
 
-<script src="assets/deck.js"></script>
-</body>
-</html>
+Regenerate the example from the source checkout:
+
+```sh
+node plan/runtime/pack.mjs shared/report-deck/assets/example-report.src.html -o shared/report-deck/assets/example-report.html
 ```
 
-`deck.js` wires it all: nav (arrows/swipe/buttons, clamps at the ends — no wrap), theme persistence (light/dark via the on-screen button), visual-style cycling (press **T** to step through the 7 styles, persisted), per-slide overflow auto-scroll, and Mermaid (re)init on load and theme switch. Don't reimplement it inline.
-
-## Scrolling report shell
-
-For a dense reference report, use normal-flow `main` and `section` elements, with `report.css` and the explicit override below. Omit `.deck`, `.slide`, navigation, progress, the theme-toggle button and `deck.js`. The CSS follows the OS theme unless the document pins `data-theme`; an interactive toggle is optional and must be implemented and checked separately. Reuse component markup without slide wrappers. Mermaid, when needed, requires its own initialization.
-
-```html
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Report</title>
-  <link rel="stylesheet" href="assets/report.css">
-  <style>
-    body { overflow: auto; }
-    main { max-width: 72rem; margin: 0 auto; padding: 2rem; }
-    main > section { margin-block: 2rem; }
-    @media print { main { max-width: none; padding: 0; } }
-  </style>
-</head>
-<body><main><h1>Report title</h1><section><h2>Finding</h2></section></main></body>
-</html>
-```
-
-Report verification checks normal document scrolling, section links, narrow viewport reflow and the chosen theme. Deck navigation, slide overflow and one-page-per-slide checks apply only to decks. A report PDF follows normal pagination; inspect its pages rather than comparing their count to `.slide` elements.
-
-## Components
-
-All classes are defined in `report.css` — read it for exact structure. Use these inside a deck slide’s `.slide-inner`, or a scrolling report’s normal-flow section. Index:
-
-| Class group | For | Note |
-|---|---|---|
-| `section` + `section-label` | a labelled sub-group under the slide title | |
-| `metric-grid` > `metric-card` (`metric-label/value/sub`) | 2–6 key numbers | only when numbers are meaningful, not filler |
-| `finding` (`finding-num/body/title-row` + badge) | numbered findings/issues | |
-| `callout`, `callout-warning`, `callout-danger` | a note/warning | sparingly — 1–2 per deck |
-| `kv-block` > `kv-row` (`kv-label/value`) | structured metadata/specs | |
-| `data-table` inside `.data-table-wrap` | tabular data | wrap is required for horizontal scroll |
-| `item-list` > `item-row` (icon + title/desc + badge) | risks, checklists, open questions | |
-| `file-tree` (spans `.new/.mod/.del/.dir/.note`) | file structure with change annotations | |
-| `mock-frame` (`mock-bar/dot/url/body`) + `mock-caption` | UI mockups | see mocks note below |
-| `diagram-wrap` > `.mermaid` + `mock-caption` | flow/sequence/state/ER diagrams | needs the Mermaid `<script>` |
-| `next-steps` (`section` + `<ol>`) | ordered actions/recommendations | see grid footgun below |
-| `badge-*` | status/type chips | see colors below |
-
-**Four real footguns (the reason this section exists):**
-- **`next-steps` and `item-list` rows are CSS grids.** Wrap each `<li>`'s content in a single element (e.g. one `<span>`), or mixed inline content (`<strong>` + text + `<code>`) shatters into separate grid cells and wraps one word per line.
-- **Exact class names matter — there is no fallback.** The CSS classes are precise; invented variants (`item-icon`, `item-body`, `item-title`, `item-desc`) match nothing, so the grid/flex layout never applies. Two telltale failures: a title and its description **run together with no break** (the styling that stacks them was never applied), and a numbered row shows a **large empty gap above it** (the flex wrapper that puts the number beside the body is missing). Copy these skeletons verbatim — don't paraphrase the class names:
-
-  ```html
-  <!-- finding: number BESIDE body requires the .finding-header flex wrapper -->
-  <div class="finding">
-    <div class="finding-header">
-      <span class="finding-num">1</span>
-      <div class="finding-body">
-        <div class="finding-title-row"><span class="finding-title">Title</span><span class="badge badge-critical">Blocker</span></div>
-        <p>Body text.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- item-row: middle column is ONE wrapper div holding the two classed lines (optional trailing badge) -->
-  <div class="item-list">
-    <div class="item-row">
-      <span class="item-row-icon">1</span>
-      <div>
-        <div class="item-row-title">Title</div>
-        <div class="item-row-desc">Description that sits under the title.</div>
-      </div>
-      <span class="badge badge-warning">Decide</span>
-    </div>
-  </div>
-  ```
-
-- **Budget content per slide — overflow is silent.** Rough ceiling at 1280×720: ~3–4 `finding` blocks, ~5–6 `item-row`s, or one `next-steps` of ~5 steps *plus* a `section` header. A slide carrying two `section`s each with their own `next-steps` (e.g. multiple phases) almost always overflows — split it. Don't trust the eye; screenshot at 1280×720 and check `scrollHeight > clientHeight` per slide (see Verify).
-- **Ground mocks in existing UI.** Read the real components/pages first; include the surrounding chrome (nav, sidebars, real labels) so the feature appears in context, not floating. Build mocks with bare HTML + inline styles, and keep them inert. Only omit existing chrome for a brand-new standalone page.
-
-## Composition archetypes
-
-The components above are also assembled into **higher-level slide layouts** — the recurring shapes a deck needs (a chapter break, a single hero number, a comparison, a roadmap). Their classes live in the `COMPOSITION ARCHETYPES` block of `report.css` and, like every component, read only `--color-*`/`--font-*` tokens — so each one inherits all 7 visual styles and light/dark for free.
-
-**`../assets/gallery.html` is the living catalogue** — every archetype below rendered as a real slide, with a style switcher and theme toggle. Open it (an available browser tool) to see them, and **read it for the exact markup of any archetype** rather than reconstructing from scratch. It pairs with `style-gallery.html` (which shows the 7 styles).
-
-| Archetype | Class(es) | For |
-|---|---|---|
-| Section divider | `slide-divider` + `divider-num` | a chapter break in a long deck |
-| KPI hero | `kpi-hero` + `kpi-figure` + `kpi-cap` | one giant number when a single figure is the story |
-| Big takeaway / quote | `quote` + `quote-attr` | one chrome-less statement to leave the reader with |
-| Stat band | `stat-band` > `stat` / `stat-divider` (`stat-figure`/`stat-label`) | a row of oversized figures split by hairlines |
-| Two-column / split hero | `split` (+ `split-wide`), `panel` for the visual side | comparisons, before/after, claim + figure |
-| Process steps | `process` > `process-step` (`process-disc`) + `process-arrow` | a left-to-right numbered pipeline |
-| 2×2 quadrant | `quadrant` > `quadrant-cell`(`.is-priority`) + `axis-x`/`axis-y` | a priority / positioning matrix |
-| Bar chart | `bar-chart` > `bar-row` (`bar-name`/`bar-track`/`bar-fill`/`bar-value`) | pure-CSS horizontal bars, no library |
-| Comparison matrix | `data-table` with centered ✓/✗ cells | capability grid across options |
-| Persona card | `persona` (`persona-avatar`/`persona-name`/`persona-role`) | research personas, stakeholder intros |
-| Annotated mock | `pin` + `pin-over` (over a `mock-frame`) + `pin-list` | numbered callouts keyed to a legend |
-| Q&A / FAQ | `qa` > `qa-q`/`qa-a` + `qa-marker` | questions, objections, open issues |
-| Kanban board | `kanban` > `kanban-col-head`/`kanban-col-body`/`kanban-card` | to-do / doing / done snapshot |
-| Code block | `code-block` (+ `code-comment`/`code-string`) | fenced multi-line code (prefer over inline) |
-| Timeline / roadmap | `timeline` > `timeline-item` (`timeline-dot`, `.is-pending`) | phased work on a vertical rail |
-
-Same rules as the base components apply: **copy the markup verbatim from `gallery.html`** (invented class names match nothing and fall back silently), keep one major idea per slide, and **budget content — overflow is still silent.** A few skeletons for the less obvious ones:
-
-```html
-<!-- KPI hero: one number, centered -->
-<div class="kpi-hero">
-  <div class="kpi-figure">−38%</div>
-  <div class="kpi-cap">p95 latency after the cutover</div>
-</div>
-
-<!-- Bar chart: set each fill width inline; the outlier gets a status colour -->
-<div class="bar-chart">
-  <div class="bar-row"><div class="bar-name">Export API</div><div class="bar-track"><div class="bar-fill is-critical" style="width:82%"></div></div><div class="bar-value">1.40%</div></div>
-  <div class="bar-row"><div class="bar-name">Webhooks</div><div class="bar-track"><div class="bar-fill" style="width:6%"></div></div><div class="bar-value">0.02%</div></div>
-</div>
-
-<!-- Timeline: one dot per item; mark not-yet-done dots .is-pending -->
-<div class="timeline">
-  <div class="timeline-item"><span class="timeline-dot"></span>
-    <div class="timeline-title">Week 1 · Shadow write</div>
-    <div class="timeline-desc">Behind a flag; compare against the legacy path.</div></div>
-  <div class="timeline-item"><span class="timeline-dot is-pending"></span>
-    <div class="timeline-title">Week 3 · Cut over</div>
-    <div class="timeline-desc">Retire the old path once parity holds.</div></div>
-</div>
-```
+Keep the shared runtime's spacing, fonts, parent rows, contents rail, theme control, comments and response sheet. Additional styling belongs only inside a product mock exhibit. Verify the source and packed report preserve IDs, citations, statuses and evidence; packer warnings are suggestions unless they expose a real rendering or content error.

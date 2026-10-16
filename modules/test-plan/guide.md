@@ -124,4 +124,4 @@ For the concise format, finish with the short plan or observed outcomes in chat;
 
 ### 8. Build the HTML report (formal format only)
 
-Read [HTML report construction](references/html-report.md) and adapt the complete `assets/example.html` document. Preserve case IDs, expected outcomes, actual evidence, and not-run reasons. Verify local rendering and report the resolved path.
+Read [HTML report construction](references/html-report.md) and adapt `assets/example.src.html`, then pack the portable report (`assets/example.html` previews the example). Preserve case IDs, expected outcomes, actual evidence, and not-run reasons. Verify local rendering and report the resolved path.

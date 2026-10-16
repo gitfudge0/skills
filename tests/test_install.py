@@ -40,6 +40,9 @@ class InstallerTests(unittest.TestCase):
             self.assertFalse((skill / 'references/roots' / marker['root']).exists())
             self.assertEqual(len(list(skill.rglob('SKILL.md'))), 1)
             self.assertTrue((skill / 'shared/artifact_path.py').is_file())
+            for asset in ('htmlplan.css', 'htmlplan.js', 'pack.mjs'):
+                self.assertEqual((skill / 'shared/report-deck/runtime' / asset).read_bytes(),
+                                 (self.repo / 'plan/runtime' / asset).read_bytes())
         self.run_install('remove', '-a', 'codex', '--all', '-y')
         self.run_install('-a', 'codex', '--root', 'setup', '-y')
         self.assertEqual([p.name for p in self.skills.iterdir()], ['fudge-setup'])
@@ -173,6 +176,32 @@ class InstallerTests(unittest.TestCase):
         build()
         self.assertTrue(retired.is_symlink())
         self.assertTrue((foreign / '.fudge-build-generated').exists())
+
+    def test_shared_report_runtime_is_portable_without_plan_dependency(self):
+        self.run_install('-a', 'codex', '--root', 'setup', '--copy', '-y')
+        package = self.skills / 'fudge-setup'
+        metadata = json.loads((package / '.fudge-package.json').read_text())
+        self.assertNotIn('plan', metadata['roots'])
+        runtime = package / 'shared/report-deck/runtime'
+        for name in ('htmlplan.css', 'htmlplan.js', 'pack.mjs'):
+            self.assertEqual((runtime / name).read_bytes(),
+                             (self.repo / 'plan/runtime' / name).read_bytes())
+        source = package / 'shared/report-deck/assets/example-report.src.html'
+        shutil.rmtree(self.repo)
+        if not shutil.which('node'):
+            self.skipTest('Node.js is required to exercise the HTML packer')
+        packed = self.base / 'offline-report.html'
+        result = subprocess.run(['node', str(runtime / 'pack.mjs'), str(source),
+                                 '-o', str(packed)], cwd=self.base,
+                                text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        text = packed.read_text()
+        self.assertIn('<style data-htmlplan>', text)
+        self.assertIn('<script data-htmlplan>', text)
+        self.assertNotIn('href="../../../plan/runtime/', text)
+        self.assertNotIn('src="../../../plan/runtime/', text)
+        self.assertIn('<doc-plan', text)
+        self.assertIn('id="delivery"', text)
 
     def test_ship_plan_packs_without_source_checkout(self):
         self.run_install('-a', 'codex', '--root', 'ship', '--copy', '-y')

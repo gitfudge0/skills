@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delivery readiness report</title>
+<link rel="stylesheet" href="../../../plan/runtime/htmlplan.css">
+<script src="../../../plan/runtime/htmlplan.js" defer></script>
+</head>
+<body>
+<header>
+<h1>Delivery readiness for BookShelf</h1>
+<p>The release needs one retry fix. <span class="pill amber">Needs changes</span></p>
+<p class="meta">Fictional report example · static evidence · 16 October 2026</p>
+</header>
+<main>
+<doc-plan open="0">
+<doc-claim id="delivery">
+<p>Failed saves can create duplicate books. <span class="pill amber">Open</span></p>
+<doc-code lang="text" title="Recorded observation"><script type="text/plain">
+A save request times out after the server writes the book.
+The client retries with a fresh request identity.
+The second write creates another book.
+</script></doc-code>
+<doc-claim id="retry-fix">
+<p>One request identity must cover each retry.</p>
+<doc-note>Preserve the original request identity until the save completes.</doc-note>
+<doc-code lang="text" title="Expected contract"><script type="text/plain">
+First request → create one book.
+Retry with the same identity → return that book.
+</script></doc-code>
+</doc-claim>
+</doc-claim>
+<doc-claim id="coverage" aux="method">
+<p>This example demonstrates the report interface.</p>
+<doc-code lang="text" title="Evidence boundary"><script type="text/plain">
+All product names and observations in this example are fictional.
+No runtime checks were executed for this illustrative report.
+</script></doc-code>
+<doc-note>Comments and copied responses are feedback. Verify new evidence before updating the report.</doc-note>
+</doc-claim>
+</doc-plan>
+</main>
+</body>
+</html>

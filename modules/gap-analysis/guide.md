@@ -150,7 +150,7 @@ Write `questions.yaml`.
 
 ### Stage 8 — Render
 
-Populate `assets/report-template.html` and write `<output-root>/report.html`. The template is self-contained — no network dependencies, works offline, prints sensibly.
+Populate `assets/report-template.html` as `<output-root>/report.src.html`, then pack `<output-root>/report.html` with the plan runtime as described in `references/report.md`. The packed report works offline and uses the native plan tree, comments, responses, theme and print controls.
 
 Substitute serialized JSON into the `__GAP_ANALYSIS_DATA__` placeholder, escaping `<` as `\u003c` so source text cannot terminate the script element. Do not hand-write HTML; the template exists so output is consistent across runs and diffable between them. See `references/report.md` for the payload schema.
 
