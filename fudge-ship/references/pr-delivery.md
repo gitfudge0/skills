@@ -29,9 +29,9 @@ Coordinator check runs do not transfer ownership. A worker that loads ship keeps
 | Situation | Mechanism |
 |---|---|
 | Grove CLI, `grove` skill and desktop available | **Grove (preferred)** for worktree and worker sessions |
-| Grove not installed, not running, or unsupported host (e.g. Codex, Cursor, OpenCode) | **Native fallback:** `git worktree add` plus the host's own subagent as main worker; direct implementation if subagents are unavailable |
+| Required Grove CLI, skill, desktop connectivity or session capability unavailable | **Native fallback:** `git worktree add` plus the host's own subagent as main worker; direct implementation if subagents are unavailable |
 
-On fallback, tell the user once that Grove was not used and why. Roles, endpoint, publishing, verification and cleanup rules do not change with the mechanism. Never switch mechanisms silently mid-task; a Grove-managed worktree stays with Grove while Grove is reachable.
+Choose by observed capabilities, not host name. Explain a fallback only when it materially affects isolation, continuity or delivery. Roles, endpoint, publishing, verification and cleanup rules do not change with the mechanism. Never switch mechanisms silently mid-task; a Grove-managed worktree stays with Grove while Grove is reachable.
 
 **Grove setup.**
 
@@ -57,8 +57,8 @@ Part of ship, run whenever needed. A standalone restack request is its own small
 **Runs:** before implementation in an existing branch or worktree; before publishing; after a base PR merges; when the user asks to "pull latest main and rebase" (then route the rest of the request).
 
 1. Fetch and record the target's remote SHA.
-2. Find branches behind their target, and stacks: branches or worktrees based on another task branch. Order each stack base-first.
-3. Rebase each clean, committed, task-owned branch in order onto the fetched SHA of its parent; after a base PR merges, rebase its child onto the target with `git rebase --onto`, dropping merged commits.
+2. Declare the selected work item’s branch and only the stack branches explicitly necessary to integrate it. Inspect their targets and ownership; order this bounded set base-first. Other branches remain read-only, even if task-owned from earlier work.
+3. Rebase only clean, committed, task-owned branches in that declared set, in order onto the fetched SHA of its parent; after a base PR merges, rebase its child onto the target with `git rebase --onto`, dropping merged commits.
 4. Resolve conflicts against agreed contracts; inspect the integrated diff.
 5. Rerun affected checks and review.
 6. Push only with history-rewrite authorization and verified ownership, using `--force-with-lease=<branch>:<expected sha>`, never plain force. A user's request to rebase and push a branch they own counts.

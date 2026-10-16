@@ -86,9 +86,11 @@ Rhetorical, adversarial, and unanswerable as posed.
   answer: "Programmatic import exists in SDK v4.2 under NDA. Requires a signed integration agreement."
   answered_by: "M. Kaur, vendor eng"
   date: 2026-08-04
-  confidence: high    # high | medium | low
+  evidence: [vendor-sdk:p.3]
+  assessment: supported   # unassessed | supported | conflicting | insufficient
+  assessment_basis: "Accountable owner confirmed capability; SDK documentation supports it"
 ```
 
 On `refresh`, cite each answer and compare ownership, supporting evidence, and date with conflicting documents. Preserve unresolved conflicts. An answer is an attributed statement, not automatically higher authority than every document.
 
-An answered question does not automatically close its linked gap. It changes the basis. A human still decides whether the gap is closed, and the report should present the answer next to the gap so that decision is easy to make.
+An answered question changes the basis, not automatically the linked gap’s resolution. Apply the closure and human-disposition rules in `report.md`; present the attributed answer, assessment and evidence beside the gap.

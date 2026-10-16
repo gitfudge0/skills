@@ -28,7 +28,7 @@ All keys are optional. Unknown keys are ignored.
 2. Working defaults.
 3. Skill defaults.
 
-A conversation instruction overrides a default for that work only; it does not rewrite the recorded defaults.
+A conversation instruction overrides a default for that work only; it does not rewrite the recorded defaults. An explicit request to create or post specified content to a specified destination authorizes that write; an explicit request to post without a draft overrides `draft-first` for that work. A generic request to draft, review or investigate does not authorize posting. Preserve an earlier approval of the exact content and destination rather than asking again. `external-writes: allowed` removes the draft gate; it does not authorize unrelated messages or destinations.
 
 ## Draft-first
 

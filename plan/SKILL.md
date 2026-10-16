@@ -5,9 +5,11 @@ description: Write an implementation plan as one interactive HTML page - a tree 
 
 # fudge:plan
 
+For package-root `shared/` guidance, find the nearest ancestor containing `.fudge-package.json` (installed) or `scripts/skill-manifest.json` (source), then use its `shared/locate.md`. This guide’s runtime and references remain relative to its directory.
+
 Plan this: $ARGUMENTS
 
-You write **one HTML file by hand**. It holds a tree of claims. A small runtime draws the tree and lets the reader open it level by level, answer decisions, edit schemas, comment on anything, and copy one response back to you. Do not start building until that response arrives.
+You write **one HTML file by hand**. It holds a tree of claims. A small runtime draws the tree and lets the reader open it level by level, answer decisions, edit schemas, comment on anything, and copy one response back to you. For a plan-only request, deliver the plan and stop. For an explicitly authorized plan-and-build request, wait only for consequential decisions that remain unsettled; existing authorization and settled requirements carry forward. A returned response resolves plan choices within the authorized scope, and does not itself authorize implementation.
 
 ```
 <this skill's directory>/
@@ -85,7 +87,7 @@ For each `doc-calls` row, author a paired plain English explanation with a follo
 3. **One exhibit per claim.** A second exhibit means a second claim.
 4. **The closed tree is the summary.** Read only the level-1 claims aloud. They must tell the whole change. So write no TL;DR, no sections and no steps list.
 5. **At most 5 children and 3 levels.**
-6. **A decision sits on the claim it changes**, after the exhibit and before any child claims. Check the option you would pick. If an option removes a claim, say so: “claim 4 goes”. Ask only about forks that change what you build: 2 to 5 per plan.
+6. **A decision sits on the claim it changes**, after the exhibit and before any child claims. Check the option you would pick. If an option removes a claim, say so: “claim 4 goes”. Ask only about unresolved forks that change what you build. Zero decisions is valid when requirements are settled. Aim for at most five decisions per review; split a larger set when that helps the user judge it.
 7. **End with `aux="shared"`**, for a record or part several claims use (skip it if there is none), **and `aux="scope"`**, for what is not changing.
 8. **Real over drawn.** Real paths and line numbers for code that exists; fill it with `src="path" lines="a-b"`. Mark code that does not exist yet as a sketch in its title. Quote the user's words; do not reword them.
 9. **Schemas are text in the project's own language**: TypeScript, SQL, protobuf. Never a table or a made-up notation.
@@ -98,46 +100,25 @@ For a change with no visible behaviour, such as a refactor, make level 1 the gua
 
 The exhibits are the plan. Words only name them.
 
-**Write all prose in ASD-STE100 Simplified Technical English (STE). Use no other style.** This rule applies to claims, captions, pins, questions, options and notes.
+Use plain language suited to the reader. These supplied guidelines are the writing reference; no external dictionary or controlled-language certification is required.
 
-- **Approved words only.** Use a word only if the STE dictionary approves it, and only with its approved meaning and part of speech. If you are not sure about a word, use the most common short word that has the same meaning.
-- **Technical names and technical verbs are permitted.** Names from the code (`createScheduled()`, `scheduled_messages`), product names, UI labels and units are technical names. Verbs of the field (*compile*, *deploy*, *merge*, *render*) are technical verbs. Use the same name for the same thing each time.
-- **Short sentences.** One topic for each sentence. An instruction has 20 words at most. A description has 25 words at most. A paragraph has 6 sentences at most.
-- **Active voice.** Say who does what: “The worker claims the row.” Not “The row is claimed.”
-- **Simple tenses.** Use the present, the past and the future: *sends*, *sent*, *will send*. Do not write *has sent* or *is sending*. Do not use an *-ing* word unless it is part of a technical name.
-- **Instructions are commands.** “Run the migration.” Write one instruction in each sentence. Put the condition first: “If the claim fails, stop.”
-- **`must` and `can`.** Use *must* for a rule and *can* for what is possible. Do not use *should*, *may* or *might*.
-- **Noun groups of 3 words at most.** “The retry limit of the send worker.” Not “the send worker retry limit setting”.
-- **Full grammar.** Keep *the*, *a* and *an*. Do not use contractions, idioms, metaphors or jokes.
+- Use familiar words and one main idea per sentence. Prefer active voice when the actor matters.
+- Keep code names, domain terms, and UI labels consistent. Explain technical terms only when the reader needs that explanation.
+- Preserve certainty and authority: *might* describes uncertainty, *should* a recommendation, *must* a requirement, and *can* a capability. Shortening prose must retain those distinctions.
+- Aim for short claims and captions. A caption names what to notice; a pin identifies the relevant detail. Keep an option's tradeoff brief.
+- Preserve quotations, code, and UI copy. A claim and its exhibit should stand together without an intervening explanation; use a note for necessary context.
 
-| Do not write | Write |
-|---|---|
-| utilize, leverage | use |
-| perform, carry out | do |
-| ensure, verify, check (as a verb) | make sure |
-| demonstrate, indicate | show |
-| commence, begin · terminate | start · stop |
-| obtain · provide | get · give |
-| prior to · in order to | before · to |
-| however · additionally | but · also |
-| about 50 | approximately 50 |
-
-These are not STE and stay as they are: the words of the user in a `doc-quote`, code, and the text on a UI mockup.
-
-- A caption is one sentence: what to notice. A pin is a clause. An option's `<small>` is 12 words at most.
-- No paragraph between a claim and its exhibit. If the exhibit needs explaining, pick a better exhibit.
-
-`pack.mjs` warns about some STE errors: common unapproved words, contractions, *has/have* tenses, the passive voice and long sentences. It does not know the full dictionary, so a clean run does not prove that the text is STE.
+`pack.mjs` warns about word budgets and a small set of needlessly elaborate phrases. Review suggestions in context; a clean run is not a claim of writing quality. Keep a justified exception when a shorter version would lose meaning.
 
 ## Steps
 
 1. **Read first.** Find the entrypoints, records and screens the change touches. Note exact paths, lines and the user's words.
 2. **Write the level-1 claims** and read them aloud. Fix them before anything else.
-3. **Add the how and where claims, then the exhibits, then the decisions.** Read `references/blocks.md` for syntax. Save the page where the project keeps docs, or in a scratch folder.
-4. **Pack.** `node <skill dir>/runtime/pack.mjs plan.html --root <repo>`. It reports errors and warnings by line or claim number. Fix them. It writes `plan.packed.html`, one file that works offline.
+3. **Add the how and where claims, then the exhibits, then the decisions.** Read `references/blocks.md` for syntax. Resolve the output path through package-root `shared/artifacts.md` (locate it with `shared/locate.md`); honor an explicit destination and reserve a new artifact rather than overwriting another plan.
+4. **Pack.** `node <skill dir>/runtime/pack.mjs plan.html --root <repo>`. It reports errors and warnings by line or claim number. Fix errors; resolve warnings or retain a justified exception. It writes `plan.packed.html`, one file that works offline.
 5. **Look at it** in a browser if you can: closed, with each claim open, and at each decision (the “to answer” button goes to them). Check that mockups are not clipped and arrows do not cross labels.
-6. **Hand it over** (next section) with one line: “Four decisions. The defaults are what I would build.”
-7. **Act on the response.** Apply changed decisions, schema edits, struck calls and each comment. Refer to claims by number. If the answers change the shape of the plan, update the page and send it again. Then build.
+6. **Hand it over** (next section) with the decision count and proposed defaults, or state that no decisions remain.
+7. **Act on the response.** Apply changed decisions, schema edits, struck calls and each comment. Refer to claims by number. If the answers change the shape of the plan, update the page and send it again. For plan-only work, stop after updating the plan. Continue to implementation only under an existing explicit plan-and-build request or a subsequent build instruction.
 
 ## Getting the answer back
 

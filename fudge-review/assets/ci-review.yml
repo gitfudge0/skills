@@ -24,7 +24,7 @@ concurrency:
 # Minimal. Optional additions: `checks: read` and `statuses: read` let the
 # review read CI status (otherwise it reports "CI status not read");
 # `actions: read` lets re-runs load the previous findings.json artifact
-# (otherwise they use the state marker in the bot's summary comment).
+# (otherwise re-runs perform a full review and disclose lost continuity).
 permissions:
   contents: read
   pull-requests: write

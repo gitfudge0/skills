@@ -1,6 +1,6 @@
 # Design for recognition
 
-Internal capability: enter through the owning public skill. Resolve cross-module and shared paths from the package root (nearest ancestor containing `.fudge-package.json`): `references/modules/<module>/guide.md`, `references/roots/<root>/guide.md`, and `shared/`. In source, use the repository identified by `scripts/skill-manifest.json`, with `modules/`, `fudge-<root>/SKILL.md`, and `shared/`. Local assets and references remain relative to this guide.
+Internal capability: enter through the owning public skill. For package addresses, use `shared/locate.md` at the ancestor containing `.fudge-package.json` (installed) or `scripts/skill-manifest.json` (source). This guide’s own references stay relative to it.
 
 Make the next useful thing apparent from the interface itself. Start with the person's task, existing product language and patterns, and the decision the interface must support. Work on the specific control, screen, or flow in scope; inspect the result in context when a rendered surface exists. This guide is the shared source for interface composition in the bundled `fudge:design` root as an internal capability.
 

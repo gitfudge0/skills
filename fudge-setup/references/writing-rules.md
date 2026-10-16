@@ -61,7 +61,7 @@ Not this:
 
 This is the load-bearing quality bar. It is what separates the output from a generic best-practices dump, and it is non-negotiable per rule — a rule that fails any test below does not ship.
 
-- **Violable today.** If no code in this repo could break it, cut it.
+- **Grounded in scope.** The rule addresses existing code or an approved intended architecture. For greenfield work, name the planned boundary or capability it governs. Cut rules about capabilities outside that scope.
 - **Checkable.** A reviewer can point at a line and say violated / not violated.
 - **Carries a because.** The rationale is what lets an agent generalize to the case the rule didn't anticipate.
 - **Counter-example from this codebase**, where one exists.
@@ -82,17 +82,17 @@ The bar is only real if rules die at it. These are the shapes that show up most 
 | "Use meaningful names for variables and functions." | Banned string. No reviewer can adjudicate it. | Nothing at the naming level. If the user cares about a specific naming shape, it is either a linter rule (config) or a checkable one: "Exported names carry the domain noun, not the pattern — `OrderStore`, not `OrderManager`." |
 | "Indent with two spaces; no unused imports; sort imports." | Not lintable — the formatter and linter enforce all three mechanically. | A line in `tooling.md`: the formatter and lint rules that enforce it, plus their inclusion in the one check command. Tooling produces configuration, not prose. |
 | "Modules should be cohesive and loosely coupled." | Not checkable, and carries no because. | The import direction the user was describing: "Nothing under `domain/` imports from `http/` or `db/`. Because the domain is the part we test without a network or a database, and one import backwards takes that away." |
-| "Never interpolate user input into a SQL string." | Not violable today — this project has no database and issues no queries. | Nothing. Cut it. A rule about a seam the code does not have is filler that trains the reader to skim. |
+| "Never interpolate user input into a SQL string." | Outside scope when the project neither uses nor plans SQL. | Cut it for a non-SQL project. Keep a concrete boundary rule when an approved greenfield design includes SQL queries. |
 | "Errors propagate to the entry point." | Carries no because — an agent hitting a case the rule didn't anticipate has nothing to reason from. | Same rule with the reason attached: "…because a swallowed failure is indistinguishable from an empty result at the call site, and the outer layer is the only place that knows what the user should see." |
 | "Background jobs authorize their own input." | Dependencies not named — it holds only because a rule elsewhere redefined "entry point" to include jobs, rake tasks, and console scripts. | The same rule, with the upstream rule named inline and the link recorded in `rationale.md`, so reversing the entry-point definition surfaces this rule instead of quietly invalidating it. |
 
-Two patterns to take from that table. First, "not lintable" almost never means *delete* — it means the rule moves from prose to `tooling.md` as configuration. Second, a rule that fails "violable today" is the only category that reliably ends in deletion, and start-clean runs generate these in bulk because every round proposes a full default set regardless of what the code contains.
+Two patterns to take from that table. First, "not lintable" almost never means *delete* — it means the rule moves from prose to `tooling.md` as configuration. Second, rules about capabilities outside existing or approved planned scope are removed. Start-clean proposals still need this scope check; a generic default set does not establish relevance.
 
 ### What travels with the rules
 
 Two things ship alongside the rules in the emitted artifact:
 
 - A **rejected-alternatives register** (`rationale.md`), so a future agent does not reopen a settled call. Every row of the table above that was argued with the user belongs in it — the proposal, the test it failed, and what replaced it.
-- An **escalation clause**: when a situation isn't covered, name the ambiguity and ask. Don't improvise a rule, and don't treat silence as permission.
+- An **escalation clause**: use established patterns and bounded judgment for routine uncovered details. Escalate consequential unresolved decisions or proposed policy changes; distinguish those from implementation choices. Do not invent authoritative rules.
 
 The escalation clause is what makes a short rule set safe. Without it, an agent facing an uncovered case invents a rule and then treats its own invention as precedent — which is how a 40-rule contract becomes a 90-rule folk tradition nobody agreed to.

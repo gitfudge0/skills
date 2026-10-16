@@ -15,8 +15,6 @@ For production-writing work, read `references/modules/engineering/guide.md` for 
 
 ## Workflow
 
-Before tuning, establish metric, representative workload, correctness constraints, useful target and time/cost boundary from the request or a proportionate explicit proposal. Read the authoritative measured optimization loop at `references/modules/engineering/references/performance.md` and verification's performance evidence rules. That reference owns harness validation, comparable measurements, attributable attempts and stopping conditions; do not create a competing loop.
+Read and follow the authoritative measured optimization loop at `references/modules/engineering/references/performance.md` and verification’s performance evidence rules. Establish the request’s metric, workload, correctness contract and time/cost boundary before attempts; these references own harness validation, comparable measurements, attributable changes, attempt records and stopping conditions.
 
-Identify the observed limiter before choosing a hypothesis. Include completed work and errors in every comparison so faster failures or dropped work cannot win. Record workload, exact revisions or changed-state identity, environment, samples and confounds. Freeze the harness during comparisons or establish a new baseline after changing it.
-
-Keep an attempt log with each hypothesis, attributable delta, correctness results, metric observations and keep/revert decision. Change one explanatory hypothesis at a time, preserving others' edits when reverting. Stop at target, budget or diminishing returns; no minimum attempts or manufactured speedup. Return retained changes, rejected attempts, measurement scope and limitations. Inconclusive results or no improvement are valid outcomes.
+Return retained changes, rejected attempts, measurement scope and limitations. Inconclusive results or no improvement are valid outcomes.

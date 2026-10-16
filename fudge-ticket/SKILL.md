@@ -7,7 +7,7 @@ description: Draft, reconcile and update issue-tracker tickets, drafts first. Us
 
 ## Locate guidance
 
-Paths under `references/modules/`, `references/roots/` and `shared/` resolve from the package root: the nearest ancestor containing `.fudge-package.json`, or in a source checkout the ancestor containing `scripts/skill-manifest.json` (mapping in `shared/locate.md`). Links to this guide's own references stay relative to this file. Read only the selected guidance.
+Package addresses (`shared/`, `references/modules/`, `references/roots/`) resolve from the nearest ancestor with `.fudge-package.json`, or `scripts/skill-manifest.json` in source. Read `shared/locate.md` when resolving a source address or nested guide; this guide’s own references remain relative.
 
 Use package-root `shared/execution.md` for scope, delegation, authorization and verification; use `shared/writing.md` for prose and `shared/artifacts.md` before writing artifacts. Read only guidance selected by the current task. Bundled roots are dependencies, not instructions to run their workflows.
 
@@ -29,14 +29,14 @@ Use whatever tracker access the host provides: an Atlassian/Jira connector, `gh 
 ### Draft
 
 1. Play the source back in one sentence; ask only what would change the stories.
-2. Split into the smallest independently shippable, user-facing stories. Slice 1 is the thinnest end-to-end path. Backend, web and mobile splits are subtasks of a story, never separate stories.
-3. More than five acceptance criteria, or a title that needs "and", means split again. Name what each story defers in its out-of-scope section.
+2. Prefer independently shippable user outcomes, beginning with the thinnest end-to-end path. Keep backend, web and mobile implementation slices as subtasks when they jointly deliver one outcome. Allow a coherent technical story for independently valuable platform, security, reliability or maintenance work; identify its consumer and observable completion criteria.
+3. More than five acceptance criteria or a title needing "and" signals a possible split; retain one story when its conditions form one coherent, independently verifiable outcome. Name what each story defers in its out-of-scope section.
 4. When the user asks for a list, give titles and one-line descriptions first; write full bodies on request.
 5. Write implementation notes only from code actually read. Otherwise mark the subtask as needing developer detail with specific open questions.
 
 ### Reconcile
 
-What was implemented is the truth. Read the ticket, its linked PRs (merged state, final diff, review threads) and the merged code. Draft the updated description and test notes from the code, list each deviation from the original ticket with its evidence, and draft related tickets for deferred or newly discovered work. Do not rewrite the ticket to match intent the code does not carry.
+Describe as-built behavior from evidence; this does not approve deviations or replace unmet acceptance requirements. Read the ticket, its linked PRs (merged state, final diff, review threads) and the merged code. Draft the updated description and test notes from the code, list each deviation from the original ticket with its evidence, and draft related tickets for deferred or newly discovered work. Do not rewrite the ticket to match intent the code does not carry.
 
 ### Update
 
@@ -48,7 +48,7 @@ Read the full thread and the code or PR each comment refers to. Draft one reply 
 
 ## Rules
 
-- **Draft first.** Show the exact content (title, body, fields, comment, transition, assignee) and wait. Approval covers that content only; changed content needs a fresh look. An explicit "create it" or "post it" in the request authorizes the write. Precedence follows `shared/working-defaults.md`.
+- **Posting authorization.** Apply `shared/working-defaults.md` to the exact content, destination and fields. Preserve prior authorization and apply the draft-first gate only when that policy requires it.
 - **Ask only for what cannot be inferred:** project, issue type, sprint, assignee, parent. Reuse answers already settled in the conversation or working defaults ("assign to me, current sprint, no parent").
 - **Never invent** ticket keys, statuses, transitions, sprints, fields or people. Look them up; when lookup fails, say so and leave a placeholder.
 - **Factual and concise.** Tracker updates state what changed, with links. Post milestones, not every internal iteration.

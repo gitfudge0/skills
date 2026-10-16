@@ -33,7 +33,7 @@ When both themes exist, semantic tokens resolve per `Brightness`. Keep identical
 
 `TextStyle(fontFamily: …, fontSize: …, height: …, fontWeight: FontWeight.w…)`.
 
-- `fontSize` in logical px: **1rem = 16 logical px**.
+- Resolve CSS `rem` against the source root font size before mapping to Flutter logical pixels. Use 16 only when the source establishes that root size; record any cross-platform scaling assumption.
 - Flutter's `height` is a multiplier of `fontSize`, so a unitless CSS line-height carries over unchanged.
 - Weights map directly: 400 → `FontWeight.w400`, etc.
 - Load the selected face through the project's existing font strategy. For a new Flutter app, `google_fonts` or bundled TTFs in `pubspec.yaml` are options.
@@ -50,7 +50,7 @@ Flutter has **no `gap` property** on `Row`/`Column`. Insert space explicitly: `S
 
 ### Shadows
 
-Map each shadow variant and theme that exists, for example with `List<BoxShadow>`. `BoxShadow(color: Color.fromRGBO(r, g, b, a), offset: Offset(x, y), blurRadius: b)`. CSS spread has no direct equivalent — if a token uses spread, say what you dropped.
+Map each shadow variant and theme that exists, for example with `List<BoxShadow>`. `BoxShadow(color: Color.fromRGBO(r, g, b, a), offset: Offset(x, y), blurRadius: b)`. Map CSS spread to [`spreadRadius`](https://api.flutter.dev/flutter/painting/BoxShadow/BoxShadow.html). Inspect the rendered shadow because blur rendering can still differ across platforms.
 
 ### Motion
 
@@ -64,7 +64,7 @@ Map each shadow variant and theme that exists, for example with `List<BoxShadow>
 
 ### Blur
 
-`ImageFilter.blur(sigmaX: s, sigmaY: s)` inside `BackdropFilter`. A CSS `blur()` radius is roughly **2× the Gaussian sigma**, so **sigma = CSS px / 2**. State the conversion in the row and in Assumptions.
+`ImageFilter.blur(sigmaX: s, sigmaY: s)` inside `BackdropFilter`. The [CSS `blur()` parameter](https://www.w3.org/TR/filter-effects-1/#funcdef-filter-blur) already specifies Gaussian standard deviation, so use the resolved CSS length as sigma under the stated CSS-pixel/logical-pixel mapping. Keep this separate from box-shadow blur-radius conversion, and inspect the rendered result.
 
 ---
 

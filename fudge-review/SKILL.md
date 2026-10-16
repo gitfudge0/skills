@@ -5,11 +5,11 @@ description: "Review a PR or local diff, re-review changed code, and render or s
 
 # Review
 
-fudge:review reviews a change, verifies every finding itself, stores the result in `findings.json`, and renders it for the chosen medium. The reader sees the verdict first and opens detail only when they want it.
+fudge:review reviews a change, verifies every finding itself, keeps one structured result, and renders it for the chosen medium. Persist `findings.json`, `method.md` and a bounded snapshot for CI, re-review, requested durable output or a caller requirement; a one-off chat review keeps the same structure in memory and writes no artifacts. The reader sees the verdict first and opens detail only when they want it.
 
 ## Locate guidance
 
-Paths under `references/modules/`, `references/roots/` and `shared/` resolve from the package root: the nearest ancestor containing `.fudge-package.json`, or in a source checkout the ancestor containing `scripts/skill-manifest.json` (mapping in `shared/locate.md`). Links to this guide's own references stay relative to this file. Read only the selected guidance.
+Package addresses (`shared/`, `references/modules/`, `references/roots/`) resolve from the nearest ancestor with `.fudge-package.json`, or `scripts/skill-manifest.json` in source. Read `shared/locate.md` when resolving a source address or nested guide; this guide’s own references remain relative.
 
 Use package-root `shared/execution.md` for implementation/delegation policy, `shared/writing.md` for prose, and `shared/artifacts.md` before writing review artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read optional package-root `shared/report-deck/guide.md`; concise chat is the default.
 
@@ -19,7 +19,7 @@ Use package-root `shared/execution.md` for implementation/delegation policy, `sh
 |---|---|---|
 | standalone | The user asks for a review. Default. | Steps 0–8. |
 | orchestrated | A `fudge:ship` run requests review of a scoped change. | Steps 0–6 once on ship's diff, scope and gate evidence; chat by default. Ship supplies artifact paths. |
-| re-review | A `findings.json` already exists for this branch. | Step 9. |
+| re-review | The user or caller requests updating an identified prior review. | Step 9. |
 | CI | A CI job runs the review on every PR. | Steps 0–9 non-interactively per `references/ci.md`. |
 
 **Orchestrated.** Delegated reviewers return candidates in the finding shape; the coordinator verifies and consolidates one result (or reviews directly, with the same discipline, when subagents are unavailable or add overhead). A separate render pass is only for a requested artifact; it keeps approved IDs, severities and content, and the coordinator checks fidelity before reporting or posting.
@@ -45,7 +45,7 @@ Use package-root `shared/execution.md` for implementation/delegation policy, `sh
 | Subject | Do |
 |---|---|
 | PR | Work from the user's local clone (find it or ask for its path). `git fetch origin <head-branch>`, then read the head from git objects: `git show <sha>:<path>`, `git grep -n <pattern> <sha>`, `git diff <base>...<sha>`. |
-| Local diff | Record the base (default HEAD), staged and unstaged patches, and contents/hashes of in-scope untracked files; store a bounded snapshot of reviewed paths for re-review. Ask for a range only when intent can't be inferred. |
+| Local diff | Record the base (default HEAD), staged and unstaged patches, and contents/hashes of in-scope untracked files; capture a bounded snapshot only when persisting the review for later comparison. Ask for a range only when intent can't be inferred. |
 | Committed branch | Use the supplied base/range. |
 
 Never check out, switch branches, create worktrees, or modify the user's working tree. Don't omit untracked changes, blame this change for pre-existing work without evidence, or invent PR metadata for a local review. CI mode differs (`references/ci.md`).
@@ -73,13 +73,13 @@ Then:
 - origin: `introduced` or `pre-existing`;
 - audience: `author` (fix in this change) or `team` (a team decision, e.g. amending a convention). Team findings render in their own short section.
 
-**6. Consolidate.** Merge duplicates across topics. Write `findings.json` and `method.md` per `references/findings.md`. IDs run `R1, R2, …`, are never renumbered, and a dropped finding keeps its ID.
+**6. Consolidate.** Merge duplicates across topics. Consolidate the structured result and method per `references/findings.md`; persist files only under the persistence rule above. IDs run `R1, R2, …`, remain stable within an identified review, and a dropped finding keeps its ID. A continuity-limited CI full review follows `references/ci.md`.
 
-**7. Triage (optional).** Only when the user or caller asks. Show the verdict and one-line list in chat. Record each drop, downgrade or edit with its reason in `findings.json` (`status: dropped`, `status_reason`). Otherwise go to step 8.
+**7. Triage (optional).** Only when the user or caller asks. Show the verdict and one-line list in chat. Record each drop, downgrade or edit with its reason in the consolidated result (`status: dropped`, `status_reason`). Otherwise go to step 8.
 
-**8. Render.** From `findings.json` only, leaving out dropped findings (`references/rendering.md`). Medium: `chat` (default), `slack`, `pr` or `html`.
-- [ ] Posting to Slack or GitHub is an external write. Interactive: follow working defaults (package-root `shared/working-defaults.md`). Under `draft-first`, show the exact comments and destination and wait (unless the user said in this conversation to post without a draft); approval covers that content only. Otherwise an explicit request to post there authorizes it; without one, ask first. CI: `references/ci.md`.
-- [ ] Check the output against `findings.json`: same IDs, same severities, same count.
+**8. Render.** From the consolidated structured result (persisted as `findings.json` when required), leaving out dropped findings (`references/rendering.md`). Medium: `chat` (default), `slack`, `pr` or `html`.
+- [ ] Posting to Slack or GitHub follows the authorization policy in package-root `shared/working-defaults.md`; preserve prior authorization. CI: `references/ci.md`.
+- [ ] Check the output against the consolidated result: same IDs, same severities, same count as the consolidated result.
 
 **9. Re-review.** Load `findings.json`, compare the stored snapshot with the current scoped change, and re-read CI status.
 - [ ] Use commits after the recorded head only when it's still an ancestor and base/scope are unchanged.
@@ -95,7 +95,7 @@ Direct and short: how the problem shows up and what causes it.
 
 | Field | Rule |
 |---|---|
-| Title | The symptom, trigger → result, ≤12 words, no code identifiers. The one-line list alone tells the author what breaks. E.g. "Admin creates staff → no invite arrives; staff can never sign in". |
+| Title | The symptom, trigger → result, ≤12 words, no code identifiers. The one-line list alone tells the author what breaks. E.g. "Admin creates staff → no invite arrives; sign-in remains blocked". |
 | Cause | One clause on what makes it happen. ≤25 words. |
 | Impact | Only when the harm isn't visible in the symptom (e.g. privacy exposure). ≤25 words. |
 | Fix | One imperative line, pointing at an existing correct pattern when there is one. ≤25 words. |
@@ -126,7 +126,7 @@ CI qualifiers: failed adds "CI failed; readiness unresolved"; pending adds "awai
 
 ## Output location
 
-Use package-root `shared/artifacts.md` with skill `review` and, for PRs, the head-branch override. Caller-supplied paths win. Keep `findings.json`, `method.md` and any snapshot/render together in a unique run directory; re-review updates that identified review and never overwrites another run.
+When persistence is required, use package-root `shared/artifacts.md` with skill `review` and, for PRs, the head-branch override. Caller-supplied paths win. Keep `findings.json`, `method.md` and any snapshot/render together in a unique run directory; re-review updates that identified review and never overwrites another run.
 
 ## References
 

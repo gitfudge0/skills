@@ -1,30 +1,30 @@
 # Dimension bank
 
-The full set of dimensions `fudge:setup` can turn into rules, grouped and typed. Phase 0 prunes the archetype-gated dimensions before the interview starts. Phase 1 runs what survives across six or seven rounds.
+The full set of dimensions `fudge:setup` can turn into rules, grouped and typed. Phase 0 selects capability-dependent dimensions from observed code, planned architecture and project scope. Phase 1 groups the relevant dimensions into rounds.
 
 ## Legend
 
 - **D** — detected from the repo, never asked.
 - **A** — asked.
-- **◇** — archetype-gated: pruned in Phase 0, before the interview starts.
+- **◇** — capability-dependent: include when the observed or approved planned capability applies.
 
-Combined markers compose: **D+A** is detected first and confirmed or corrected with the user; **A◇** is asked, but only if the archetype survives the Phase 0 gate.
+Combined markers compose: **D+A** is detected first and confirmed or corrected with the user; **A◇** is asked, but only when the capability applies.
 
-## Archetype gating
+## Capability applicability
 
-Archetype classification happens before any question is asked. It prunes roughly a third of the question bank — a library is never asked about health checks, a CLI tool is never asked about transaction boundaries. The table below is the full picture of which ◇ dimensions survive the gate for each archetype.
+Use archetypes as discovery hints, not exclusions. A repository may have several surfaces. Detect implemented capabilities and include approved planned capabilities for greenfield work; ask only where an unresolved capability changes the rules.
 
-| Archetype | Enabled ◇ dimensions | Pruned ◇ dimensions | Notes |
-|---|---|---|---|
-| Library | Versioning and deprecation policy · Third-party SDKs and HTTP clients · Changelog and release process | Concurrency · Persistence · Snapshot/golden tests · Observability and operations (whole group) | Versioning and deprecation is dominant for libraries. Observability is pruned — a library is never asked about health checks. |
-| CLI tool | Versioning and deprecation policy · Third-party SDKs and HTTP clients · Changelog and release process · Snapshot/golden tests | Concurrency · Persistence · Observability and operations (whole group) | Persistence is pruned — a CLI tool is never asked about transaction boundaries. Observability is pruned: not a service, web app, or data pipeline. |
-| Long-running service | Concurrency · Persistence · Third-party SDKs and HTTP clients · Observability and operations (whole group) | Versioning and deprecation policy · Snapshot/golden tests · Changelog and release process | Versioning and deprecation is pruned — irrelevant for an internal service. Observability is enabled per the Phase 1 rule. |
-| Web app | Concurrency · Persistence · Third-party SDKs and HTTP clients · Snapshot/golden tests · Observability and operations (whole group) | Versioning and deprecation policy · Changelog and release process | Observability is enabled per the Phase 1 rule. |
-| Data pipeline | Concurrency · Persistence · Third-party SDKs and HTTP clients · Snapshot/golden tests · Observability and operations (whole group) | Versioning and deprecation policy · Changelog and release process | Observability is enabled per the Phase 1 rule. |
-| Embedded | Concurrency · Versioning and deprecation policy · Changelog and release process | Persistence · Third-party SDKs and HTTP clients · Snapshot/golden tests · Observability and operations (whole group) | Observability is pruned: not a service, web app, or data pipeline. |
-| Mobile | Concurrency · Third-party SDKs and HTTP clients · Snapshot/golden tests · Changelog and release process | Persistence · Versioning and deprecation policy · Observability and operations (whole group) | Observability is pruned: not a service, web app, or data pipeline. |
+| Dimension | Include when |
+|---|---|
+| Concurrency | Parallel jobs, async work, shared state, cancellation or concurrent callers exist or are planned |
+| Persistence | Local files, SQLite, offline mobile storage, databases or other durable state exist or are planned |
+| Third-party SDKs and HTTP clients | External integrations exist or are planned |
+| Versioning and deprecation | Public APIs, persisted formats, library exports or independently released consumers need compatibility |
+| Snapshot/golden tests | Stable text, visual, protocol or serialization output makes these useful |
+| Changelog and release process | The project delivers releases or changes consumed independently |
+| Observability and operations | Long-running processes, jobs, deployed services or operational support require signals and recovery |
 
-Only the library/versioning, service/versioning, library/observability, CLI/persistence, and the service-web app-pipeline observability calls come from the spec directly. The rest follow the obvious shape of each archetype — whether it holds persistent state, runs concurrent work, or has external consumers of a stable interface — and are not spelled out in the spec itself.
+For example, a SQLite CLI needs transaction rules, an offline mobile app needs persistence rules, and a public web API needs versioning rules. Prune a dimension only after confirming that neither current scope nor approved intended architecture needs it.
 
 ## The eight dimension groups
 
@@ -54,7 +54,7 @@ Only the library/versioning, service/versioning, library/observability, CLI/pers
 | Concurrency (async at the edges or everywhere, blocking calls, shared state, cancellation) | A◇ |
 | Persistence (repository pattern vs. direct queries, transaction boundaries) | A◇ |
 | Third-party SDKs and HTTP clients — wrapped or used directly | A◇ |
-| Versioning and deprecation policy (dominant for libraries, irrelevant for an internal service) | A◇ |
+| Versioning and deprecation policy (for interfaces or formats with compatibility obligations) | A◇ |
 | Performance posture (when optimizing is allowed, what gets measured) | A |
 
 ### Testing
@@ -97,7 +97,7 @@ Almost entirely detected; gaps are proposed, not asked.
 
 ### Observability and operations
 
-Archetype-gated; mostly skipped outside services.
+Capability-dependent; include operational needs across product types.
 
 | Dimension | Type |
 |---|---|
@@ -131,10 +131,10 @@ The eight groups above do not map one-to-one onto interview rounds. Two fold int
 
 1. **Structure** — Project structure.
 2. **Architecture** — Architecture and patterns.
-3. **Observability and operations** — its own group, inserted here only when the archetype is a long-running service, web app, or data pipeline. For every other archetype this round is skipped and the interview stays at six rounds.
+3. **Observability and operations** — its own group, inserted here when current or approved planned operational capabilities need it.
 4. **Testing** — Testing.
 5. **Workflow** — Workflow, plus Tooling's two asked rows: pre-commit hooks, and the one command that checks everything. Both are about the loop around writing code rather than the code itself, so they run here rather than in a Tooling round of their own. The rest of Tooling is resolved by detection in Phase 0.5 and never reaches an interview round.
 6. **Docs** — Documentation.
-7. **Security** — Security. Asked in full even when the user says "keep it light" — never defaulted away.
+7. **Security** — Security. Consider the applicable security implications in full-project setup; focused setup remains scoped to its concern.
 
-Six rounds run on every project: structure, architecture, testing, workflow, docs, security. The seventh — observability — is archetype-gated and only ever inserted after architecture.
+A full-project setup considers structure, architecture, testing, workflow, docs and security, grouping short topics where useful. Add observability after architecture when operational capabilities need it; focused setups consider only their relevant concerns.

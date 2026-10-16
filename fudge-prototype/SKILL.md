@@ -13,7 +13,7 @@ Use package-root `shared/execution.md` for scope, delegation, authorization and 
 
 ## Workflow
 
-Name one empirical question, the observation that would change the decision, and the bounded experiment. Use minimal machinery and an isolated unused artifact directory under shared artifact guidance (default category `prototype`). Label the artifact exploratory and data synthetic. Keep dependencies, simulated services and state inside the experiment; do not alter production files or lockfiles.
+Name one empirical question, the observation that would change the decision, and the bounded experiment. Use minimal machinery and an isolated unused artifact directory under shared artifact guidance (default category `prototype`). Label the artifact exploratory. Identify inputs, outputs and behavior by actual provenance: synthetic, supplied, captured, mocked or observed; distinguish real-service evidence from simulation. Keep dependencies, simulated services and state inside the experiment; do not alter production files or lockfiles.
 
 For an interaction experiment, use `references/modules/ui-prototype/guide.md` as the authoritative UI prototype procedure, including its caller path override, transitions, persistence, reset and rendered inspection. Preserve design callers of that module. For API or algorithm experiments, build the smallest runnable harness that exercises the disputed contract or representative inputs; record actual outputs and errors. For performance experiments, use engineering's authoritative `references/modules/engineering/references/performance.md` with verification's measurement rules, without turning exploration into a production optimization.
 

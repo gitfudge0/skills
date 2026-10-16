@@ -24,15 +24,15 @@ As a <actor>, I can <capability>.
 ## Acceptance criteria
 1. Given <state>, when <action>, then <observable result>.
 2. ...
-(At most 5. One platform-agnostic set; prefix a criterion with (Web) or (Mobile) only where clients genuinely diverge.)
+(Prefer a short set. More than five signals a scope check, not an automatic split. Prefix with (Web) or (Mobile) only where clients diverge.)
 
 ## Out of scope
 - <deferred path, rule, platform or data range a reader might assume is included>
 ```
 
-Each criterion should be a behavior a user would notice and that could be wrong on its own. Visible failure behavior earns a criterion; retries and timeouts belong in subtasks.
+Each criterion establishes an observable outcome for the story’s consumer. Visible failure behavior earns a criterion; include retries or timeouts here when they are part of the promised outcome. For technical stories, replace the actor/capability wording with the operational consumer and verifiable technical result.
 
-## Subtask (one per platform)
+## Subtask (when an implementation slice helps)
 
 Title: `[Server|Web|Mobile] <technical outcome>`.
 

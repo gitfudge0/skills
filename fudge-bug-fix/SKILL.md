@@ -15,10 +15,6 @@ For production-writing work, read `references/modules/engineering/guide.md` for 
 
 ## Workflow
 
-Establish expected and observed behavior at the actual appropriate boundary: an HTTP request, persisted record, UI action or lowest faithful test layer. Read the engineering guide's authoritative bug diagnosis and regression procedure before editing. Record reproduction inputs, output and environment. If reproduction is unavailable, use an evidence-backed hypothesis with honest limits and a falsifying check; inspection alone is not a reproduced failure.
-
-Trace the owning-layer cause and affected contracts before selecting the smallest cohesive fix. Reuse the engineering procedure for repeated failed fixes: reassess the premise, layer and boundary rather than piling on patches. Fix related occurrences only when they share the demonstrated cause and are in scope.
-
-Use verification and `shared/test-effectiveness.md` for changed tests. Add a cheap meaningful regression when warranted, exercising the original failure rather than asserting implementation wording. Demonstrate that it fails on the defective baseline where feasible without disturbing others' work; verify the fix and relevant neighboring contracts. Record unavailable baseline evidence honestly.
+Read and follow the engineering guide’s authoritative bug diagnosis and regression procedure before editing, then verification’s acceptance and regression evidence rules. Keep the fix bounded to the demonstrated cause and affected contracts; retain explicit reproduction limits. For changed tests, use `shared/test-effectiveness.md`.
 
 Return the cause, bounded change, actual acceptance/regression results and remaining limits. Complete only the selected production delivery endpoint.

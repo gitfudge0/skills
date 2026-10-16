@@ -1,6 +1,6 @@
 # Requirements discovery and gap analysis
 
-Internal capability: enter through the owning public skill. Resolve cross-module and shared paths from the package root (nearest ancestor containing `.fudge-package.json`): `references/modules/<module>/guide.md`, `references/roots/<root>/guide.md`, and `shared/`. In source, use the repository identified by `scripts/skill-manifest.json`, with `modules/`, `fudge-<root>/SKILL.md`, and `shared/`. Local assets and references remain relative to this guide.
+Internal capability: retain the owning public skill’s scope and endpoint. For source/installed path resolution, use package-root `shared/locate.md`; local references stay relative to this guide.
 
 Use a bounded requirements check for a clear request, a focused gap list for incomplete scope, and this full corpus pipeline only for scattered or conflicting requirements. Analysis-only requests stop before implementation. Use evidence to resolve gaps and continue independent work; ask only about consequential unresolved choices. The full pipeline produces: reconstructed flows, a gap register, an assumption map, and — the actual deliverable — a routed list of questions humans must answer.
 
@@ -75,9 +75,9 @@ Run stages in order. Each stage writes its artifact before the next begins — i
 
 Inventory every document: id, filename, type, date if determinable, apparent owner or team, one-line summary.
 
-Then build the coverage grid: systems and journey phases down one axis, documents across the other, cell = how many documents substantively address that intersection. Read `references/extraction.md` for how to identify systems before you have read everything.
+Then build the coverage grid: systems and journey phases down one axis, documents across the other, cell = coverage strength (`0` absent, `1` contextual mention, `2` usable substantive detail). Record the count of substantive sources separately; contextual mentions never count as substantive coverage. Read `references/extraction.md` for how to identify systems before you have read everything.
 
-**This grid is often the single most valuable output of the whole run.** "Thirty-eight documents concern the patient app, two mention the robot in passing, zero describe the planning software's export format" is actionable today, before any analysis. Zero-coverage cells go straight into the register as `evidence` gaps.
+**This grid is often the single most valuable output of the whole run.** "Thirty-eight documents concern the patient app, two mention the robot in passing, zero describe the planning software's export format" is actionable today, before any analysis. Rows without any substantive coverage go straight into the register as `evidence` gaps, even when several documents mention the area.
 
 The grid does not get its own section in the report — the findings survive as register entries and the ceremony is dropped. It is still the whole output of `map` mode, and `corpus-map.md` remains on disk.
 
@@ -164,7 +164,7 @@ On `refresh`:
 
 1. Read `answers.yaml`. Compare each answer with the documents using the answerer’s ownership and authority over the subject, supporting evidence, and date. Cite answers as attributed statements; a recent answer from the accountable owner may supersede an older document, while an unsupported or conflicting answer remains unresolved. Do not silently convert a disputed assumption into a fact.
 2. Re-run stages 1–7 against the updated corpus.
-3. **Diff, do not replace.** Produce four buckets: new, changed basis, unchanged, and resolved by an answer.
+3. **Diff, do not replace.** Produce four buckets: new, changed basis, unchanged, and verified resolved. An answer received is a basis change until the closure action is verified or the required stakeholder decision is recorded.
 4. Preserve every existing ID and recorded human disposition. If a gap no longer appears in fresh analysis, keep its history and mark its basis changed or resolution proposed; never silently delete it or override a human disposition.
 5. Surface "records whose basis changed since last run" as its own report section. Silent drift is what turns a register into write-only noise by week three.
 

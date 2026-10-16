@@ -1,6 +1,6 @@
 # Rendering
 
-Render from `findings.json` only, and leave out dropped findings. In orchestrated mode the root-approved set is the only source. The render pass never adds, removes, merges, splits, or reclassifies a finding.
+Render only the consolidated result, from memory or `findings.json` according to the root’s persistence rule, and leave out dropped findings. In orchestrated mode the root-approved set is the only source. The render pass never adds, removes, merges, splits, or reclassifies a finding.
 
 ## Layers
 
@@ -8,7 +8,7 @@ Render from `findings.json` only, and leave out dropped findings. In orchestrate
 2. **List.** One line per finding: severity, ID, title, area. Add `SUSPECTED` or `pre-existing` after the title when they apply.
 3. **Detail.** Cause, Impact (only when present), Fix, Rule (conventions only), Where. Where is always last. HTML uses the shared HTML plan claim tree with recorded evidence (see HTML below).
 
-After the findings come two short blocks. **For the team** lists `team` findings, one line each (title, then fix), and is skipped when there are none. **Method** summarizes `method.md`, collapsed where the medium allows it and 2 to 4 lines in chat.
+After the findings come two short blocks. **For the team** lists `team` findings, one line each (title, then fix), and is skipped when there are none. **Method** summarizes the recorded method (in memory or `method.md`), collapsed where the medium allows it and 2 to 4 lines in chat.
 
 ## Depth
 
@@ -31,7 +31,7 @@ Example with the two worked findings (2 findings, so flat):
 ```
 Mergeable after fixes — 0 blockers · 2 should-fix · 0 nits · CI: passed
 
-🟠 R1 Admin creates staff → no invite arrives; staff can never sign in
+🟠 R1 Admin creates staff → no invite arrives; sign-in remains blocked
 Cause: the invite call is commented out, and nothing re-sends it later.
 Fix: hold the UI until the follow-up lands; the follow-up backfills accounts never sent an invite.
 Where: app/services/admin/create_support_staff_service.rb:28
@@ -52,12 +52,12 @@ With 5 or more findings, put a table between the verdict and the detail:
 ```
 |    | ID | Finding | Area |
 |----|----|---------|------|
-| 🟠 | R1 | Admin creates staff → no invite arrives; staff can never sign in | admin staff |
+| 🟠 | R1 | Admin creates staff → no invite arrives; sign-in remains blocked | admin staff |
 ```
 
 ## Slack
 
-Show the full message and thread to the user and wait for a yes before posting.
+Apply package-root `shared/working-defaults.md` before posting the message and thread; it owns the draft-first gate and authorization precedence.
 
 The message holds the verdict and the one-line list, then stops. Show the area, not file paths. Slack has no collapse, so the thread holds the detail at every depth:
 
@@ -68,7 +68,7 @@ The message holds the verdict and the one-line list, then stops. Show the area, 
 Mergeable after fixes — 0 blockers · 2 should-fix · 0 nits · CI: passed
 example-org/admin-portal #61
 
-🟠 R1 Admin creates staff → no invite arrives; staff can never sign in · admin staff
+🟠 R1 Admin creates staff → no invite arrives; sign-in remains blocked · admin staff
 🟠 R2 Physician enters patient's email → form says 'taken' · admin staff
 
 Detail in thread
@@ -77,7 +77,7 @@ Detail in thread
 Thread reply:
 
 ```
-🟠 R1 Admin creates staff → no invite arrives; staff can never sign in
+🟠 R1 Admin creates staff → no invite arrives; sign-in remains blocked
 Cause: the invite call is commented out, and nothing re-sends it later.
 Fix: hold the UI until the follow-up lands; the follow-up backfills accounts never sent an invite.
 Where: create_support_staff_service.rb:28
@@ -93,7 +93,7 @@ Method: CI passed · 6 read fully, 3 skimmed · 2 prior comments checked
 
 ## GitHub (`pr`)
 
-Interactive: show the summary comment and every inline comment, and wait for a yes before posting, unless the user already asked to post this content (working defaults in package-root `shared/working-defaults.md`; under `draft-first`, show the exact comments first unless the user said in this conversation to post without a draft). CI mode posts without asking and follows `ci.md` for markers, inline scope and re-runs.
+Interactive posting follows package-root `shared/working-defaults.md`. CI posting follows `ci.md` for configured authorization, markers, inline scope and re-runs.
 
 Post one summary comment. It holds the verdict as a heading, the one-line list as a table, one `<details>` block per finding, the team section, and Method in its own `<details>` block. Then post one inline review comment per blocker, anchored to its line. The inline comment is one sentence plus a pointer to the summary. Never copy the full finding inline.
 
@@ -102,7 +102,7 @@ Post one summary comment. It holds the verdict as a heading, the one-line list a
 
 |    | ID | Finding | Area |
 |----|----|---------|------|
-| 🟠 | R1 | Admin creates staff → no invite arrives; staff can never sign in | admin staff |
+| 🟠 | R1 | Admin creates staff → no invite arrives; sign-in remains blocked | admin staff |
 | 🟠 | R2 | Physician enters patient's email → form says 'taken' | admin staff |
 
 <!-- one <details> block per finding; R1's is left out here -->

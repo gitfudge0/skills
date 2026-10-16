@@ -62,6 +62,11 @@ Stage 8 builds one JSON object and substitutes it for the literal string `__GAP_
     { "id": "Q-021", "answerer": "Robot vendor — engineering", "question": "…",
       "we_believe": "…", "consequence": "…", "links": ["GAP-014"], "status": "open" }
   ],
+  "answers": [
+    { "id": "Q-021", "answer": "…", "answered_by": "Accountable vendor lead",
+      "date": "2026-10-16", "evidence": ["sdk:p.3"],
+      "assessment": "conflicting", "assessment_basis": "Conflicts with signed agreement" }
+  ],
   "changes": { "new": [], "basis_changed": [], "resolved": [] }
 }
 ```
@@ -118,6 +123,12 @@ Contradictions lead because they need no inference at all — a reader can act o
 
 Coverage findings from stage 0 do not get their own section. They enter the register as `evidence`-type gaps and appear in the gaps table alongside everything else, which keeps the finding and drops the ceremony.
 
+## Lifecycle and answer evidence
+
+Keep human-authored `owner`, `status` and notes unchanged. Machine analysis uses separate fields: `basis_state` (`unchanged` or `changed`), `resolution` (`unresolved`, `proposed` or `verified`) and `resolution_evidence` (source/check references). Legacy `status: basis-changed` is readable but new refreshes use `basis_state`. When a human disposition conflicts with new evidence, preserve it and surface a proposed resolution instead of overwriting it.
+
+Each `answers` entry retains the question ID, attributed answer, respondent, date and supporting `evidence`. Assess ownership/authority, recency and conflicting sources; use `assessment` (`unassessed`, `supported`, `conflicting` or `insufficient`) and `assessment_basis` to explain the result. Missing attribution or evidence remains visible as unavailable. Answer text is attributed testimony, not independent verification. Include these fields in the payload and render them both beside the question and each linked gap.
+
 ## Refresh diff
 
 On `refresh`, compute `changes` by comparing the fresh analysis against the previous `register.yaml`.
@@ -125,14 +136,14 @@ On `refresh`, compute `changes` by comparing the fresh analysis against the prev
 | Bucket | Contents |
 |---|---|
 | `new` | Records with no matching prior ID |
-| `basis_changed` | Prior ID whose `basis`, `sources` or `provenance` changed |
-| `resolved` | Prior ID whose linked question now has an answer in `answers.yaml` |
+| `basis_changed` | Prior ID whose basis, sources, provenance or assessed answer evidence changed; includes answers received without verified closure |
+| `resolved` | Prior ID with newly verified objective closure evidence or a recorded required stakeholder decision; an answered question alone does not qualify |
 
 Rules that keep the register trustworthy over months:
 
 - **Never reissue an ID.** `GAP-014` is that finding forever. Deleted IDs stay retired.
-- **Never silently drop a human-touched record.** If a gap marked `investigating` or `accepted` no longer appears in the fresh analysis, keep it and set `status: basis-changed` with a note. A record disappearing because a document was reworded is a bug, not a resolution.
-- **Never auto-close.** An answer changes the basis; a human decides whether the gap is closed. Render the answer beside the gap so that decision takes seconds.
+- **Preserve every existing record and human disposition.** If a gap no longer appears in fresh analysis, keep its history and human-authored `status`; record `basis_state: changed` with an explanatory note instead. Disappearance is not resolution.
+- **Close only against verified evidence.** An objective closure action may be resolved when verified; a stakeholder decision requires its recorded decision. Preserve any existing human disposition and record a conflicting machine resolution as a proposal. An answer alone changes the basis. Render attributed answers and assessments beside the gap.
 - **Surface drift as its own section.** Silent divergence between register and reality is what turns this into write-only noise by week three, and by then nobody trusts any of it.
 
 Preserve human-authored fields across refreshes without exception: `owner`, `status`, and any note a person added. Those are the only fields in the file that were not machine-generated, which makes them the most valuable content in it.

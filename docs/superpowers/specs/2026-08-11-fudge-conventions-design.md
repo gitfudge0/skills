@@ -1,5 +1,7 @@
 # fudge:conventions — design spec
 
+> Historical design. Current setup behavior is defined by [the setup skill](../../../fudge-setup/SKILL.md), [capability applicability](../../../fudge-setup/references/dimension-bank.md) and [emission guidance](../../../fudge-setup/references/emitting.md). Their capability-based selection and scope-dependent reference layout supersede this document’s archetype pruning and fixed reference set.
+
 **Status:** Historical design. The current workflow is defined in [`fudge-conventions/SKILL.md`](../../../fudge-conventions/SKILL.md); it now supports setup, audit, and amend modes.
 **Date:** 2026-08-11
 **Skill:** `fudge:conventions` (directory: `fudge-conventions/`)

@@ -1,6 +1,6 @@
 # Decision pressure-test
 
-Internal capability: enter through the owning public skill. Resolve cross-module and shared paths from the package root (nearest ancestor containing `.fudge-package.json`): `references/modules/<module>/guide.md`, `references/roots/<root>/guide.md`, and `shared/`. In source, use the repository identified by `scripts/skill-manifest.json`, with `modules/`, `fudge-<root>/SKILL.md`, and `shared/`. Local assets and references remain relative to this guide.
+Internal capability: retain the owning public skill’s scope and endpoint. For source/installed path resolution, use package-root `shared/locate.md`; local references stay relative to this guide.
 
 Casts a small set of role-specific personas grounded in the actual project, examines each simulated perspective’s read on a feature/bug/decision, then synthesizes that input into an actual product decision — not a transcript of a meeting. The value is in reaching a clear recommendation while keeping competing arguments on record, not smoothing it into false consensus.
 

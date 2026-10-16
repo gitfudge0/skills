@@ -266,6 +266,13 @@ function flows(){
   return sec("flows","02","§ 02 — domain stories",fs.length+" reconstructed","flows",
    `Each row is one sentence: <b>actor</b> — verb — <b>work object</b> — <b>actor</b>, numbered in sequence. A dashed red arrow means <b>nothing in the corpus describes that step</b> — a finding about the documentation, not about the system. Gaps sit on the step where they bite.`,inner);
 }
+function answerEvidence(questionIds){
+  return (DATA.answers||[]).filter(a=>questionIds.includes(a.id)).map(a=>
+    `<div class="dim"><b>Answer received · ${E(a.id)}</b><div>${E(a.answer)}</div>
+      <div>${E(a.answered_by||"respondent unavailable")} · ${E(a.date||"date unavailable")}</div>
+      <div>${(a.evidence||[]).length?a.evidence.map(e=>`<code>${E(e)}</code>`).join(" "):"supporting evidence unavailable"}</div>
+      <div>${tag(a.assessment==="conflicting"?"r":"",a.assessment||"unassessed")}${a.assessment_basis?` ${E(a.assessment_basis)}`:""}</div></div>`).join("");
+}
 function register(){
   const gs=DATA.register||[];
   const rank={never:0,late:1,mid:2,now:3};
@@ -281,10 +288,10 @@ function register(){
         ${(g.sources||[]).length?`<div class="dim2">${g.sources.map(s=>`<code>${E(s)}</code>`).join(" ")}</div>`:""}</td>
       <td class="nw"><div class="dim" style="margin:0">${E(g.seam||"—")}</div><div style="margin-top:7px">${tag("",g.type)}</div></td>
       <td class="nw">${tag(d[0],d[1])}<div style="margin-top:7px">${tag(p[0],p[1])}</div></td>
-      <td>${E(g.closure||"—")}${g.closure_kind?`<div style="margin-top:7px">${tag("",g.closure_kind)}</div>`:""}</td>
-      <td class="nw"><div class="dim" style="margin:0">${E(g.owner||"unassigned")}</div><div style="margin-top:7px">${tag(g.status&&g.status!=="open"?"i":"",g.status||"open")}</div></td></tr>`}).join("")}
+      <td>${E(g.closure||"—")}${answerEvidence((DATA.questions||[]).filter(q=>(q.links||[]).includes(g.id)).map(q=>q.id))}${g.closure_kind?`<div style="margin-top:7px">${tag("",g.closure_kind)}</div>`:""}</td>
+      <td class="nw"><div class="dim" style="margin:0">${E(g.owner||"unassigned")}</div><div style="margin-top:7px">${tag(g.status&&g.status!=="open"?"i":"",g.status||"open")}</div>${g.basis_state?`<div>${tag("", "basis "+g.basis_state)}</div>`:""}${g.resolution?`<div>${tag("i", "resolution "+g.resolution)}</div>`:""}${(g.resolution_evidence||[]).map(e=>`<div class="dim2">${E(e)}</div>`).join("")}</td></tr>`}).join("")}
    </tbody></table></div>`;
-  return sec("register","03","§ 03 — the register",gs.length+" open items","gaps",
+  return sec("register","03","§ 03 — the register",gs.filter(g=>g.status!=="closed"&&g.status!=="accepted").length+" open items","gaps",
    `Ordered by <b>when you would find out anyway</b>. A gap that fails silently outranks a more severe one that announces itself, because the loud one gets fixed for free during normal work. Priority ordering is deliberately left to you.`,inner);
 }
 function assumptions(){
@@ -313,12 +320,12 @@ function questions(){
   const inner=order.map(who=>{
     const open=by[who].filter(q=>q.status!=="deferred"), def=by[who].filter(q=>q.status==="deferred");
     return `<div class="qb"><div class="qh"><span class="qn">${E(who.toLowerCase())}</span>
-      ${tag(who==="UNASSIGNED"?"r":"f",open.length+" to answer")}${def.length?tag("",def.length+" deferred"):""}</div>
+      ${tag(who==="UNASSIGNED"?"r":"f",open.filter(q=>q.status!=="answered").length+" to answer")}${def.length?tag("",def.length+" deferred"):""}</div>
       <div class="panel pad"><table><tbody>
       ${open.map(q=>`<tr class="${q.status==="answered"?"faded":""}">
         <td class="nw" style="width:70px"><span class="ref">${E(q.id)}</span></td>
         <td><div class="ttl">${E(q.question)}</div>
-          ${q.we_believe?`<div class="dim">we believe — ${E(q.we_believe)}</div>`:""}
+          ${q.we_believe?`<div class="dim">we believe — ${E(q.we_believe)}</div>`:""}${answerEvidence([q.id])}
           <div class="dim2">${(q.links||[]).map(l=>E(l)).join(" · ")}</div></td>
         <td class="dim" style="width:34%">${E(q.consequence||"—")}</td></tr>`).join("")}
       ${def.map(q=>`<tr class="faded"><td class="nw"><span class="ref">${E(q.id)}</span></td>

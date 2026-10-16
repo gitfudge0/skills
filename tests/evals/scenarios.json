@@ -794,6 +794,76 @@
       ],
       "source": "user-correction",
       "lesson": "Work was squashed into two commits despite an agreed per-step commit plan."
+    },
+    {
+      "root": "setup",
+      "prompt": "Set up conventions for this SQLite CLI and its public HTTP companion API.",
+      "fixture": "CLI persists changes transactionally in SQLite, runs concurrent imports, and calls a separately released public HTTP API.",
+      "invariants": [
+        "Considers persistence and concurrency for the CLI based on capabilities",
+        "Considers compatibility/versioning for the public API",
+        "Does not prune these topics based on archetype labels"
+      ]
+    },
+    {
+      "root": "setup",
+      "prompt": "Set up conventions for this offline mobile app.",
+      "fixture": "Mobile app persists queued edits locally and syncs them later.",
+      "invariants": [
+        "Includes local persistence, transaction and sync-state concerns",
+        "Does not assume mobile has no persistence"
+      ]
+    },
+    {
+      "root": "setup",
+      "prompt": "Draft conventions for our greenfield SQL-backed account service using the approved architecture.",
+      "fixture": "No application code yet; approved architecture includes SQL persistence, HTTP authentication and background jobs.",
+      "invariants": [
+        "Allows concrete rules grounded in the approved intended architecture",
+        "Distinguishes planned capabilities from unapproved speculation",
+        "Shows exact proposed rules before authoritative emission"
+      ]
+    },
+    {
+      "root": "setup",
+      "prompt": "Audit these proposed conventions before I approve them.",
+      "fixture": "Proposal escalates any unnamed helper detail; established repo naming exists. Another proposed change weakens an approved authorization policy.",
+      "invariants": [
+        "Allows bounded judgment for routine uncovered implementation details",
+        "Escalates the consequential proposed policy change",
+        "Does not create blanket approval pauses for all uncovered cases"
+      ]
+    },
+    {
+      "root": "review",
+      "prompt": "Give me a quick chat review of this one-function local diff.",
+      "fixture": "One-off local review; no durable report or future re-review requested.",
+      "invariants": [
+        "Returns structured evidenced findings and method in chat",
+        "Creates no findings.json, snapshots or run-artifact directory",
+        "Does not run builds/tests or call GitHub for local review"
+      ]
+    },
+    {
+      "root": "review",
+      "prompt": "Run the next CI review for this PR.",
+      "fixture": "Prior bot summary has only an old partial state marker; previous artifact and snapshot are inaccessible. Current full PR diff and source are available.",
+      "invariants": [
+        "Performs a full scoped review rather than trusting partial prior state",
+        "Discloses that continuity and fixed-finding attribution cannot be verified",
+        "Does not reconstruct absent evidence/fixes as if stored",
+        "Does not resolve old inline threads or duplicate inline findings without continuity"
+      ]
+    },
+    {
+      "root": "ticket",
+      "prompt": "Draft one story to replace our expiring internal signing infrastructure and its rollback path.",
+      "fixture": "A coherent independently deployable platform outcome with six linked verification conditions, no direct UI change.",
+      "invariants": [
+        "Allows an independently valuable technical story with a named consumer",
+        "Treats criterion count and title conjunction as scope signals, not forced splitting",
+        "Retains coherent verification and rollback requirements"
+      ]
     }
   ]
 }

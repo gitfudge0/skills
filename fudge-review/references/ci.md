@@ -24,16 +24,16 @@ On the first run for a PR:
 - [ ] Post one summary comment with the GitHub (`pr`) renderer in `rendering.md`.
 - [ ] Post inline comments only for `verified` author findings with severity blocker or should-fix, anchored to `where[0]`. `SUSPECTED` findings, nits and team findings stay in the summary.
 - [ ] Mark every bot comment so later runs can find it: the summary carries `<!-- fudge-review:summary -->`, and each inline comment carries `<!-- fudge-review:R<n> -->`.
-- [ ] Embed the stored state in the summary as `<!-- fudge-review:state {"round":N,"head":"<sha>","base":"<sha>","findings":[{"id","severity","status","title","where"}]} -->`. Re-runs read it when the previous artifact isn't available.
+- [ ] Embed a versioned review index in the summary, for example `<!-- fudge-review:index {"schema_version":1,"round":1,"head":"<sha>","base":"<sha>","artifact":"fudge-review-pr-61","last_id":3} -->`. This index locates prior artifacts and reserves finding IDs; it is not a substitute for findings, provenance or snapshots.
 - [ ] Check the posted content against `findings.json`: same IDs, severities and count.
 
 ## Re-runs on new pushes
 
-- [ ] Load the previous state. Prefer the previous run's `findings.json` artifact when the token can read workflow artifacts; otherwise read the state marker in the latest bot summary. When neither exists, run a full first review.
-- [ ] Apply step 9 and the re-review status rules in `findings.md`. IDs stay stable; new findings take the next IDs.
-- [ ] Edit the existing summary in place, rendering the delta first: fixed, still open, new. Don't post a second summary.
-- [ ] For each `fixed` or `no-longer-applies` finding, reply once on its inline thread with the status and the head sha, then resolve the thread.
-- [ ] For each still-open finding, leave the existing inline comment. Post a new inline comment only for a new verified blocker or should-fix, or when the anchored line is gone.
+- [ ] Load the previous complete artifact bundle: `findings.json`, `method.md` and its verified snapshot. Use the summary index to identify the prior run. If the bundle or comparison evidence is missing, run a full scoped review; state in method and summary that prior finding continuity and fix attribution could not be verified. A summary/index alone never supports incremental review.
+- [ ] With complete prior evidence, apply step 9 and the re-review status rules in `findings.md`, preserving IDs. Otherwise allocate fresh IDs after the prior index’s `last_id` (or begin a distinct review identity at R1 if no trustworthy index exists), label the round a full review, and do not claim old findings fixed or resolved.
+- [ ] Edit the existing summary in place. With complete prior evidence, render the delta first: fixed, still open, new. In a continuity-limited full review, show current findings and the explicit continuity limit instead. Do not post a second summary.
+- [ ] Only with complete prior evidence, for each `fixed` or `no-longer-applies` finding, reply once on its inline thread with the status and the head sha, then resolve the thread.
+- [ ] Leave existing inline threads untouched when prior continuity is unavailable; put the full review’s findings in the summary without new inline comments. With complete evidence, leave still-open comments and post inline only for new verified blockers or should-fix findings, or when an anchor is gone.
 - [ ] Never duplicate a comment that already carries the same `fudge-review:R<n>` marker.
 
 ## Limits

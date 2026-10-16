@@ -17,7 +17,7 @@ Established from a user-provided reference (a Korean research infographic: cream
 --skeptical: #A3402F;    /* stance color: skeptic */
 ```
 
-Fonts: 'Space Grotesk' (700) for headers/labels/nodes, 'Inter' for body text. Both via Google Fonts.
+Fonts: use system stacks by default (`system-ui, -apple-system, 'Segoe UI', sans-serif`), with weight 700 for headers/labels/nodes. Remote fonts require an explicit choice for the run and system fallbacks; the default works offline.
 
 ## Structural pattern
 

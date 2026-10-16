@@ -1,6 +1,6 @@
 # Accessible UI
 
-Internal capability: enter through the owning public skill. Resolve cross-module and shared paths from the package root (nearest ancestor containing `.fudge-package.json`): `references/modules/<module>/guide.md`, `references/roots/<root>/guide.md`, and `shared/`. In source, use the repository identified by `scripts/skill-manifest.json`, with `modules/`, `fudge-<root>/SKILL.md`, and `shared/`. Local assets and references remain relative to this guide.
+Internal capability: enter through the owning public skill. For package addresses, use `shared/locate.md` at the ancestor containing `.fudge-package.json` (installed) or `scripts/skill-manifest.json` (source). This guide’s own references stay relative to it.
 
 Make the requested task usable across the input, perception, and comprehension needs relevant to its users. Determine the platform, product requirements, target content, and requested endpoint before choosing an assessment standard. Inspect existing components and project conventions. For web work, use the current [WCAG standard](https://www.w3.org/TR/WCAG22/) and the relevant [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/patterns/) for a custom widget; prefer native semantics and behavior when they meet the task. For web work without a specified target level, WCAG 2.2 AA can be a stated **assessment baseline**, not an inferred legal obligation. For native or other platforms, identify the applicable platform guidance and project requirement instead of assuming a web conformance claim.
 

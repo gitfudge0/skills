@@ -1,6 +1,6 @@
 # Interaction design
 
-Internal capability: enter through the owning public skill. Resolve cross-module and shared paths from the package root (nearest ancestor containing `.fudge-package.json`): `references/modules/<module>/guide.md`, `references/roots/<root>/guide.md`, and `shared/`. In source, use the repository identified by `scripts/skill-manifest.json`, with `modules/`, `fudge-<root>/SKILL.md`, and `shared/`. Local assets and references remain relative to this guide.
+Internal capability: enter through the owning public skill. For package addresses, use `shared/locate.md` at the ancestor containing `.fudge-package.json` (installed) or `scripts/skill-manifest.json` (source). This guide’s own references stay relative to it.
 
 Define what happens when a person acts, including what they see while the result is uncertain. Start with their task, the relevant actors, and existing product policy. Inspect the current flow, domain rules, and authoritative project documents before specifying new behavior.
 

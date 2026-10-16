@@ -23,7 +23,7 @@ Cell value is substantive coverage, not mentions. A document that names a system
 - `1` — mentions with some context
 - `0` — absent
 
-Row totals give you the story. Any row summing to `0` or `1` becomes a register entry immediately, type `evidence`, provenance `stated` — you are not inferring that documentation is missing, you are observing it.
+A row with no cell scored `2` becomes a register entry immediately, type `evidence`, provenance `stated`: no supplied source covers it substantively. Count substantive sources separately from contextual mentions; summing mention scores cannot establish substantive coverage.
 
 ## Per-document extraction
 

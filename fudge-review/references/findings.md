@@ -1,6 +1,6 @@
 # findings.json and method.md
 
-Both files live in the output location from SKILL.md. `findings.json` is the only source for every render. A renderer reads it and never adds to it.
+Use this structure in memory for a one-off chat review. When the root requires persistence, both files live in its output location, with the bounded snapshot needed for future comparison. The consolidated result is the only source for every render; a renderer never adds findings.
 
 ## findings.json
 
@@ -28,7 +28,7 @@ Both files live in the output location from SKILL.md. `findings.json` is the onl
 
 Field notes:
 
-- `pr` is null for local reviews. `subject` records the exact comparison, scope, attribution, and a bounded content snapshot including tracked and in-scope untracked files. The snapshot must support old/new comparison after rewritten history. Hash the canonical snapshot. Legacy PR records remain readable; capture their missing snapshot when possible and state any limit.
+- `pr` is null for local reviews. `subject` records the exact comparison, scope and attribution. Persisted reviews also record a bounded content snapshot including tracked and in-scope untracked files; in-memory reviews may leave snapshot fields null. The snapshot must support old/new comparison after rewritten history. Hash the canonical snapshot. Legacy PR records remain readable; capture their missing snapshot when possible and state any limit.
 - `pr.head` is the SHA this round reviewed. An incremental commit range is valid only with unchanged scope/base and verified ancestry.
 - `ci` value `none` renders as "No CI ran". `unread` (CI mode only, when the token can't read checks) renders as "CI status not read".
 - `verdict` and the counts in the verdict line come from open findings with audience `author`. Team findings don't change the verdict. For `subject.kind: local`, any open blocker or should-fix sets `verdict: needs-changes`; otherwise use `no-blocking-findings`. Local reviews never use `mergeable` or `mergeable-after-fixes`. For PRs, severity and the root's CI qualifications govern the verdict.
@@ -83,7 +83,7 @@ From a real review. Both are should-fix.
 
 Rendered:
 
-> 🟠 **R1 Admin creates staff → no invite arrives; staff can never sign in**
+> 🟠 **R1 Admin creates staff → no invite arrives; sign-in remains blocked**
 > Cause: the invite call is commented out, and nothing re-sends it later.
 > Fix: hold the UI until the follow-up lands; the follow-up backfills accounts never sent an invite.
 > Where: `app/services/admin/create_support_staff_service.rb:28`
@@ -94,7 +94,7 @@ Rendered:
 > Fix: add `rate_limit`; leave patient accounts out of the check.
 > Where: `app/controllers/admin/support_staff_controller.rb` (`validate_email`)
 
-R2 carries an Impact line because its title shows a wrong message, not the privacy leak behind it. R1 has none, because "can never sign in" is already the harm.
+R2 carries an Impact line because its title shows a wrong message, not the privacy leak behind it. R1 has none, because "sign-in remains blocked" is already the harm.
 
 As stored (the `evidence` text is illustrative):
 
@@ -102,7 +102,7 @@ As stored (the `evidence` text is illustrative):
 [
   {
     "id": "R1", "severity": "should-fix", "topic": "correctness",
-    "title": "Admin creates staff → no invite arrives; staff can never sign in",
+    "title": "Admin creates staff → no invite arrives; sign-in remains blocked",
     "cause": "The invite call is commented out, and nothing re-sends it later.",
     "impact": null,
     "fix": "Hold the UI until the follow-up lands; the follow-up backfills accounts never sent an invite.",

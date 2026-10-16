@@ -40,7 +40,7 @@ Follow package-root `shared/artifacts.md`; the default category is `report-deck`
 
 ## Shell and composition
 
-Read [deck shell and component examples](references/composition.md) for exact markup. Reuse `assets/report.css` and `assets/deck.js`; do not reinvent the runtime. The reference retains grid structure, exact class names, content budgets, mock grounding, and composition archetypes.
+Read [deck shell and component examples](references/composition.md) for exact markup. Reuse `assets/report.css`; decks also reuse `assets/deck.js`. Scrolling reports use the normal-flow shell without the deck runtime. The reference retains grid structure, exact class names, content budgets, mock grounding, and composition archetypes.
 
 ## Design language
 
@@ -59,17 +59,19 @@ Only when asked — the HTML is the primary deliverable.
 
 Reuse the HTML’s established style unless the user requests a different PDF style. Invoke the bundled script by its resolved absolute path, for example `bash <renderer-directory>/scripts/html-to-pdf.sh <report.html> <report.pdf>`. Set `STYLE` only for an intentional override. Do not ask for a style again solely because output is frozen.
 
-One landscape page per slide, always rendered in **light mode** (PDFs are light regardless of the on-screen theme). It drives a **headless Chromium-family browser** to execute Mermaid JS and honor `@media print`; choose a renderer that supports both.
+For decks, one landscape page per slide, always rendered in **light mode** (PDFs are light regardless of the on-screen theme). It drives a **headless Chromium-family browser** to execute Mermaid JS and honor `@media print`; choose a renderer that supports both.
 - `STYLE=<style>` pins one of the 7 visual styles for the render (validated; invalid values error out).
 - Set `CHROME_BIN=/path/to/chrome` to pick a browser; bump `RENDER_MS=6000` if diagrams come out blank.
-- **Verify the page count equals the number of `.slide` sections.** Don't trust `file foo.pdf` or a `/Count` grep — both misreport for Chrome PDFs. Use a PDF parser for the page count, for example:
+- **For decks, verify the page count equals the number of `.slide` sections.** Don't trust `file foo.pdf` or a `/Count` grep — both misreport for Chrome PDFs. Use a PDF parser for the page count, for example:
   ```bash
   python3 -c "from pypdf import PdfReader; print(len(PdfReader('foo.pdf').pages))"
   ```
 
 ## Verify before handoff
 
-Use an available browser automation tool when practical: drive a `file://` load at viewport 1280×720, set `data-theme` to `light` then `dark`, step every slide with `ArrowRight`, screenshot each, and log any slide where `scrollHeight > clientHeight`. This catches overflow and theme-specific breakage that the naked eye misses. Then read the screenshots. Use the installed tool’s documented import/API contract. If rendering tools are unavailable, report the unverified visual checks.
+For decks, use an available browser automation tool when practical: drive a `file://` load at viewport 1280×720, set `data-theme` to `light` then `dark`, step every slide with `ArrowRight`, screenshot each, and log any slide where `scrollHeight > clientHeight`. This catches overflow and theme-specific breakage that the naked eye misses. Then read the screenshots. Use the installed tool’s documented import/API contract. If rendering tools are unavailable, report the unverified visual checks.
+
+For scrolling reports, use the normal-flow shell and verification in `references/composition.md`; slide/navigation and slide-count PDF requirements below apply only to decks.
 
 Open the deck and check — these fail *silently*:
 - **Navigation:** arrow keys and ‹ › advance slides, progress bar updates, prev/next disable at the ends (clamp, no wrap).

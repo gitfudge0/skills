@@ -21,13 +21,13 @@ Use the existing project-skill location if the repo already has one, or the call
     rationale.md    # every contested call + the alternatives rejected + why
 ```
 
-`<project>` is derived from the project name. The reference set is fixed at seven files — do not add an eighth because a round produced more material than expected.
+`<project>` is derived from the project name. The layout above is an example. Emit only references needed by the approved scope, combine short related topics, and split substantial topics when their routing warrants it. A focused setup may need no references.
 
 ## SKILL.md is short and always-read
 
 It carries the rules that apply to every file the agent touches, plus a pointer to which reference file to open for depth on a given topic. **Depth lives in the references, not in `SKILL.md`.** Target roughly 80 lines.
 
-The discipline is that `SKILL.md` is loaded on every task in that repo, so every line in it is paid for on every task. A rule that only applies when touching the database layer is not an always-read rule — it is a line in `architecture.md` and a routing pointer in `SKILL.md`.
+The discipline is that `SKILL.md` is loaded on every task in that repo, when the host’s project pointer loads it, so keep that always-read path short. A rule that only applies when touching the database layer is not an always-read rule — it is a line in `architecture.md` and a routing pointer in `SKILL.md`.
 
 ## rationale.md is a register, not a changelog
 
@@ -51,17 +51,17 @@ Its job is to stop a future agent — human or otherwise — from reopening a se
 | workflow | `workflow.md` |
 | security | `security.md` |
 
-Observability does not get a file of its own. When the archetype gate opens that seventh round, its rules fold into `architecture.md` — logging boundaries, what must never be logged, metrics and tracing, health checks and rollback discipline are all statements about the shape of the system, and splitting them off strands them where nobody looks.
+In the example layout, observability shares `architecture.md`. When operational capabilities need this round, route its rules to the references agents will consult for those operations; use a dedicated file when substantial guidance warrants it.
 
 `tooling.md` receives no round. Tooling is resolved in Phase 0.5 by detection, and the file carries **the check-command spec and any linter config delta** — not prose restating what the linter already enforces. Its two asked rows are put during the workflow round (pre-commit hooks, and the one command that checks everything) but the answers are written here, because that is where an agent looks for how to verify its own work.
 
-The documentation round has no reference of its own — none of the seven is a `docs.md`. Route its rules by the surface they govern: comment density with `architecture.md`, doc comments on the public API with `structure.md` (which already owns the public-versus-internal line), and the ADR question with `rationale.md`, which is where recorded reasoning already lives.
+In the example layout, documentation rules share the relevant references. Route its rules by the surface they govern: comment density with `architecture.md`, doc comments on the public API with `structure.md` (which already owns the public-versus-internal line), and the ADR question with `rationale.md`, which is where recorded reasoning already lives.
 
 ---
 
 ## Template — the generated SKILL.md
 
-Angle-bracket slots are project-specific. Everything outside them is structural and stays.
+Use the template’s applicable sections; omit empty or irrelevant sections and adapt reference pointers to the emitted files. Angle-bracket slots are project-specific.
 
 ```markdown
 ---
@@ -114,7 +114,7 @@ Read `references/testing.md` for shape, doubles, and determinism; `references/to
 
 ## When this file doesn't cover it
 
-Name the ambiguity and ask. Do not improvise a rule, and do not treat silence as permission. An uncovered case permits bounded implementation judgment using established patterns. Escalate consequential unresolved choices; do not invent a new authoritative rule.
+Use established patterns and bounded judgment for routine uncovered details. Escalate consequential unresolved choices and proposed policy changes; do not invent authoritative rules.
 
 Why a rule is what it is: `references/rationale.md`, which also records which rules depend on which.
 ```

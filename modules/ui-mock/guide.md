@@ -1,6 +1,6 @@
 # UI mocks
 
-Internal capability: enter through the owning public skill. Resolve cross-module and shared paths from the package root (nearest ancestor containing `.fudge-package.json`): `references/modules/<module>/guide.md`, `references/roots/<root>/guide.md`, and `shared/`. In source, use the repository identified by `scripts/skill-manifest.json`, with `modules/`, `fudge-<root>/SKILL.md`, and `shared/`. Local assets and references remain relative to this guide.
+Internal capability: enter through the owning public skill. For package addresses, use `shared/locate.md` at the ancestor containing `.fudge-package.json` (installed) or `scripts/skill-manifest.json` (source). This guide’s own references stay relative to it.
 
 Make a reviewable visual answer to the user's design question. The output is one self-contained HTML file. It may show a single frame, a few consequential states, or alternatives side by side. A mock request authorizes edits to the mock artifact. Choosing a variant records a design decision; product changes require an explicit build request or an implementation caller that already has that scope.
 

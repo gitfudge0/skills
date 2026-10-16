@@ -4,7 +4,7 @@
 
 ### Phase 0 — Ground it
 
-**Classify the archetype first, before a single question.** One of: library, CLI tool, long-running service, web app, data pipeline, embedded, mobile. The archetype prunes roughly a third of the bank up front — a library is never asked about health checks, a CLI is never asked about transaction boundaries. The `◇` rows in `dimension-bank.md` are the ones this gate controls.
+**Inspect capabilities before asking questions.** Identify the project’s surfaces and current or approved planned needs using the applicability table in `dimension-bank.md`. Product labels suggest where to look; they never exclude persistence, concurrency, compatibility or operational concerns.
 
 **If the repo already has code**, ask which starting point the user wants, in these words:
 
@@ -45,7 +45,7 @@ Before showing anything, check the accumulated rules across rounds for **conflic
 
 The shape of a real one: one round declared everything past the controller to be trusted input, while another required background jobs to authorize. Resolved by redefining "entry point" to include jobs, rake tasks, and console scripts — jobs are boundaries, not downstream code.
 
-**Past 60 accumulated rules, offer a re-filter** at a harder admissibility bar — keep what is both violable today *and* costly when broken, challenge what is true but rarely load-bearing. Offer it; never apply it automatically. The user may ship the full set. 60 is a tunable starting threshold, not a law. Start-clean runs are the ones that hit it: every round proposes a full default set and accepting them all compounds, where build-on-what's-here is bounded by the habits actually in the code.
+**Past 60 accumulated rules, offer a re-filter** at a harder admissibility bar — keep what is both grounded in current or approved planned capabilities *and* costly when broken, challenge what is true but rarely load-bearing. Offer it; never apply it automatically. The user may ship the full set. 60 is a tunable starting threshold, not a law. Start-clean runs are the ones that hit it: every round proposes a full default set and accepting them all compounds, where build-on-what's-here is bounded by the habits actually in the code.
 
 Then present the full rule set as a **compact table**. Everything upstream of that table is drafting. Everything downstream is emission after approval, not a git commit.
 
@@ -59,7 +59,7 @@ Where Phase 0.5 found tooling gaps, show the exact config that would be added an
 
 If the workflow round settled any working defaults, they appear in the Phase 2 table and are emitted as a `## Working defaults` section in the conventions `SKILL.md`, in the format of package-root `shared/working-defaults.md`. Unset keys are omitted. They are proposed with a stance like any other row, not a separate approval gate.
 
-On a **start-clean** run, finish with a conformance report: where existing code does not match the rules just agreed. That was promised in the Phase 0 question and it is a report, not a work order — no file is edited to close a gap. Write it to this skill's Output location below unless the user or a calling workflow names another path.
+On a **start-clean** run, finish with a conformance report: where existing code does not match the rules just agreed. That was promised in the Phase 0 question and it is a report, not a work order — no file is edited to close a gap. Use package-root `shared/artifacts.md` with skill `setup`, honoring caller destinations.
 
 Show the exact pointer in the active host instruction file (`AGENTS.md` for Codex, `CLAUDE.md` for Claude). Add it when that exact change is authorized; prior authorization applies. Preserve existing instructions.
 
@@ -70,8 +70,8 @@ Six rounds baseline. Groups in the dimension bank do not map one-to-one onto rou
 | # | Round | Covers |
 |---|---|---|
 | 1 | structure | Repo topology, layering and import direction, directory organization, where a new feature starts, public vs. internal surface, config, the `utils/` junk-drawer rule |
-| 2 | architecture | Error model, trust boundaries, abstraction threshold, DI posture, state and mutation, domain types vs. primitives, plus the archetype-gated rows (concurrency, persistence, SDK wrapping, versioning) |
-| — | observability | **Inserted after architecture only for long-running service, web app, or data pipeline.** Logging, what must never be logged, metrics and tracing, health checks and rollback discipline. Pruned entirely for every other archetype |
+| 2 | architecture | Error model, trust boundaries, abstraction threshold, DI posture, state and mutation, domain types vs. primitives, plus the capability-dependent rows (concurrency, persistence, SDK wrapping, versioning) |
+| — | observability | Inserted after architecture when operational capabilities need it. Logging, sensitive data, metrics, tracing, health checks and rollback discipline relevant to the actual system |
 | 3 | testing | Framework and location, test floor, shape, doubles, determinism, coverage stance, test-first or tests-with, flaky test policy |
 | 4 | workflow | Branching, commits, PR discipline, what blocks merge, definition of done, release process — **plus tooling's two asked rows**: pre-commit hooks, and the one command that checks everything. Both are about the loop around writing code, not the code itself. **Also the working defaults, asked once**: `endpoint`, `commit-push`, `external-writes`, `runtime` (package-root `shared/working-defaults.md`) |
 | 5 | docs | Comment density and what earns one, doc comments on public API, whether decisions are recorded as ADRs |

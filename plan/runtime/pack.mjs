@@ -228,7 +228,7 @@ if (/<doc-plan\b/.test(html)) {
   if (root.kids.length && !root.kids.some((k) => k.a.aux === 'scope')) warn('doc-plan: no <doc-claim aux="scope"> — end with what is not changing');
   const i = root.kids.findIndex((k) => k.a.aux); if (i >= 0 && root.kids.slice(i).some((k) => !k.a.aux)) warn('doc-plan: aux claims go last');
   root.kids.forEach(walk);
-  const nAsk = (flat.match(/<doc-ask\b/g) || []).length; if (nAsk > 6) warn(`doc-plan: ${nAsk} decisions — 2 to 5; ask only about forks that change what you build, and default the rest`);
+  const nAsk = (flat.match(/<doc-ask\b/g) || []).length; if (nAsk > 5) warn(`doc-plan: ${nAsk} decisions — aim for at most 5 per review; retain only unresolved forks that change what you build`);
 }
 
 for (const m of html.matchAll(/<doc-changes\b([^>]*)>/g)) { const a = attrs(m[1]); if (!['new', 'changed', 'deleted'].some((k) => parseInt(a[k], 10) > 0)) warn(`line ${lineOf(m.index)} <doc-changes>: give new="N", changed="N" or deleted="N" (files) — with none it draws nothing`); }
@@ -236,7 +236,7 @@ for (const m of html.matchAll(/<doc-changes\b([^>]*)>/g)) { const a = attrs(m[1]
 if (/<doc-plan\b/.test(html)) {   // a plan starts with a title, not a label line or a goal sentence
   const k = html.match(/<p\s+class=["']?kicker\b/i); if (k) warn(`line ${lineOf(k.index)}: a plan has no label line above its title — remove <p class="kicker">; the page hides it`);
   const m = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i); const t = m ? stripTags(m[1]).replace(/\s+/g, ' ').trim() : '';
-  if (t && (wc(t) > 8 || /[.!?](\s|$)/.test(t))) warn(`line ${lineOf(m.index)}: the <h1> of a plan is a title, not a sentence — name the change and the place in 3 to 7 words ("Scheduling Sent Messages in PostBox"); the level-1 claims say what changes`);
+  if (t && (wc(t) < 3 || wc(t) > 7 || /[.!?](\s|$)/.test(t))) warn(`line ${lineOf(m.index)}: the <h1> of a plan is a title, not a sentence — name the change and the place in 3 to 7 words ("Scheduling Sent Messages in PostBox"); the level-1 claims say what changes`);
 }
 
 /* ── words: the blocks are the document; prose only joins them ── */
@@ -248,19 +248,12 @@ if (/<doc-plan\b/.test(html)) {   // a plan starts with a title, not a label lin
   if (long) warn(`${long} paragraph${long > 1 ? 's' : ''} over 40 words (longest ${longest}) — two short sentences, then a block; move the rest into a caption, a pin or a table`);
   if (slow) warn(`${slow} sentence${slow > 1 ? 's' : ''} over 25 words — split them; one idea per sentence`);
   if (total > 350 || (blocks && total / blocks > 45)) warn(`${total} words of prose for ${blocks} block${blocks === 1 ? '' : 's'} — aim for ≤ 350 words and ≤ ~30 per block; cut, or show it as a block`);
-  // ASD-STE100 (Simplified Technical English). This is a partial check: it knows a few common unapproved words and the countable writing rules, not the full dictionary.
-  const STE = { utilize: 'use', utilizes: 'uses', leverage: 'use', leverages: 'uses', facilitate: 'help', facilitates: 'helps', 'in order to': 'to', subsequently: 'then', aforementioned: 'this', 'prior to': 'before', additionally: 'also', furthermore: 'also', however: 'but', comprehensive: 'full', robust: 'strong', seamless: 'smooth', seamlessly: 'smoothly', numerous: 'many', commence: 'start', commences: 'starts', begin: 'start', begins: 'starts', terminate: 'stop', terminates: 'stops', demonstrate: 'show', demonstrates: 'shows', indicate: 'show', indicates: 'shows', ensure: 'make sure', ensures: 'makes sure', verify: 'make sure', verifies: 'makes sure', perform: 'do', performs: 'does', 'carry out': 'do', 'carries out': 'does', obtain: 'get', obtains: 'gets', provide: 'give', provides: 'gives', should: 'must', shall: 'must', might: 'can', 'with respect to': 'about', 'due to the fact that': 'because' };
-  const prose = stripTags(bare.replace(/<(code|kbd|pre)\b[\s\S]*?<\/\1>/gi, ' ')); const text = prose.toLowerCase();
-  const hits = Object.keys(STE).filter((w) => new RegExp(`\\b${w}\\b`).test(text)); if (/[a-z,] may\b/.test(prose)) { hits.push('may'); STE.may = 'can'; }
-  if (hits.length) warn(`ASD-STE100 words: ${hits.slice(0, 8).map((w) => `"${w}" → "${STE[w]}"`).join(', ')}${hits.length > 8 ? ` … ${hits.length - 8} more` : ''}`);
-  const contr = [...new Set(text.match(/\b(?:\w+n['’]t|(?:it|that|there|here|what|let|who)['’]s|\w+['’](?:re|ve|ll))\b/g) || [])];
-  if (contr.length) warn(`ASD-STE100: no contractions — ${contr.slice(0, 6).join(', ')}`);
-  const perfect = [...new Set(text.match(/\b(?:has|have|had) (?:been|already|not|never|just) \w+|\b(?:has|have|had) \w+ed\b/g) || [])];
-  if (perfect.length) warn(`ASD-STE100: use simple tenses, not "has/have + verb" — ${perfect.slice(0, 4).map((x) => `"${x}"`).join(', ')}`);
-  const passive = [...new Set(text.match(/\b(?:is|are|was|were|be|been|being) (?:\w+ed|written|sent|made|done|shown|taken|given|kept|held|read|run|set|put|built|chosen) by\b/g) || [])];
-  if (passive.length) warn(`ASD-STE100: use the active voice — ${passive.slice(0, 4).map((x) => `"${x}"`).join(', ')} (say who does it first)`);
-  let six = 0; for (const m of bare.matchAll(/<(p|li|dd|doc-note)\b[^>]*>([\s\S]*?)<\/\1>/gi)) if (stripTags(m[2]).split(/(?<=[.!?])\s+/).filter((x) => x.trim()).length > 6) six++;
-  if (six) warn(`ASD-STE100: ${six} paragraph${six > 1 ? 's' : ''} with more than 6 sentences — split`); }
+  // These are review suggestions, not a controlled-language certification.
+  const simpler = { utilize: 'use', utilizes: 'uses', leverage: 'use', leverages: 'uses', 'in order to': 'to', aforementioned: 'this', 'prior to': 'before', 'due to the fact that': 'because' };
+  const prose = stripTags(bare.replace(/<(code|kbd|pre)\b[\s\S]*?<\/\1>/gi, ' ')).toLowerCase();
+  const hits = Object.keys(simpler).filter((word) => new RegExp(`\\b${word}\\b`).test(prose));
+  if (hits.length) warn(`Plain language: consider ${hits.map((word) => `"${word}" → "${simpler[word]}"`).join(', ')} where meaning stays the same`);
+}
 
 /* ── inline assets ── */
 let packed = html; let inlined = 0;

@@ -2,9 +2,9 @@
 
 Assets in example output use `assets/`; the guide resources below use `../assets/` relative to this reference. Copy assets to the output bundle or inline them for a single-file deliverable.
 
-## Required shell
+## Deck shell
 
-Every report needs: a `.deck` of `.slide` sections, the nav chrome, the theme toggle, and `deck.js`. Include the Mermaid `<script>` only if the deck has diagrams.
+A deck needs: a `.deck` of `.slide` sections, the nav chrome, the theme toggle, and `deck.js`. Include the Mermaid `<script>` only if the deck has diagrams.
 
 ```html
 <!DOCTYPE html>
@@ -70,9 +70,33 @@ Every report needs: a `.deck` of `.slide` sections, the nav chrome, the theme to
 
 `deck.js` wires it all: nav (arrows/swipe/buttons, clamps at the ends — no wrap), theme persistence (light/dark via the on-screen button), visual-style cycling (press **T** to step through the 7 styles, persisted), per-slide overflow auto-scroll, and Mermaid (re)init on load and theme switch. Don't reimplement it inline.
 
+## Scrolling report shell
+
+For a dense reference report, use normal-flow `main` and `section` elements, with `report.css` and the explicit override below. Omit `.deck`, `.slide`, navigation, progress, the theme-toggle button and `deck.js`. The CSS follows the OS theme unless the document pins `data-theme`; an interactive toggle is optional and must be implemented and checked separately. Reuse component markup without slide wrappers. Mermaid, when needed, requires its own initialization.
+
+```html
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report</title>
+  <link rel="stylesheet" href="assets/report.css">
+  <style>
+    body { overflow: auto; }
+    main { max-width: 72rem; margin: 0 auto; padding: 2rem; }
+    main > section { margin-block: 2rem; }
+    @media print { main { max-width: none; padding: 0; } }
+  </style>
+</head>
+<body><main><h1>Report title</h1><section><h2>Finding</h2></section></main></body>
+</html>
+```
+
+Report verification checks normal document scrolling, section links, narrow viewport reflow and the chosen theme. Deck navigation, slide overflow and one-page-per-slide checks apply only to decks. A report PDF follows normal pagination; inspect its pages rather than comparing their count to `.slide` elements.
+
 ## Components
 
-All classes are defined in `report.css` — read it for exact structure. Use these as building blocks **inside each slide's `.slide-inner`**; mix freely. Index:
+All classes are defined in `report.css` — read it for exact structure. Use these inside a deck slide’s `.slide-inner`, or a scrolling report’s normal-flow section. Index:
 
 | Class group | For | Note |
 |---|---|---|
