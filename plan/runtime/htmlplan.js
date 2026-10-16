@@ -941,6 +941,11 @@ define('doc-schema', (el) => {
 });
 
 /* ── doc-calls (call-tree diff) ───────────────────── */
+let callView = 'english';
+const setCallView = (next) => {
+  callView = next;
+  $$('doc-calls').forEach((tree) => tree._setCallView?.(next));
+};
 define('doc-calls', (el) => {
   const m = NW.parseCalls(srcOf(el)); errBox(el, m.errors, 'doc-calls');
   const cid = el.id || 'calls' + $$('doc-calls').indexOf(el);
@@ -965,16 +970,16 @@ define('doc-calls', (el) => {
   const head = h('div', { class: 'cl-head' });
   const filesBox = el.hasAttribute('files') ? h('div', { class: 'cl-files' }) : null;
   const glyph = (n) => { const bits = []; for (let x = n; x.parent; x = x.parent) { const sibs = x.parent.children; bits.unshift(x === sibs[sibs.length - 1] ? (x === n ? '└─ ' : '   ') : (x === n ? '├─ ' : '│  ')); } return bits.join(''); };
-  let open = null, view = 'english';
+  let open = null, view = callView;
   const names = new Map();
-  const viewButtons = [];
   const setView = (next) => {
     view = next; el.dataset.callView = view;
     names.forEach((nm, n) => { nm.textContent = view === 'english' ? (n.english || n.name) : n.name; });
-    viewButtons.forEach((button, i) => button.setAttribute('aria-pressed', String((i === 0) === (view === 'english'))));
+    viewButton.setAttribute('aria-checked', String(view === 'technical'));
   };
-  const viewToggle = h('div', { class: 'cl-view', role: 'group', 'aria-label': 'Call description format' });
-  ['Plain English', 'Technical'].forEach((text, i) => { const button = h('button', { type: 'button', class: 'cl-view-btn', onclick: () => setView(i ? 'technical' : 'english') }, text); viewButtons.push(button); viewToggle.append(button); });
+  el._setCallView = setView;
+  const viewButton = h('button', { type: 'button', class: 'cl-view-btn', role: 'switch', 'aria-label': 'Technical call descriptions', onclick: () => setCallView(callView === 'english' ? 'technical' : 'english') });
+  const viewToggle = h('div', { class: 'cl-view' }, h('span', null, 'Plain English'), viewButton, h('span', null, 'Technical'));
   const render = () => {
     rows.innerHTML = ''; names.clear();
     let plus = 0, minus = 0, tilde = 0;
@@ -1028,7 +1033,7 @@ define('doc-calls', (el) => {
   render();
   const body = filesBox ? h('div', { class: 'cl-split' }, rows, filesBox) : rows;
   el.prepend(head, body, el.getAttribute('caption') ? h('div', { class: 'fig-cap' }, el.getAttribute('caption')) : '');
-  el._reset = () => { open = null; view = 'english'; render(); };
+  el._reset = () => { open = null; setCallView('english'); render(); };
   if (m.nodes.some((n) => (n.name.length + (n.note || '').length) > 70) || filesBox) el.classList.add('wide');
 });
 
