@@ -48,12 +48,19 @@
     <doc-calls title="Scheduling" caption="Tap the second call to open its code.">
 <script type="text/plain">
 ~ <Composer/>                                  @ web/src/composer/Composer.tsx:41
+  english: Show the message composer
 +   <**SendLaterMenu**/>                       @ web/src/composer/SendLaterMenu.tsx:12
+  english: Show the new Send later menu
 +     POST /api/scheduled                      @ web/src/api/scheduled.ts:9
+  english: Ask the server to schedule the message
 + **createScheduled**(req)                     @ server/src/scheduled/routes.ts:18
+  english: Handle the scheduling request
 +   **assertUnderLimit**(userId)               @ server/src/scheduled/limits.ts:6
+  english: Check that the user is below the scheduling limit
 +   **buildScheduled**(body, session)          @ server/src/scheduled/build.ts:10
+  english: Build the scheduled message from the request and session
 +   insert into scheduled_messages             @ server/src/scheduled/store.ts:22
+  english: Save the scheduled message
 </script>
     </doc-calls>
     <doc-claim at="server/src/scheduled/routes.ts:18">
@@ -128,10 +135,15 @@ export async function assertUnderLimit(userId: string) {
     <doc-calls title="The list" caption="One query. It reads only this user's rows.">
 <script type="text/plain">
 ~ <Sidebar/>                                   @ web/src/nav/Sidebar.tsx:30
+  english: Show the sidebar
 +   <**ScheduledFolder**/>                     @ web/src/scheduled/ScheduledFolder.tsx:14
+  english: Show the new Scheduled folder
 +     GET /api/scheduled                       @ web/src/api/scheduled.ts:21
+  english: Ask the server for scheduled messages
 + **listScheduled**(req)                       @ server/src/scheduled/routes.ts:34
+  english: Handle the scheduled message list request
 +   select … where user_id = $1 order by send_at   @ server/src/scheduled/store.ts:40
+  english: Read this user’s messages, soonest first
 </script>
     </doc-calls>
   </doc-claim>
@@ -141,9 +153,13 @@ export async function assertUnderLimit(userId: string) {
     <doc-calls title="Actions" caption="Each one checks the status first.">
 <script type="text/plain">
 + <**ScheduledRow**/>                          @ web/src/scheduled/ScheduledRow.tsx:9
+  english: Show a scheduled message row
 +   Edit → PATCH /api/scheduled/:id            @ server/src/scheduled/routes.ts:48
+  english: Update the scheduled message
 +   Send now → **sendNow**(id)                 @ server/src/scheduled/routes.ts:66
+  english: Send the message now
 +   Cancel → **cancelScheduled**(id)           @ server/src/scheduled/routes.ts:80
+  english: Cancel the scheduled message
 </script>
     </doc-calls>
   </doc-claim>
@@ -183,10 +199,15 @@ failed    -cancel-> cancelled : Cancel
     <doc-calls title="The worker" caption="The existing send function is called, not changed.">
 <script type="text/plain">
 + **runScheduledSends**()                      @ server/src/scheduled/worker.ts:12
+  english: Run the scheduled send worker
 +   **claimDue**(now, 100)                     @ server/src/scheduled/store.ts:58
+  english: Claim up to 100 messages that are due
 +   sendMessage(message)                       @ server/src/mail/send.ts:20
+  english: Send the message
 +   if ok → markSent(id)                       @ server/src/scheduled/store.ts:74
+  english: Mark the message as sent if sending succeeds
 +   else markFailed(id, error)                 @ server/src/scheduled/store.ts:82
+  english: Mark the message as failed if sending fails
 </script>
     </doc-calls>
     <doc-claim at="server/src/scheduled/store.ts:58">
@@ -223,7 +244,9 @@ RETURNING id;   -- no row back: too late, tell the user
     <doc-calls title="Retry" caption="The same worker picks it up.">
 <script type="text/plain">
 ~ runScheduledSends()                          @ server/src/scheduled/worker.ts:12
+  english: Run the scheduled send worker
 ?   claimRetries(now)                          @ server/src/scheduled/store.ts:96   -- attempts < 3, 5 minutes apart
+  english: Claim messages that are due for retry
 </script>
     </doc-calls>
     <doc-ask id="retry">
@@ -251,7 +274,9 @@ RETURNING id;   -- no row back: too late, tell the user
     <doc-calls title="Notify" caption="Uses the notifications that exist today.">
 <script type="text/plain">
 ~ markFailed(id, error)                        @ server/src/scheduled/store.ts:82
+  english: Mark the message as failed
 +   if (attempts >= 3) notify(userId, …)       @ server/src/notify/notify.ts:15
+  english: Notify the user after the third failed attempt
 </script>
     </doc-calls>
   </doc-claim>

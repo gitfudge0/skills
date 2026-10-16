@@ -91,16 +91,23 @@ failed    -cancel-> cancelled : Cancel
 <doc-calls title="Scheduling" caption="Tap the second call to open its code.">
 <script type="text/plain">
 ~ <Composer/>                                  @ web/src/composer/Composer.tsx:41
+  english: Show the message composer
 +   <**SendLaterMenu**/>                       @ web/src/composer/SendLaterMenu.tsx:12
+  english: Show the new Send later menu
 +     POST /api/scheduled                      @ web/src/api/scheduled.ts:9
+  english: Ask the server to schedule the message
 -   legacyQueue(message)                       @ web/src/composer/queue.ts:30   -- no longer used
+  english: Remove the old message queue call
 ?   trackScheduled()                           @ web/src/metrics.ts:14          -- proposed; strike it if not wanted
+  english: Record a scheduling metric
     saveDraft()                                @ web/src/drafts.ts:22
+  english: Save the draft
 </script>
 </doc-calls>
 ```
 
 - One call per line. Column 0 is the mark: `+` new call, `-` removed, `~` changed entrypoint, `?` proposed (drawn dashed), a space for context. An entrypoint's text starts at column 2, marked or not. Each level adds 2 spaces.
+- Follow each call with `english: Authored plain English` on its own line. This annotation belongs to the preceding call and does not add a row or affect indentation. Author both versions together and keep their meaning aligned; annotations must be nonempty and appear at most once per call. The header’s **Plain English | Technical** toggle defaults to Plain English. Legacy calls without an annotation display their technical text in both views; no translation is inferred. Switching preserves row identity, nesting, source links, open code, comments and strikes. Both views retain the same source paths and notes; the existing narrow-screen layout hides them.
 - `**bold**` marks a **new symbol**. A `+` row without bold is a new call to something that exists.
 - End a line with `@ path:line` and, if needed, `-- one clause`. A blank line starts a new entrypoint.
 - A tap on a row opens the code there. Pack embeds ±6 lines when it can find the file (`--root <repo>`, `ref="<sha>"`), so always write `@ path:line`. Files that do not exist yet open nothing. For a new function in a file that exists, cite the line it goes after. Either way, give the important one a level-3 claim with a sketch; a tap then opens that claim as well.

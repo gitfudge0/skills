@@ -76,6 +76,8 @@ Each level answers one question. The question picks the exhibit.
 
 ## Rules
 
+For each `doc-calls` row, author a paired plain English explanation with a following `english: …` line (see [blocks](references/blocks.md)). Plain English is the default; the header toggle reveals the technical version without changing the row or its feedback.
+
 `pack.mjs` checks 2, 3, 5, 6 (the count), 7 and 11. The rest are yours to check.
 
 1. **Split the top level by behaviour.** Never by file, layer or order of work. Behaviour is the one split the reader can judge without reading code.

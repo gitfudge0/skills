@@ -128,7 +128,7 @@ NW.parseTree = function parseTree(text) {
 };
 
 /** Call-tree diff DSL → { roots:[node], nodes:[node], errors }
- *  node = { id, depth, mark:' '|'+'|'-'|'~'|'?', name, kind, loc, file, line, note, tags:{ui,net,data,cond,new}, children, parent }
+ *  node = { id, depth, mark:' '|'+'|'-'|'~'|'?', name, english, kind, loc, file, line, note, tags:{ui,net,data,cond,new}, children, parent }
  *  line grammar:  [mark] <indent> name  [@ file[:line]]  [-- note]      indent = 2 spaces per level (tabs ok)
  *  name conventions:  <Comp/> → ui · post(/…) | POST … | fetch( → net · if (…) / else → cond · **bold** or *x* → new symbol
  *  a leading `…` line ("… 5 framework frames") is a collapsed gap row */
@@ -137,6 +137,15 @@ NW.parseCalls = function parseCalls(text) {
   // pass 1: split mark from body, measure indent of the body; depth is relative to the shallowest line
   const pre = []; text.replace(/\t/g, '  ').split('\n').forEach((raw, i) => {
     if (!raw.trim() || /^\s*\/\//.test(raw)) return;
+    const english = raw.trim().match(/^english:\s*(.*)$/);
+    if (english) {
+      const previous = pre[pre.length - 1];
+      if (!previous) m.errors.push(`line ${i + 1}: english: needs a preceding call`);
+      else if (previous.english != null) m.errors.push(`line ${i + 1}: duplicate english: for the preceding call`);
+      else if (!english[1]) m.errors.push(`line ${i + 1}: english: needs authored text`);
+      else previous.english = english[1];
+      return;
+    }
     // column 0 is the rail: a mark char or a space. Body indent is measured from column 1, so
     //   "+   foo()"  and  "    foo()"  are the same depth (2 spaces per level after the rail).
     let mark = ' ', line = raw; const mm = raw.match(/^([+\-~?·=])(?=[ \t])/); if (mm) { mark = mm[1] === '·' || mm[1] === '=' ? ' ' : mm[1]; line = ' ' + raw.slice(1); }
@@ -145,7 +154,7 @@ NW.parseCalls = function parseCalls(text) {
   // depth 0 = the body column of the shallowest MARKED line (marks sit in column 0, so a root reads "+ foo" / "~ foo");
   // an unmarked root may start at column 0 or at that same column — both are depth 0. 2 spaces per level after that.
   const marked = pre.filter((x) => x.marked); const base = marked.length ? Math.min(...marked.map((x) => x.col)) : Math.min(...pre.map((x) => x.col), 0);
-  pre.forEach(({ ln, mark, col, marked: isM, line }) => {
+  pre.forEach(({ ln, mark, col, marked: isM, line, english = '' }) => {
     const rel = isM ? col - base : (col < base ? 0 : col - base);
     const depth = Math.max(0, Math.round(rel / 2));
     let body = line.trim(); let note = '', loc = '';
@@ -158,7 +167,7 @@ NW.parseCalls = function parseCalls(text) {
     const [file, lineNo] = loc.split(':');
     const bold = body.match(/\*\*([^*]+)\*\*/); const comp = name.match(/<([\w.]+)/); const lastCall = [...name.matchAll(/([A-Za-z_$][\w$.]*)\s*\(/g)].pop();
     const sym = bold ? bold[1] : comp ? comp[1] : lastCall ? lastCall[1] : name.replace(/\(.*$/, '').trim();
-    const node = { id: `n${m.nodes.length + 1}`, depth, mark, name, sym, kind, loc, file: file || '', line: lineNo || '', note, isNew, gap, children: [], parent: null, ln };
+    const node = { id: `n${m.nodes.length + 1}`, depth, mark, name, english, sym, kind, loc, file: file || '', line: lineNo || '', note, isNew, gap, children: [], parent: null, ln };
     let d = depth; if (d > stack.length) { m.errors.push(`line ${ln}: indented ${d} levels but the line above is at ${stack.length - 1} — indent by exactly 2 spaces per level`); d = stack.length; }
     node.depth = d; stack.length = d;
     if (d === 0 || !stack[d - 1]) { if (d > 0) m.errors.push(`line ${ln}: no parent for indented line`); node.depth = 0; m.roots.push(node); }
@@ -956,9 +965,18 @@ define('doc-calls', (el) => {
   const head = h('div', { class: 'cl-head' });
   const filesBox = el.hasAttribute('files') ? h('div', { class: 'cl-files' }) : null;
   const glyph = (n) => { const bits = []; for (let x = n; x.parent; x = x.parent) { const sibs = x.parent.children; bits.unshift(x === sibs[sibs.length - 1] ? (x === n ? '└─ ' : '   ') : (x === n ? '├─ ' : '│  ')); } return bits.join(''); };
-  let open = null;
+  let open = null, view = 'english';
+  const names = new Map();
+  const viewButtons = [];
+  const setView = (next) => {
+    view = next; el.dataset.callView = view;
+    names.forEach((nm, n) => { nm.textContent = view === 'english' ? (n.english || n.name) : n.name; });
+    viewButtons.forEach((button, i) => button.setAttribute('aria-pressed', String((i === 0) === (view === 'english'))));
+  };
+  const viewToggle = h('div', { class: 'cl-view', role: 'group', 'aria-label': 'Call description format' });
+  ['Plain English', 'Technical'].forEach((text, i) => { const button = h('button', { type: 'button', class: 'cl-view-btn', onclick: () => setView(i ? 'technical' : 'english') }, text); viewButtons.push(button); viewToggle.append(button); });
   const render = () => {
-    rows.innerHTML = '';
+    rows.innerHTML = ''; names.clear();
     let plus = 0, minus = 0, tilde = 0;
     m.roots.forEach((root, ri) => {
       if (ri) rows.append(h('div', { class: 'cl-sep' }));
@@ -969,7 +987,7 @@ define('doc-calls', (el) => {
         const row = h('div', { class: ['cl-row', 'm-' + (n.mark === ' ' ? 'ctx' : n.mark === '+' ? 'add' : n.mark === '-' ? 'rem' : n.mark === '~' ? 'mod' : 'ask'), 'k-' + n.kind, isStruck && 'struck', n.gap && 'gap', open === n && 'open'].filter(Boolean).join(' '), 'data-id': n.id });
         row.append(h('span', { class: 'cl-rail' }, self ? '✕' : n.mark === ' ' ? '·' : n.mark === '-' ? '−' : n.mark));
         row.append(h('span', { class: 'cl-tg' }, glyph(n)));
-        const nm = h('span', { class: 'cl-nm' + (n.isNew ? ' new' : '') }, n.name); row.append(nm);
+        const nm = h('span', { class: 'cl-nm' + (n.isNew ? ' new' : '') }, view === 'english' ? (n.english || n.name) : n.name); names.set(n, nm); row.append(nm);
         if (n.note) row.append(h('span', { class: 'cl-note' }, n.note));
         if (n.loc) row.append(h('span', { class: 'cl-loc' }, n.loc));
         if (S.comments[`calls:${cid}:${n.id}`]) row.classList.add('has-comment');
@@ -1004,12 +1022,13 @@ define('doc-calls', (el) => {
     });
     const struckN = Object.keys(S.strikes).filter((k) => k.startsWith(`calls:${cid}:`)).length;
     head.innerHTML = ''; head.append(h('span', { class: 'cl-kind' }, 'calls'), el.getAttribute('title') ? h('span', { class: 'cl-title' }, el.getAttribute('title')) : '', h('span', { class: 'cl-counts' }, h('b', { class: 'p' }, '+' + plus), ' ', h('b', { class: 'm' }, '−' + minus), ' ', h('b', { class: 'a' }, '~' + tilde), ` · ${m.roots.length} entrypoint${m.roots.length === 1 ? '' : 's'}`, struckN ? ` · ${struckN} struck` : ''));
+    head.append(viewToggle); setView(view);
     if (filesBox) { const f = fileRows(); filesBox.innerHTML = ''; filesBox.append(h('div', { class: 'cl-files-h' }, `files touched · ${Object.keys(f).length}`)); Object.entries(f).sort(([a], [b]) => a.localeCompare(b)).forEach(([file, v]) => { const i = file.lastIndexOf('/'); filesBox.append(h('div', { class: 'cl-file' + (v.new ? ' new' : ' mod') }, h('span', { class: 'mk' }, v.new ? '+' : '~'), h('span', { class: 'nm' }, h('i', null, i >= 0 ? file.slice(0, i + 1) : ''), file.slice(i + 1)), h('small', null, `${v.n}`))); }); }
   };
   render();
   const body = filesBox ? h('div', { class: 'cl-split' }, rows, filesBox) : rows;
   el.prepend(head, body, el.getAttribute('caption') ? h('div', { class: 'fig-cap' }, el.getAttribute('caption')) : '');
-  el._reset = () => { open = null; render(); };
+  el._reset = () => { open = null; view = 'english'; render(); };
   if (m.nodes.some((n) => (n.name.length + (n.note || '').length) > 70) || filesBox) el.classList.add('wide');
 });
 
