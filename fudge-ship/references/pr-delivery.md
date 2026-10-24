@@ -26,29 +26,16 @@ Protect existing work:
 
 Coordinator check runs do not transfer ownership. A worker that loads ship keeps its assigned role and does not launch another main worker. A worker's claim or task status never establishes success.
 
-| Situation | Mechanism |
-|---|---|
-| Grove CLI, `grove` skill and desktop available | **Grove (preferred)** for worktree and worker sessions |
-| Required Grove CLI, skill, desktop connectivity or session capability unavailable | **Native fallback:** `git worktree add` plus the host's own subagent as main worker; direct implementation if subagents are unavailable |
-
-Choose by observed capabilities, not host name. Explain a fallback only when it materially affects isolation, continuity or delivery. Roles, endpoint, publishing, verification and cleanup rules do not change with the mechanism. Never switch mechanisms silently mid-task; a Grove-managed worktree stays with Grove while Grove is reachable.
-
-**Grove setup.**
-
-1. Read the `grove` skill for current commands (registration, sessions, tasks, observation, results, recovery, removal) and CLI help.
-2. Confirm connectivity and ownership with read-only discovery; check exit status and the JSON envelope.
-3. Reuse the registered project, workspace, task worktree and active main-worker session. Register the repository when needed, in its established or the user's selected workspace.
-4. Never create a workspace unasked, move a project, initialize Git, install Grove or its skill, auto-launch the desktop, or edit saved Grove state. Ask about an unresolved workspace choice while continuing discovery.
-5. Use returned paths and opaque IDs; record worktree, session, task and request IDs.
+**Mechanism.** Create the task worktree with `git worktree add` and run the host's own subagent there as main worker; implement directly if subagents are unavailable. Record the worktree path, branch and base SHA. Roles, endpoint, publishing, verification and cleanup rules do not change when work runs directly.
 
 **Worker prompt** (self-contained UTF-8, written outside worker-owned paths):
 
 - Role, scope, acceptance conditions, owned and off-limits paths, integration duty, preserving others' edits.
 - Settled decisions, governing instructions, relevant ship guidance, base SHA, target branch, endpoint with its publishing and cleanup limits.
 - Delegation allowance: total concurrency and lane ownership; each extra writing worker gets its own worktree and session via the same mechanism. Read-only subagents may investigate or review; respect host limits and avoid needless recursion.
-- Required checks, raw evidence and revisions to return, blockers to report, and the return path (Grove task result, or the subagent's final report).
+- Required checks, raw evidence and revisions to return, blockers to report, and the return path (the subagent's final report).
 
-**During the run.** Follow `shared/execution.md` (decomposition, dependency order, one writer per worktree, collect every worker's terminal result); with Grove, link child tasks to the parent. The coordinator keeps consequential decisions and reruns build, test, lint and other required checks on the integrated state. After a failed or ambiguous operation, inspect state before retrying; with Grove, follow its idempotent launch rules.
+**During the run.** Follow `shared/execution.md` (decomposition, dependency order, one writer per worktree, collect every worker's terminal result). The coordinator keeps consequential decisions and reruns build, test, lint and other required checks on the integrated state. After a failed or ambiguous operation, inspect state before retrying.
 
 ## Restack check
 
@@ -121,14 +108,12 @@ Name pending human approvals or mergeability; never claim approved or mergeable.
 
 ### Clean up after the PR endpoint
 
-After the endpoint (PR opened: on creation; PR ready: after checks and review), clean up only task-created worktrees and designated sessions, from Grove or the fallback. Keep pre-existing or reused user resources, anything needed for active review, unresolved work or recovery, and the branch backing the PR.
+After the endpoint (PR opened: on creation; PR ready: after checks and review), clean up only task-created worktrees and designated sessions. Keep pre-existing or reused user resources, anything needed for active review, unresolved work or recovery, and the branch backing the PR.
 
 1. Confirm ownership, that required commits are in the pushed branch, and local/remote head agreement.
 2. Inspect uncommitted, relevant untracked and ignored files; preserve dirty or unpushed work and report the blocker.
 3. Save evidence and recovery details outside the checkout being removed.
 4. Stop only the task's sessions or subagents, after collecting their results.
-5. Remove:
-   - **Grove:** inspect any teardown script, then follow the `grove` skill's `worktrees remove` confirmation and poll `removal-status` to completion. Never bypass teardown or treat an accepted request as done; after failures inspect state and keep recovery IDs.
-   - **Fallback:** `git worktree remove <path>` (no `--force` over dirty state), then `git worktree prune`.
+5. Remove with `git worktree remove <path>` (no `--force` over dirty state), then `git worktree prune`.
 
 Report removed and retained resources and any failures. Cleanup never authorizes extra publishing or deleting unrelated resources.

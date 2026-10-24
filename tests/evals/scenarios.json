@@ -544,18 +544,6 @@
       ]
     },
     {
-      "id": "ship-grove-fallback",
-      "root": "ship",
-      "prompt": "Ship the pagination fix in a worktree.",
-      "fixture": "Git repository with a small pagination bug; Grove CLI not installed or not reachable.",
-      "invariants": [
-        "Detects that Grove is unavailable without repeated retries",
-        "Falls back to a native git worktree and continues the run",
-        "Reports the fallback in one short note",
-        "Does not block or ask the user to install Grove"
-      ]
-    },
-    {
       "id": "setup-bring-up-stack-for-manual-testing",
       "root": "setup",
       "prompt": "Get the web and server up so I can test this branch manually.",
