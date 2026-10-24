@@ -12,7 +12,8 @@
     "hillclimb": {"source": "fudge-hillclimb", "modules": [], "roots": ["ship"]},
     "prototype": {"source": "fudge-prototype", "modules": [], "roots": ["ship"]},
     "visual-parity": {"source": "fudge-visual-parity", "modules": [], "roots": ["ship"]},
-    "ticket": {"source": "fudge-ticket", "modules": [], "roots": []}
+    "ticket": {"source": "fudge-ticket", "modules": [], "roots": []},
+    "retro": {"source": "fudge-retro", "modules": [], "roots": ["review", "investigation", "setup", "ship"]}
   },
   "modules": {
     "design-for-recognition": {"owner": "design", "source": "modules/design-for-recognition"},

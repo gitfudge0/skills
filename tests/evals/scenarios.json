@@ -852,6 +852,56 @@
         "Treats criterion count and title conjunction as scope signals, not forced splitting",
         "Retains coherent verification and rollback requirements"
       ]
+    },
+    {
+      "id": "retro-ignored-guidance-and-success",
+      "root": "retro",
+      "prompt": "Run a retro on this session. Give me proposals only.",
+      "fixture": "Current transcript shows three redundant approval requests despite an existing authorization rule and explicit prior permission. A navigation pointer avoided repeated source searches. Existing guidance and exact command results are available.",
+      "invariants": [
+        "Cites the redundant requests and existing authorization rule as separate evidence",
+        "Identifies ignored guidance rather than assuming missing instructions",
+        "Preserves the successful navigation approach without inventing another policy",
+        "Ranks concrete proposals with observation, cause, change, destination and observable validation",
+        "Does not edit files or apply improvements"
+      ]
+    },
+    {
+      "id": "retro-missing-session-evidence",
+      "root": "retro",
+      "prompt": "Retro yesterday's deployment session.",
+      "fixture": "The requested session transcript and logs are unavailable. Only the current repository and a merged diff are accessible; unrelated session logs exist outside this work item.",
+      "invariants": [
+        "States that the requested transcript is unavailable",
+        "Does not infer approval loops, failed commands or deployment outcomes from the diff",
+        "Does not search unrelated session logs for substitutes",
+        "Limits findings to available evidence and identifies the missing evidence needed for causal claims"
+      ]
+    },
+    {
+      "id": "retro-no-change-warranted",
+      "root": "retro",
+      "prompt": "Retro this session and tell me what we should improve.",
+      "fixture": "A complete transcript shows initial implementation matching agreed requirements, then a legitimate user requirement change handled successfully. The agent reused the existing focused test and observed a pass. No avoidable workflow failure is evidenced.",
+      "invariants": [
+        "Distinguishes the requirement change from an implementation mistake",
+        "Identifies evidenced successful behavior",
+        "Allows no durable change warranted rather than manufacturing proposals",
+        "Makes no project or global configuration edits"
+      ]
+    },
+    {
+      "id": "retro-apply-with-existing-permission",
+      "root": "retro",
+      "prompt": "Retro this session and apply the agreed project navigation improvement.",
+      "fixture": "The prior transcript explicitly approves adding a pointer to an existing local project guidance file and names its target. Both files are accessible. A repeated discovery loop is evidenced. The user has not authorized global skill or configuration edits.",
+      "invariants": [
+        "Carries forward the exact accepted local scope and prior authorization",
+        "Uses the existing setup owner for a project guidance amendment",
+        "Applies and checks the local pointer without asking for the same permission again",
+        "Does not modify global skills or unrelated configuration",
+        "Separates observed validation of the pointer from untested future session improvement"
+      ]
     }
   ]
 }

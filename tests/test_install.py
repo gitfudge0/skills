@@ -29,7 +29,7 @@ class InstallerTests(unittest.TestCase):
         return result
     def test_defaults_and_standalone_navigation(self):
         self.run_install('install', '-a', 'codex')
-        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'investigation', 'bug-fix', 'hillclimb', 'prototype', 'visual-parity', 'ticket']} | {'fudge-plan'})
+        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'investigation', 'bug-fix', 'hillclimb', 'prototype', 'visual-parity', 'ticket', 'retro']} | {'fudge-plan'})
         spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
         builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
@@ -49,6 +49,11 @@ class InstallerTests(unittest.TestCase):
     def test_specialists_install_alone_as_portable_copies(self):
         required = {
             'investigation': [],
+            'retro': ['agents/openai.yaml',
+                      'references/roots/review/guide.md',
+                      'references/roots/investigation/guide.md',
+                      'references/roots/setup/guide.md',
+                      'references/roots/ship/guide.md'],
             'bug-fix': ['references/modules/engineering/guide.md',
                         'references/modules/verification/guide.md',
                         'references/roots/ship/references/pr-delivery.md'],
@@ -70,6 +75,9 @@ class InstallerTests(unittest.TestCase):
                 self.assertEqual([p.name for p in self.skills.iterdir()], [package.name])
                 for address in resources:
                     self.assertTrue((package / address).is_file(), address)
+                if root == 'retro':
+                    self.assertEqual((package / 'agents/openai.yaml').read_bytes(),
+                                     (self.repo / 'fudge-retro/agents/openai.yaml').read_bytes())
                 # Move the install away from its source/build: concrete links must
                 # still resolve, including routes rewritten to the primary root.
                 portable = self.base / ('portable-' + root)
@@ -123,7 +131,7 @@ class InstallerTests(unittest.TestCase):
             self.assertTrue((directory / 'fudge-ship/references/roots/setup/references/project-verification.md').is_file())
             self.assertTrue((directory / 'fudge-ship/references/modules/engineering/references/refactoring.md').is_file())
             self.assertTrue((directory / 'fudge-review/shared/test-effectiveness.md').is_file())
-        self.assertIn('Installed 12 public skills for 4 agents', result.stdout)
+        self.assertIn('Installed 13 public skills for 4 agents', result.stdout)
         # Noninteractive default selection has the same retirement behavior.
         old = self.home / targets[0] / 'fudge-write'
         old.symlink_to(self.repo / 'fudge-write')

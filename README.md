@@ -1,6 +1,6 @@
 # Fudge skills
 
-Twelve public skills cover setup, shipping, design, UX, review, planning, issue tracking and focused specialist workflows. Each installed root bundles its dependency closure and works independently; bundled guidance is loaded only when needed.
+Thirteen public skills cover setup, shipping, design, UX, review, planning, issue tracking and focused specialist workflows. Each installed root bundles its dependency closure and works independently; bundled guidance is loaded only when needed.
 
 | Public skill | Purpose | Internal capabilities |
 |---|---|---|
@@ -16,6 +16,9 @@ Twelve public skills cover setup, shipping, design, UX, review, planning, issue 
 | `fudge:prototype` | Answer one empirical question with a disposable experiment | UI prototype machinery, API/algorithm harnesses, measurement |
 | `fudge:visual-parity` | Preserve appearance or verify matched renderings | Controlled before/after captures, design QA and scoped verification |
 | `fudge:ticket` | Draft, reconcile and update issue-tracker tickets, drafts first | User-facing story splits with platform subtasks, ticket-vs-implementation reconciliation, post-merge comments and transitions; also routed from ship |
+| `fudge:retro` | Learn from a coding session and propose durable improvements | Bounded evidence, cause tracing, ranked proposals; routes application to existing owners |
+
+Invoke `fudge:retro` explicitly to review a current or specified session. It ranks evidence-backed improvements and stops at proposals unless application is requested. Codex invocation metadata disables implicit selection; the same explicit-only rule is stated in the skill for other hosts. Inspired by [Matt Pocock's retro skill](https://github.com/mattpocock/skills/blob/main/skills/engineering/retro/SKILL.md).
 
 Ship is a router with a task-to-guide map: focused engineering and verification modules, native PR delivery guidance, and conditional comprehensive/recovery references. Shared execution remains the single delegation and integration policy. Git implementation defaults to an isolated worktree and PR-ready delivery; explicit local-only and analysis endpoints remain available. Ship routes focused requests directly to their specialist without asking users to choose. Features and refactoring remain in ship. Specialists retain their analysis, artifact or selected production endpoint and never re-enter the ship router. A narrow request loads only its selected guidance. Asking for button labels does not start a mock workflow; asking what's missing before building can stop at requirements analysis. Rendering a report deck is optional. Mindmap has been removed.
 
@@ -29,14 +32,15 @@ Requires Python 3.9+ and Bash. Clone this repository, then run:
 ./install.sh -a claude -a codex --all -y
 ./install.sh -a codex --root ship --copy -y
 ./install.sh -a codex --root plan -y
+./install.sh -a codex --root retro -y
 ./install.sh -a codex --root bug-fix --copy -y
 ./install.sh list
 ./install.sh remove -a codex --all -y
 ```
 
-Supported terminals use a four-step keyboard installer: agents → roots → method → review. Use arrows to move, Space to select, Enter to continue, Esc to go back, and q to cancel. Back preserves selections. Narrow or unsupported terminals use numbered choices. Conflicts appear before applying changes. Defaults select all twelve roots. Supported targets: Claude, Codex, Cursor, OpenCode. Non-interactive installation requires an explicit target (`-a`); it applies without a prompt. `-y` bypasses interactive confirmation. Non-interactive removal requires `-y`.
+Supported terminals use a four-step keyboard installer: agents → roots → method → review. Use arrows to move, Space to select, Enter to continue, Esc to go back, and q to cancel. Back preserves selections. Narrow or unsupported terminals use numbered choices. Conflicts appear before applying changes. Defaults select all thirteen roots. Supported targets: Claude, Codex, Cursor, OpenCode. Non-interactive installation requires an explicit target (`-a`); it applies without a prompt. `-y` bypasses interactive confirmation. Non-interactive removal requires `-y`.
 
-The installer offers twelve public roots. Each package includes its dependency closure, internal guides, and shared policies. Symlinks point to generated `.fudge-build` packages; copies include an installer ownership marker and can be updated by rerunning the installer.
+The installer offers thirteen public roots. Each package includes its dependency closure, internal guides, and shared policies. Symlinks point to generated `.fudge-build` packages; copies include an installer ownership marker and can be updated by rerunning the installer.
 
 ### Migration
 
@@ -48,7 +52,7 @@ Installation removes retired entries only when they are owned by this checkout's
 
 ```text
 fudge-{ship,review,design,ux,setup}/SKILL.md
-fudge-{investigation,bug-fix,hillclimb,prototype,visual-parity,ticket}/SKILL.md
+fudge-{investigation,bug-fix,hillclimb,prototype,visual-parity,ticket,retro}/SKILL.md
 modules/<capability>/guide.md
 plan/SKILL.md                  # standalone public skill, also bundled into ship
 shared/{execution.md,writing.md,artifacts.md,locate.md,working-defaults.md,artifact_path.py}
