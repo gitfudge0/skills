@@ -958,8 +958,8 @@
         "Creates a fresh task branch before implementation in a task-owned checkout or linked worktree, leaving the original checkout on its existing branch",
         "Does not install or replace the user app, restart it, or install host prerequisites; application verification uses isolated QA apps or CI",
         "Fetches remote base immediately before PR creation; integrates new base commits and reruns affected checks and review before publishing",
-        "Includes merge-risk output for final base/head snapshot in PR description: overall judgment, CI state, five dimensions, evidence gaps and precautions",
-        "Updates assessment after changed head, base or relevant evidence and preserves repository PR template",
+        "Includes a visible Markdown Merge risk section in PR description: prominent overall judgment, five-dimension table with status and evidence, final base/head snapshot, CI state, evidence gaps and precautions; no unfilled placeholders",
+        "Updates the existing assessment after changed head, base or relevant evidence without duplication; preserves repository PR template and reads back published body",
         "Stops ready for human review and does not merge or request duplicate publishing authorization"
       ]
     },
@@ -970,7 +970,7 @@
       "invariants": [
         "Creates fresh task branch targeting main and follows repository branch and commit patterns",
         "Fetches and integrates base changes before opening PR and rechecks freshness before merge; revalidates affected checks and reviews",
-        "Includes current merge-risk assessment in PR description and preserves unknown evidence",
+        "Includes current merge-risk assessment as a visible Markdown section with overall verdict and five-dimension status/verdict/evidence table, snapshot, CI, gaps and precautions; preserves unknown evidence",
         "Treats invocation as authorization for scoped push, PR and squash merge without another permission gate",
         "Does not bypass protections or self-approve; queued automatic merge remains pending until observed merged",
         "Confirms actual squash merge and resulting SHA before reporting completion"

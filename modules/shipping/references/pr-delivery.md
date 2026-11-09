@@ -94,6 +94,33 @@ After final synchronization and verification, load package-root `references/root
 
 Include the skill’s output: overall risk and decisive reason, assessed base/head snapshot and CI state, all five dimensions (alignment, impact, verification, rollback cost, error detection), evidence gaps and precautions. Preserve unknowns and accepted risks. This assessment is not approval and does not replace code review or checks. Revalidate affected conclusions and update the description after fixes, base synchronization, or changed evidence; before automatic merge, ensure it describes the current snapshot.
 
+#### PR description format
+
+Use the following visible Markdown section for both `pr-review` and `pr-squash-main`. Keep it outside collapsed details and code fences in the published body. Fit it into an existing risk heading when the repository template has one, preserving other sections and human-written context. Use Markdown rather than an image or HTML dashboard so the assessment stays readable and editable in the PR.
+
+```markdown
+## Merge risk
+
+**Overall risk: <low | medium | high | unknown>** — <decisive reason and main precaution>.
+
+| Dimension | Assessment | Evidence / gap |
+| --- | --- | --- |
+| <status> Alignment | <verdict> | <match to request and issue> |
+| <status> Impact | <verdict> | <affected users, paths and contracts> |
+| <status> Verification | <verdict> | <observed checks and missing coverage> |
+| <status> Rollback cost | <verdict> | <recovery path and cost> |
+| <status> Error detection | <verdict> | <how failures would be noticed> |
+
+**Assessed snapshot:** base `<sha>` → head `<sha>`.
+**CI:** <passed | failed | pending | absent | not read> — <check link or evidence>.
+**Evidence gaps:** <material unknowns or missing checks; “None identified” only when supported>.
+**Precautions:** <specific mitigation, recovery or follow-up; include attributed accepted risks, or “None identified” when supported>.
+```
+
+Replace every placeholder with current evidence. Choose row status independently: `✅` supported/favorable, `⚠️` concern or gap, `❓` unknown, or `➖` N/A with a reason. Always include a plain-language verdict (for example good, small, poor, low, decent, unknown); symbols and color alone must not carry meaning. These are dimension judgments, not checkboxes or numerical scores: favorable rows never cancel a material risk. Derive the overall judgment using the merge-risk guide's overrides, not a row count. Do not copy the reference image's medium rating or example verdicts into an assessment without evidence.
+
+When updating the PR, replace the existing assessment rather than appending another one; preserve surrounding content. Read back the saved PR body to confirm the overall verdict, five table rows and snapshot are present and no placeholders remain. If publication or readback fails, report that gap rather than claiming the assessment is published.
+
 ### Synchronize the target
 
 - Run the [restack check](#restack-check) before publishing and again before declaring readiness.
