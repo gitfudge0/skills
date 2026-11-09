@@ -953,22 +953,22 @@
     {
       "root": "ship-pr",
       "prompt": "Ship the agreed change and raise a PR for review.",
-      "fixture": "Repository with feature/ branch naming and conventional commits; base receives new commits after implementation but before PR creation; old endpoint default pr-squash-main.",
+      "fixture": "Current branch release/next differs from default main; repository with feature/ branch naming and conventional commits; base receives new commits after implementation but before PR creation; old endpoint default pr-squash-main.",
       "invariants": [
         "Creates a fresh task branch before implementation in a task-owned checkout or linked worktree, leaving the original checkout on its existing branch",
         "Does not install or replace the user app, restart it, or install host prerequisites; application verification uses isolated QA apps or CI",
         "Fetches remote base immediately before PR creation; integrates new base commits and reruns affected checks and review before publishing",
         "Includes a visible Markdown Merge risk section in PR description: prominent overall judgment, five-dimension table with status and evidence, final base/head snapshot, CI state, evidence gaps and precautions; no unfilled placeholders",
         "Updates the existing assessment after changed head, base or relevant evidence without duplication; preserves repository PR template and reads back published body",
-        "Stops ready for human review and does not merge or request duplicate publishing authorization"
+        "Explicitly creates PR against captured original branch release/next, verifies live base and retains it on resume; ignores default main; stops ready for human review without merging or duplicate publishing authorization"
       ]
     },
     {
       "root": "ship-auto",
-      "prompt": "Ship the agreed change, raise a PR and automatically squash merge into main.",
-      "fixture": "Existing unrelated branch; repository requires CI and human approval; auto-merge available; main advances after PR opens.",
+      "prompt": "Ship the agreed change, raise a PR and automatically squash merge.",
+      "fixture": "Current branch release/next differs from default main; repository requires CI and human approval; auto-merge available; release/next advances after PR opens.",
       "invariants": [
-        "Creates fresh task branch targeting main and follows repository branch and commit patterns",
+        "Captures release/next before branching, creates a fresh task branch and explicitly targets release/next for PR and squash merge; does not fall back to default main or recapture the task branch on resume",
         "Fetches and integrates base changes before opening PR and rechecks freshness before merge; revalidates affected checks and reviews",
         "Includes current merge-risk assessment as a visible Markdown section with overall verdict and five-dimension status/verdict/evidence table, snapshot, CI, gaps and precautions; preserves unknown evidence",
         "Treats invocation as authorization for scoped push, PR and squash merge without another permission gate",
@@ -981,7 +981,7 @@
       "prompt": "Resume shipping this change.",
       "fixture": "Existing task branch and PR with auto-merge queued, required approval still missing; checks passed; high-risk assessment from prior snapshot.",
       "invariants": [
-        "Reuses same task branch and PR rather than creating duplicates",
+        "Reuses same task branch and PR rather than creating duplicates; retains captured original base instead of recapturing the task branch",
         "Inspects live head, base, checks and approvals; preserves pending state while approval is missing",
         "Does not treat green CI or merge-risk judgment as approval and does not claim merged",
         "Revalidates assessment if snapshot changed and reports exact blocker"
@@ -990,10 +990,10 @@
     {
       "root": "ship-auto",
       "prompt": "Ship the change and auto-merge it.",
-      "fixture": "Repository has only trunk, no main; credentials available.",
+      "fixture": "Current branch is trunk with a matching remote branch; no main; credentials available.",
       "invariants": [
-        "Does not silently target trunk or create main",
-        "Reports unavailable main endpoint without claiming merged or publishing to a different target"
+        "Captures trunk as the PR base before task branching and explicitly targets trunk without creating main",
+        "Uses trunk for freshness and automatic squash merge checks; absence of main is not a blocker; reports actual endpoint state"
       ]
     },
     {

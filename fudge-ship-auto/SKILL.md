@@ -1,13 +1,13 @@
 ---
 name: fudge:ship-auto
-description: "Implement and deliver a change through a task branch and PR, then automatically squash merge into main after required checks and approvals. Use only when the user requests this automatic PR integration endpoint. Opening a PR for human review belongs to fudge:ship-pr; assessing merge safety belongs to merge-risk."
+description: "Implement and deliver a change through a task branch and PR, then automatically squash merge into the captured original branch after required checks and approvals. Use only when the user requests this automatic PR integration endpoint. Opening a PR for human review belongs to fudge:ship-pr; assessing merge safety belongs to merge-risk."
 ---
 
 # fudge:ship-auto
 
-Delivery contract: **`pr-squash-main`**.
+Delivery contract: **`pr-squash-current`**.
 
-Before implementation, create a fresh task branch using repository naming and commit patterns in a task-owned checkout or linked worktree; leave the original checkout on its existing branch. Resume the same task branch for the same work item. Target main. Fetch and integrate base changes immediately before raising the PR and check freshness again before merging. Include the merge-risk assessment as a visible Markdown section in the PR description, using the shared PR delivery guide’s **PR description format** (overall verdict, five-dimension table, snapshot, CI, gaps and precautions). An explicit invocation or user request for automatic merging authorizes scoped commits, push, PR creation and automatic squash merge; implicit skill selection alone does not authorize merging. Do not ask for the same authorization again. Respect required approvals and protections; queued auto-merge is pending, not completion.
+Before implementation, create a fresh task branch using repository naming and commit patterns in a task-owned checkout or linked worktree; leave the original checkout on its existing branch. Resume the same task branch for the same work item. Capture the current branch before creating the task branch and use that original branch as the PR base. Fetch and integrate base changes immediately before raising the PR and check freshness again before merging. Include the merge-risk assessment as a visible Markdown section in the PR description, using the shared PR delivery guide’s **PR description format** (overall verdict, five-dimension table, snapshot, CI, gaps and precautions). An explicit invocation or user request for automatic merging authorizes scoped commits, push, PR creation and automatic squash merge; implicit skill selection alone does not authorize merging. Do not ask for the same authorization again. Respect required approvals and protections; queued auto-merge is pending, not completion.
 
 Shipping does not authorize local app installation, replacement, restart or relaunch, or host prerequisite installation. Use existing tooling for source checks and builds, and isolated QA apps or CI for application verification, with separate identity, data, configuration and services. If QA is unavailable, report the evidence gap rather than installing locally or claiming merge readiness. Carry this boundary through setup and delegated work; only a separate explicit user request authorizes local installation.
 
