@@ -1,6 +1,6 @@
 ---
 name: fudge:ticket
-description: Draft, reconcile and update issue-tracker tickets, drafts first. Use to turn mocks, plans or conversations into small user-facing stories, reconcile a ticket with what was built, comment on or transition a ticket after merge, or draft replies to ticket comments. Works with Jira, GitHub Issues, Linear or paste-ready text; implementation belongs to ship.
+description: "Draft, split, reconcile, or update issue-tracker tickets and acceptance criteria from plans, mocks, conversations, or implemented changes. Use for Jira, GitHub Issues, Linear, post-merge status updates, or replies to ticket comments; provide paste-ready drafts when tracker access is unavailable. Implementing a ticket belongs to fudge:ship."
 ---
 
 # fudge:ticket

@@ -1,6 +1,6 @@
 ---
 name: fudge:visual-parity
-description: Verify matched renderings or preserve existing appearance through an implementation change. Use for before/after visual parity; approving a new design belongs to design QA.
+description: "Compare before/after UI renderings for visual regressions, or preserve existing appearance during a refactor or migration. Use for screenshot comparisons, pixel parity, or checking that a UI still looks the same across scoped states and viewports. Creating or approving a new visual design belongs to fudge:design."
 ---
 
 # fudge:visual-parity

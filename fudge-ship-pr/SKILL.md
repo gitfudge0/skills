@@ -1,6 +1,6 @@
 ---
 name: fudge:ship-pr
-description: Ship a change on a new task branch and raise a verified, reviewed PR for human review. Use when a PR is requested without automatic merging.
+description: "Implement and deliver a change on a task branch with verification, review, and a PR for human review. Use when asked to build a feature or prepare existing changes and open a pull request without automatic merging. Reviewing an existing PR belongs to fudge:review; automatic integration belongs to fudge:ship-auto."
 ---
 
 # fudge:ship-pr

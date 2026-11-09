@@ -1,6 +1,6 @@
 ---
 name: fudge:ux
-description: "Resolve user needs, research, navigation, content, interaction states, accessibility, and experience measurement. Use for usability and task-flow questions; route visual composition and mocks to design."
+description: "Resolve usability, user needs, navigation, labels and copy, forms, interaction states, accessibility, and experience measurement. Use for user research, UX audits, clearer wording, or deciding how a task flow should work. Visual styling, screen mockups, and component appearance belong to fudge:design."
 ---
 
 # fudge:ux

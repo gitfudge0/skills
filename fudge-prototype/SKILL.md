@@ -1,6 +1,6 @@
 ---
 name: fudge:prototype
-description: Build a disposable runnable experiment to answer one interaction, API, algorithm or performance question. Use for exploratory prototypes; production features and refactoring remain in ship.
+description: "Build and run a disposable prototype, technical spike, or proof of concept to answer a bounded interaction, API, algorithm, or performance question. Use to test feasibility or compare ideas before production implementation. Static screen mockups belong to fudge:design; production features and refactoring belong to fudge:ship."
 ---
 
 # fudge:prototype

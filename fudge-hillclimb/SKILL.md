@@ -1,6 +1,6 @@
 ---
 name: fudge:hillclimb
-description: Improve a measured performance metric within a bounded workload, correctness contract and time or cost budget. Use for empirical optimization; preserve behavior and accept no improvement when evidence warrants it.
+description: "Optimize performance through measured experiments while preserving correctness. Use to make code faster, reduce latency, memory, or resource cost, or improve throughput against a representative workload and time or cost budget. Establish a baseline before changing code; explanation-only performance diagnosis belongs to fudge:investigation."
 ---
 
 # fudge:hillclimb

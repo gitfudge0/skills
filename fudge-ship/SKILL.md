@@ -1,6 +1,6 @@
 ---
 name: fudge:ship
-description: Ship a change into the current branch locally. Use for implementation and refactoring without a PR; PR delivery belongs to fudge:ship-pr or fudge:ship-auto.
+description: "Implement features, refactor code, or complete an agreed change with verification and local integration into the current branch. Use for production implementation without a requested PR. Bounded defect repair belongs to fudge:bug-fix; PR delivery belongs to fudge:ship-pr or fudge:ship-auto."
 ---
 
 # fudge:ship

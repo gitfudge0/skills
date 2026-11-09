@@ -1,6 +1,6 @@
 ---
 name: fudge:retro
-description: Review a coding session for evidenced workflow friction, identify causes, and propose small durable improvements to guidance, tooling, checks, and skill orchestration. Use when explicitly asked for a retrospective; code defects belong to review and unresolved diagnosis to investigation.
+description: "Analyze a coding session for workflow friction, causes, and small durable improvements to guidance, tooling, checks, or skill orchestration. Use when explicitly asked for a retrospective, session postmortem, or lessons learned. Code review belongs to fudge:review; unresolved runtime causes belong to fudge:investigation."
 ---
 
 # fudge:retro

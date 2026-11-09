@@ -1,6 +1,6 @@
 ---
 name: fudge:review
-description: "Review a PR or local diff, re-review changed code, and render or share verified findings. Use for correctness, security, contracts, conventions, and test coverage review."
+description: "Review a PR, committed range, or local changes for correctness, security, API contracts, project conventions, and test coverage. Use for code review, finding defects before integration, or re-reviewing fixes to prior findings. Merge-risk assessment belongs to merge-risk; requested repairs belong to fudge:bug-fix."
 ---
 
 # Review

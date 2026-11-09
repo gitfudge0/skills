@@ -1,6 +1,6 @@
 ---
 name: fudge:bug-fix
-description: Diagnose and repair a bounded defect with reproduction, owning-layer cause tracing and relevant regression evidence. Use for requested bug fixes; explanation-only work belongs to investigation.
+description: "Diagnose, reproduce, and repair a bounded bug, regression, crash, or failing test, then verify the fix with relevant regression evidence. Use when broken behavior should be corrected. Explanation-only debugging belongs to fudge:investigation; new features and broad refactoring belong to fudge:ship."
 ---
 
 # fudge:bug-fix

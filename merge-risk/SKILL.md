@@ -1,6 +1,6 @@
 ---
 name: merge-risk
-description: Assess the risk of merging a PR or scoped local change from code, verification evidence, rollback cost and production detection. Use for merge-risk questions; a full defect review belongs to fudge:review.
+description: "Assess how risky a PR or scoped local change is to merge, using code, verification evidence, blast radius, rollback cost, and production error detection. Use for merge-readiness or rollout-risk questions. This read-only assessment does not merge changes; a full defect review belongs to fudge:review."
 ---
 
 # Merge risk

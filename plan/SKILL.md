@@ -1,6 +1,6 @@
 ---
 name: fudge:plan
-description: Write an implementation plan as one interactive HTML page - a tree of claims (why › what › how › where), each proved by one exhibit (UI mockup, state machine, call stack, schema or code), with the decisions the user has to make placed on the claim they change. Use when the user types /fudge:plan, or asks for a plan, RFC or design before building something that touches more than a couple of files.
+description: "Plan an implementation before building it. Use for an implementation plan, technical RFC, architecture proposal, or comparing approaches and resolving consequential build decisions. Ground the plan in repository evidence and make behavior, dependencies, verification, and open choices reviewable. Visual mockups belong to fudge:design; implementation belongs to fudge:ship."
 ---
 
 # fudge:plan

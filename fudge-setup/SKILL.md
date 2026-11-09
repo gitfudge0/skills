@@ -1,6 +1,6 @@
 ---
 name: fudge:setup
-description: "Set up a project’s coding rules and local run readiness, audit convention drift, or amend approved rules. Use for project setup, running an existing project, focused tooling setup, project verification recipes, diagnosing failed project guidance, project-rule changes, working defaults, and everyday local stack operations (branch or worktree stacks, one-off tasks, dump restores, startup failures)."
+description: "Set up or run an existing project locally, install its prerequisites, troubleshoot startup, or operate branch/worktree environments and containers. Also use to establish or amend project coding rules, audit convention drift, maintain verification recipes, or diagnose ineffective project guidance. Product feature implementation belongs to fudge:ship."
 ---
 
 # fudge:setup

@@ -1,6 +1,6 @@
 ---
 name: fudge:design
-description: "Shape visual hierarchy, screens, components, design systems, static mocks, prototypes, or rendered UI checks. Use for interface expression; route consequential user needs and behavior questions to UX."
+description: "Design, build, or critique screens, components, visual hierarchy, typography, themes, and design systems. Use for UI polish, static mockups, interaction demos, or checking built UI against a chosen design. User needs, navigation, copy, and task-flow decisions belong to fudge:ux; preserving existing appearance belongs to fudge:visual-parity."
 ---
 
 # fudge:design

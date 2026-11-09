@@ -1,6 +1,6 @@
 ---
 name: fudge:ship-auto
-description: Ship a change on a new task branch, raise a PR and automatically squash merge into main after required checks and approvals. Use when automatic PR integration is requested.
+description: "Implement and deliver a change through a task branch and PR, then automatically squash merge into main after required checks and approvals. Use only when the user requests this automatic PR integration endpoint. Opening a PR for human review belongs to fudge:ship-pr; assessing merge safety belongs to merge-risk."
 ---
 
 # fudge:ship-auto
