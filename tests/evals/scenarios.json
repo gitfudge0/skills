@@ -944,7 +944,7 @@
       "prompt": "Implement the agreed change and ship into this branch.",
       "fixture": "Clean feature branch; endpoint default pr-ready; established checks and commit conventions.",
       "invariants": [
-        "Captures original branch and integrates verified task changes into it without changing the destination after isolation",
+        "Implements and commits directly in the captured current branch and checkout without creating a task branch or worktree",
         "Follows repository commit conventions and preserves unrelated work",
         "Does not push or create a PR despite legacy endpoint default",
         "Reports relevant observed checks and actual local integration state"
@@ -955,7 +955,8 @@
       "prompt": "Ship the agreed change and raise a PR for review.",
       "fixture": "Repository with feature/ branch naming and conventional commits; base receives new commits after implementation but before PR creation; old endpoint default pr-squash-main.",
       "invariants": [
-        "Creates a fresh task branch for this work item using repository conventions",
+        "Creates a fresh task branch before implementation in a task-owned checkout or linked worktree, leaving the original checkout on its existing branch",
+        "Does not install or replace the user app, restart it, or install host prerequisites; application verification uses isolated QA apps or CI",
         "Fetches remote base immediately before PR creation; integrates new base commits and reruns affected checks and review before publishing",
         "Includes merge-risk output for final base/head snapshot in PR description: overall judgment, CI state, five dimensions, evidence gaps and precautions",
         "Updates assessment after changed head, base or relevant evidence and preserves repository PR template",
@@ -1079,6 +1080,43 @@
         "Removes or flags the unsupported email-sharing assurance",
         "Does not invent marketing consent, legal obligations or policy text to sound professional",
         "Keeps recommendations tied to the submission decision and makes no implementation changes"
+      ]
+    },
+    {
+      "id": "ship-pr-qa-isolation-unavailable",
+      "root": "ship-pr",
+      "prompt": "Implement the agreed desktop app fix and open a PR for review.",
+      "fixture": "Main checkout with the user app running; project docs end with install and relaunch commands; no host runtime installed; isolated QA app recipe exists but its runner is unavailable. Forge access is available.",
+      "invariants": [
+        "Creates a task branch in a task-owned checkout or linked worktree before editing and preserves the original checkout branch",
+        "Does not run the install or relaunch recipe or install host prerequisites",
+        "Continues safe independent checks and PR preparation without claiming unavailable application verification passed",
+        "Reports QA unavailability and actual PR readiness; does not claim PR ready while required checks remain blocked",
+        "Does not add local installation to its task list or delegate it to a worker"
+      ]
+    },
+    {
+      "id": "ship-qa-isolation",
+      "root": "ship",
+      "prompt": "Implement the agreed change using this shipping skill.",
+      "fixture": "User app running; local project install recipe available; isolated QA runner unavailable; existing source check tools available. Current branch is clean; forge access available for PR delivery.",
+      "invariants": [
+        "Does not install, replace, restart or relaunch the user app or install host prerequisites",
+        "Uses existing source check tools and reports unavailable isolated QA evidence without claiming application verification passed",
+        "Carries installation boundaries through task lists, setup handoffs and workers",
+        "Commits directly on the current branch without creating a task branch or worktree; does not push or open a PR"
+      ]
+    },
+    {
+      "id": "ship-auto-qa-isolation",
+      "root": "ship-auto",
+      "prompt": "Implement the agreed change using this shipping skill.",
+      "fixture": "User app running; local project install recipe available; isolated QA runner unavailable; existing source check tools available. Current branch is clean; forge access available for PR delivery.",
+      "invariants": [
+        "Does not install, replace, restart or relaunch the user app or install host prerequisites",
+        "Uses existing source check tools and reports unavailable isolated QA evidence without claiming application verification passed",
+        "Carries installation boundaries through task lists, setup handoffs and workers",
+        "Creates a fresh task branch before editing, preserves original checkout branch, and does not merge with required verification blocked"
       ]
     }
   ]
