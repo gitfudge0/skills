@@ -2,6 +2,14 @@
 
 Read for Git implementation isolation, a restack, or a PR endpoint. The caller picks scope and depth; this guide owns worktrees, restacking, review learning and PR completion. Delegation and coordinator verification: package-root `shared/execution.md`. Evidence: `references/modules/verification/guide.md`. Project defaults: `shared/working-defaults.md`.
 
+## Local branch integration (`merge-current`)
+
+Capture the destination branch, checkout, starting HEAD and existing edits before isolation. Do not substitute a newly created implementation branch for this destination. Implement directly on the captured branch when requested or appropriate; otherwise integrate the reviewed task-owned branch using repository merge conventions. Inspect destination drift before integration, resolve conflicts within scope, and verify the integrated result. Commit only attributable task work using repository commit conventions. Preserve unrelated edits and never switch, reset, stash or overwrite them to force integration. If safe integration is blocked, retain the task branch and report the blocker. A detached HEAD needs an explicit destination before branch integration. No push or PR is implied.
+
+## PR branch creation (both PR contracts)
+
+For each new work item create a fresh task-owned branch; do not publish directly from the original branch or reuse an unrelated branch. Inspect project guidance and recent branch/commit patterns, select a collision-free name and follow repository commit and PR conventions. Capture the original branch, base branch and fetched remote base SHA. `pr-review` uses the requested base, repository target or stack parent; `pr-squash-main` always targets `main`. Missing `main` is a blocker, not permission to retarget. Start from the selected base; transfer existing task inputs only when scoped and authorized. Resume the same task branch for retries and review fixes.
+
 ## Worktree isolation
 
 1. Inspect the checkout root, `git rev-parse --git-dir --git-common-dir` and `git worktree list --porcelain`; compare resolved paths (a `.git` file alone does not prove a linked worktree).
@@ -59,15 +67,26 @@ Never rewrite a shared or unowned branch; without rewrite authorization, use a p
 |---|---|---|
 | Verified locally | Nothing published unless requested | Observed evidence |
 | PR opened | Scoped branch, commit, push, PR | Live link and accurate pending checks |
-| PR ready (default) | Remote checks and repeated review | [Finish conditions](#finish-pr-ready) on the current head |
-| PR integrated | Merge when approvals, checks, protection and host rules allow | Merged |
+| PR ready (legacy explicit endpoint) | Remote checks and repeated review | [Finish conditions](#finish-pr-ready) on the current head |
+| `pr-review` | Fresh branch, PR, full review loop and required checks | Ready for human review; no merge |
+| `pr-squash-main` | Same PR gates, then automatic squash merge into `main` | Confirmed merged SHA |
 
 None authorizes release/deploy, self-approval, bypassing protection or changing agreed behavior. Issue updates and external messages are separate opt-ins.
 
-1. Use the configured forge and available connector or CLI.
-2. Target: the user's request, repository configuration or stack parent; `main` only if it exists and nothing more specific applies. Record target, remote and branch ownership.
+1. Use the configured forge and available connector or CLI. The caller’s explicit delivery contract owns the endpoint; legacy endpoint defaults do not change it.
+2. For `pr-squash-main`, target `main` only. For other PR endpoints, target the user's request, repository configuration or stack parent; `main` only if it exists and nothing more specific applies. Record target, remote and branch ownership.
 3. Inspect staged content before each commit; commit only task-owned changes.
-4. Push only the selected branch; the PR title and description reflect final behavior, verification and limitations.
+4. Push only the selected task branch. Immediately before PR creation, perform the freshness gate below, assess merge risk, and include the assessment in the description alongside final behavior, verification and limitations. Preserve the repository PR template and applicable human-written context.
+
+### Base freshness gate
+
+Immediately before raising a PR, fetch the selected remote base and compare its current SHA with the base revision already integrated into the task branch. A fetch alone does not establish compatibility. If new base commits are not included, merge or rebase them using repository policy and task ownership safeguards; resolve conflicts, inspect the resulting diff, rerun affected checks and review, push the current task head, then recheck the base. Never rewrite a published branch without authorization. If concurrent updates prevent a stable check, report the pending state rather than claiming freshness or retrying indefinitely. Record fetched base SHA, task head and time. Remote changes can race this check; use required up-to-date checks or a merge queue where available.
+
+### Merge-risk assessment in every PR description
+
+After final synchronization and verification, load package-root `references/roots/merge-risk/guide.md` and assess the exact base/head diff using current check and review evidence. Before a PR exists, use its local-range assessment; do not invent PR metadata or CI results. The shipping caller, not the read-only assessor, publishes the assessment in a **Merge risk** section of the PR description.
+
+Include the skill’s output: overall risk and decisive reason, assessed base/head snapshot and CI state, all five dimensions (alignment, impact, verification, rollback cost, error detection), evidence gaps and precautions. Preserve unknowns and accepted risks. This assessment is not approval and does not replace code review or checks. Revalidate affected conclusions and update the description after fixes, base synchronization, or changed evidence; before automatic merge, ensure it describes the current snapshot.
 
 ### Synchronize the target
 
@@ -104,11 +123,17 @@ For the pushed current head:
 - [ ] All required checks green.
 - [ ] Local and remote heads agree; checked target SHA reported.
 
-Name pending human approvals or mergeability; never claim approved or mergeable. If credentials, CI or policy block, report the precise partial state, the PR link when available, and keep recovery state. Never merge automatically.
+Name pending human approvals or mergeability; never claim approved or mergeable. If credentials, CI or policy block, report the precise partial state, the PR link when available, and keep recovery state. Do not merge under `pr-review` or a legacy PR-ready endpoint. Automatic merging is permitted only under the explicit `pr-squash-main` contract or equivalent explicit user authorization.
+
+### Automatic squash merge (`pr-squash-main`)
+
+Explicit invocation of the auto entry point or an explicit user request for automatic merging authorizes merging its scoped PR into `main` without another permission question. Complete the PR-ready gates first, then fetch and check base freshness again. Integrate any new base changes and rerun affected checks, review and merge-risk assessment before proceeding. Verify the live PR base is `main`, its head matches the reviewed and checked head, required checks and human approvals satisfy repository rules, and no confirmed actionable in-scope issue remains. Use expected-head guards where supported. Never bypass branch protection, self-approve, use an administrative override, or change the requested merge method.
+
+Squash merge when eligible, or enable the forge’s native automatic squash merge/merge queue when prerequisites remain pending. If the forge cannot preserve squash semantics, report the blocker rather than substituting another method. Enabling auto-merge or entering a queue is a pending state; observe the actual merged state and record the resulting merge SHA before claiming completion. Pending approvals, failed checks, merge conflicts, missing permission or unavailable auto-merge remain explicit blockers. Resume by inspecting live state before retrying; never duplicate PRs or merge operations. Merging does not authorize a release or deployment.
 
 ### Clean up after the PR endpoint
 
-After the endpoint (PR opened: on creation; PR ready: after checks and review), clean up only task-created worktrees and designated sessions. Keep pre-existing or reused user resources, anything needed for active review, unresolved work or recovery, and the branch backing the PR.
+After the endpoint (PR opened: on creation; PR ready / `pr-review`: after checks and review; `pr-squash-main`: after confirmed merge), clean up only task-created worktrees and designated sessions. Keep pre-existing or reused user resources, anything needed for active review, unresolved work or recovery, and the branch backing the PR.
 
 1. Confirm ownership, that required commits are in the pushed branch, and local/remote head agreement.
 2. Inspect uncommitted, relevant untracked and ignored files; preserve dirty or unpushed work and report the blocker.

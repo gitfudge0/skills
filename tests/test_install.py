@@ -29,7 +29,7 @@ class InstallerTests(unittest.TestCase):
         return result
     def test_defaults_and_standalone_navigation(self):
         self.run_install('install', '-a', 'codex')
-        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'investigation', 'bug-fix', 'hillclimb', 'prototype', 'visual-parity', 'ticket', 'retro']} | {'fudge-plan', 'merge-risk'})
+        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'ship-pr', 'ship-auto', 'review', 'setup', 'investigation', 'bug-fix', 'hillclimb', 'prototype', 'visual-parity', 'ticket', 'retro']} | {'fudge-plan', 'merge-risk'})
         spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
         builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
@@ -67,6 +67,12 @@ class InstallerTests(unittest.TestCase):
 
     def test_specialists_install_alone_as_portable_copies(self):
         required = {
+            'ship-pr': ['references/modules/shipping/guide.md',
+                        'references/modules/shipping/references/pr-delivery.md',
+                        'references/roots/merge-risk/guide.md'],
+            'ship-auto': ['references/modules/shipping/guide.md',
+                          'references/modules/shipping/references/pr-delivery.md',
+                          'references/roots/merge-risk/guide.md'],
             'investigation': [],
             'retro': ['agents/openai.yaml',
                       'references/roots/review/guide.md',
@@ -75,7 +81,7 @@ class InstallerTests(unittest.TestCase):
                       'references/roots/ship/guide.md'],
             'bug-fix': ['references/modules/engineering/guide.md',
                         'references/modules/verification/guide.md',
-                        'references/roots/ship/references/pr-delivery.md'],
+                        'references/modules/shipping/references/pr-delivery.md'],
             'hillclimb': ['references/modules/engineering/references/performance.md',
                          'references/modules/verification/guide.md'],
             'prototype': ['references/modules/ui-prototype/guide.md',
@@ -150,7 +156,7 @@ class InstallerTests(unittest.TestCase):
             self.assertTrue((directory / 'fudge-ship/references/roots/setup/references/project-verification.md').is_file())
             self.assertTrue((directory / 'fudge-ship/references/modules/engineering/references/refactoring.md').is_file())
             self.assertTrue((directory / 'fudge-review/shared/test-effectiveness.md').is_file())
-        self.assertIn('Installed 14 public skills for 4 agents', result.stdout)
+        self.assertIn('Installed 16 public skills for 4 agents', result.stdout)
         # Noninteractive default selection has the same retirement behavior.
         old = self.home / targets[0] / 'fudge-write'
         old.symlink_to(self.repo / 'fudge-write')

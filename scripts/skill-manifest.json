@@ -3,7 +3,7 @@
   "roots": {
     "design": {"source": "fudge-design", "modules": ["design-for-recognition", "design-system", "ui-mock", "ui-prototype", "design-qa"], "roots": ["ux"]},
     "ux": {"source": "fudge-ux", "modules": ["ux-research", "content-architecture", "interaction-design", "accessible-ui", "experience-measurement"], "roots": ["design"]},
-    "ship": {"source": "fudge-ship", "modules": ["gap-analysis", "test-plan", "decision-room", "system-decomposition", "plan", "engineering", "verification"], "roots": ["design", "ux", "review", "setup", "investigation", "bug-fix", "hillclimb", "prototype", "visual-parity", "ticket"]},
+    "ship": {"source": "fudge-ship", "modules": ["shipping", "gap-analysis", "test-plan", "decision-room", "system-decomposition", "plan", "engineering", "verification"], "roots": ["design", "ux", "review", "setup", "investigation", "bug-fix", "hillclimb", "prototype", "visual-parity", "ticket", "merge-risk"]},
     "review": {"source": "fudge-review", "modules": [], "roots": ["setup", "plan"]},
     "setup": {"source": "fudge-setup", "modules": [], "roots": []},
     "plan": {"source": "plan", "modules": [], "roots": []},
@@ -14,7 +14,9 @@
     "visual-parity": {"source": "fudge-visual-parity", "modules": [], "roots": ["ship"]},
     "ticket": {"source": "fudge-ticket", "modules": [], "roots": []},
     "merge-risk": {"source": "merge-risk", "package": "merge-risk", "modules": [], "roots": []},
-    "retro": {"source": "fudge-retro", "modules": [], "roots": ["review", "investigation", "setup", "ship"]}
+    "retro": {"source": "fudge-retro", "modules": [], "roots": ["review", "investigation", "setup", "ship"]},
+    "ship-pr": {"source": "fudge-ship-pr", "modules": [], "roots": ["ship"]},
+    "ship-auto": {"source": "fudge-ship-auto", "modules": [], "roots": ["ship"]}
   },
   "modules": {
     "design-for-recognition": {"owner": "design", "source": "modules/design-for-recognition"},
@@ -33,7 +35,8 @@
     "test-plan": {"owner": "ship", "source": "modules/test-plan"},
     "system-decomposition": {"owner": "ship", "source": "modules/system-decomposition"},
     "decision-room": {"owner": "ship", "source": "modules/decision-room"},
-    "plan": {"owner": "ship", "source": "plan", "entry": "SKILL.md"}
+    "plan": {"owner": "ship", "source": "plan", "entry": "SKILL.md"},
+    "shipping": {"owner": "ship", "source": "modules/shipping"}
   },
   "shared": ["shared"],
   "helpers": []

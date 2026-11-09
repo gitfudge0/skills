@@ -11,7 +11,7 @@ Paths under `references/modules/`, `references/roots/` and `shared/` resolve fro
 
 Use package-root `shared/execution.md` for scope, delegation, authorization and verification; use `shared/writing.md` for prose and `shared/artifacts.md` before writing artifacts. Read only guidance selected by the current task. Bundled roots are dependencies, not instructions to run their workflows.
 
-For production-writing work, read `references/modules/engineering/guide.md` for bounded discovery and `references/modules/verification/guide.md` for acceptance and regression evidence. Follow PR delivery adjacent to `references/roots/ship/guide.md` selectively for Git isolation and the selected delivery endpoint. Preserve an explicitly local endpoint; do not invoke the ship router or expand authorization. Analysis and experiments stop at their own endpoint. Read package-root `shared/working-defaults.md` before choosing an endpoint, committing or pushing, starting services, or posting externally.
+For production-writing work, read `references/modules/engineering/guide.md` for bounded discovery and `references/modules/verification/guide.md` for acceptance and regression evidence. Follow package-root `references/modules/shipping/references/pr-delivery.md` selectively for Git isolation and the selected delivery endpoint. Preserve an explicitly local endpoint; do not invoke the ship router or expand authorization. Analysis and experiments stop at their own endpoint. Read package-root `shared/working-defaults.md` before choosing an endpoint, committing or pushing, starting services, or posting externally.
 
 ## Workflow
 

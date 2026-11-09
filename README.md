@@ -1,10 +1,12 @@
 # Fudge skills
 
-Fourteen public skills cover setup, shipping, design, UX, review, planning, issue tracking and focused specialist workflows. Each installed root bundles its dependency closure and works independently; bundled guidance is loaded only when needed.
+Sixteen public skills cover setup, shipping, design, UX, review, planning, issue tracking and focused specialist workflows. Each installed root bundles its dependency closure and works independently; bundled guidance is loaded only when needed.
 
 | Public skill | Purpose | Internal capabilities |
 |---|---|---|
-| `fudge:ship` | Discover requirements, implement, verify, deliver | Engineering, verification, PR delivery and review learning, gap analysis, system decomposition, interactive HTML planning, test planning, decision pressure-testing; routes to design, UX, review, setup, ticket |
+| `fudge:ship` | Implement, verify, and integrate into the current branch locally | Engineering, verification, PR delivery and review learning, gap analysis, system decomposition, interactive HTML planning, test planning, decision pressure-testing; routes to design, UX, review, setup, ticket |
+| `fudge:ship-pr` | Ship on a fresh branch and raise a PR for human review | Shared shipping workflow; base freshness gate; merge-risk output in PR description |
+| `fudge:ship-auto` | Ship on a fresh branch, raise PR, automatically squash merge into main | Shared shipping workflow; required checks and approvals; confirmed merge |
 | `/merge-risk` | Assess integration risk read-only | Evidence gaps, blast radius, rollback and production detection |
 | `fudge:review` | Review a PR or local diff | Findings, re-review, conventions checks |
 | `fudge:design` | Shape and build the visual experience | Visual craft, design systems, static mocks, prototypes, design QA |
@@ -21,7 +23,7 @@ Fourteen public skills cover setup, shipping, design, UX, review, planning, issu
 
 Invoke `fudge:retro` explicitly to review a current or specified session. It ranks evidence-backed improvements and stops at proposals unless application is requested. Codex invocation metadata disables implicit selection; the same explicit-only rule is stated in the skill for other hosts. Inspired by [Matt Pocock's retro skill](https://github.com/mattpocock/skills/blob/main/skills/engineering/retro/SKILL.md).
 
-Ship is a router with a task-to-guide map: focused engineering and verification modules, native PR delivery guidance, and conditional comprehensive/recovery references. Shared execution remains the single delegation and integration policy. Git implementation defaults to an isolated worktree and PR-ready delivery; explicit local-only and analysis endpoints remain available. Ship routes focused requests directly to their specialist without asking users to choose. Features and refactoring remain in ship. Specialists retain their analysis, artifact or selected production endpoint and never re-enter the ship router. A narrow request loads only its selected guidance. Asking for button labels does not start a mock workflow; asking what's missing before building can stop at requirements analysis. Rendering a report deck is optional. Mindmap has been removed.
+Three thin shipping entry points select explicit delivery contracts and load `modules/shipping/guide.md`. The common module is a router with a task-to-guide map: focused engineering and verification modules, native PR delivery guidance, and conditional comprehensive/recovery references. Shared execution remains the single delegation and integration policy. Local shipping captures and integrates into the original branch without pushing. Both PR flows create fresh task branches using repository branch and commit conventions, fetch and integrate base changes immediately before PR creation, and include the `/merge-risk` assessment in the PR description. Automatic delivery targets `main`, rechecks freshness before squash merging, and respects required approvals and branch protections; queued auto-merge remains pending. Explicit narrower and analysis endpoints remain available. Ship routes focused requests directly to their specialist without asking users to choose. Features and refactoring remain in ship. Specialists retain their analysis, artifact or selected production endpoint and never re-enter the ship router. A narrow request loads only its selected guidance. Asking for button labels does not start a mock workflow; asking what's missing before building can stop at requirements analysis. Rendering a report deck is optional. Mindmap has been removed.
 
 ## Install
 
@@ -32,6 +34,8 @@ Requires Python 3.9+ and Bash. Clone this repository, then run:
 ./install.sh -a codex -y
 ./install.sh -a claude -a codex --all -y
 ./install.sh -a codex --root ship --copy -y
+./install.sh -a codex --root ship-pr -y
+./install.sh -a codex --root ship-auto -y
 ./install.sh -a codex --root plan -y
 ./install.sh -a codex --root retro -y
 ./install.sh -a codex --root merge-risk -y
@@ -40,9 +44,9 @@ Requires Python 3.9+ and Bash. Clone this repository, then run:
 ./install.sh remove -a codex --all -y
 ```
 
-Supported terminals use a four-step keyboard installer: agents → roots → method → review. Use arrows to move, Space to select, Enter to continue, Esc to go back, and q to cancel. Back preserves selections. Narrow or unsupported terminals use numbered choices. Conflicts appear before applying changes. Defaults select all fourteen roots. Supported targets: Claude, Codex, Cursor, OpenCode. Non-interactive installation requires an explicit target (`-a`); it applies without a prompt. `-y` bypasses interactive confirmation. Non-interactive removal requires `-y`.
+Supported terminals use a four-step keyboard installer: agents → roots → method → review. Use arrows to move, Space to select, Enter to continue, Esc to go back, and q to cancel. Back preserves selections. Narrow or unsupported terminals use numbered choices. Conflicts appear before applying changes. Defaults select all sixteen roots. Supported targets: Claude, Codex, Cursor, OpenCode. Non-interactive installation requires an explicit target (`-a`); it applies without a prompt. `-y` bypasses interactive confirmation. Non-interactive removal requires `-y`.
 
-The installer offers fourteen public roots. Each package includes its dependency closure, internal guides, and shared policies. Symlinks point to generated `.fudge-build` packages; copies include an installer ownership marker and can be updated by rerunning the installer.
+The installer offers sixteen public roots. Each package includes its dependency closure, internal guides, and shared policies. Symlinks point to generated `.fudge-build` packages; copies include an installer ownership marker and can be updated by rerunning the installer.
 
 ### Migration
 

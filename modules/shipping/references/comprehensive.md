@@ -1,6 +1,6 @@
 # Comprehensive assurance
 
-Read this for the comprehensive route selected in `SKILL.md`. Apply package-root `references/modules/engineering/guide.md` and `references/modules/verification/guide.md`, plus the router’s endpoint rules; this reference adds risk-specific assurance.
+Read this for the comprehensive route selected in the shared shipping guide. Apply package-root `references/modules/engineering/guide.md` and `references/modules/verification/guide.md`, plus the router’s endpoint rules; this reference adds risk-specific assurance.
 
 Before implementation, capture the relevant starting state and planned ownership to distinguish task work from existing edits. Use Git status and scoped diffs in a repository; use bounded file snapshots otherwise. A local implementation does not require initializing Git. When recovery or coordination warrants durable state, read [run state and recovery](run-state.md), reserve a unique directory through `shared/artifacts.md`, and record the request, endpoint, decisions, artifacts, evidence, and blockers in `run.json`. Supply chosen artifact paths to selected stages. For UI work, a mock is required only when a visual decision needs to be seen.
 

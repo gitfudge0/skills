@@ -17,7 +17,7 @@ All keys are optional. Unknown keys are ignored.
 
 | Key | Values | Absent means |
 |---|---|---|
-| `endpoint` | `verified-locally` · `pr-opened` · `pr-ready` | ship's existing default (`pr-ready` when a forge is configured) |
+| `endpoint` | `merge-current` · `pr-review` · `pr-squash-main` · `verified-locally` · `pr-opened` · `pr-ready` | the selected public entry point’s contract; standalone callers retain their own default |
 | `commit-push` | `ask` · `allowed` | current behavior |
 | `external-writes` | `draft-first` · `allowed` | `draft-first` for issue trackers and chat (for example Jira, Linear, Slack); existing behavior for PR delivery |
 | `runtime` | `docker-only` · `local-ok` | follow the project's existing run docs |
@@ -27,6 +27,8 @@ All keys are optional. Unknown keys are ignored.
 1. An explicit instruction in the current conversation.
 2. Working defaults.
 3. Skill defaults.
+
+Named shipping entry points explicitly select their contract: `fudge:ship` uses `merge-current`, `fudge:ship-pr` uses `pr-review`, and `fudge:ship-auto` uses `pr-squash-main`. An endpoint default applies only to callers without an explicit contract; it must not turn local shipping into a PR or PR review into automatic merging. Selecting an automatic endpoint explicitly authorizes its scoped merge, subject to repository/host safeguards. Legacy endpoint values remain supported for callers that use them.
 
 A conversation instruction overrides a default for that work only; it does not rewrite the recorded defaults. An explicit request to create or post specified content to a specified destination authorizes that write; an explicit request to post without a draft overrides `draft-first` for that work. A generic request to draft, review or investigate does not authorize posting. Preserve an earlier approval of the exact content and destination rather than asking again. `external-writes: allowed` removes the draft gate; it does not authorize unrelated messages or destinations.
 

@@ -690,7 +690,7 @@
         "Gives exact usage instructions"
       ],
       "source": "user-correction",
-      "lesson": "An explicit \"don't commit\" overrides the default PR-ready endpoint."
+      "lesson": "An explicit \"don't commit\" overrides any delivery contract requiring commits."
     },
     {
       "id": "correction-artifacts-not-committed",
@@ -937,6 +937,62 @@
         "Uses proportional UI evidence without demanding an unrelated end-to-end suite",
         "Does not query a forge or invent PR mergeability",
         "Keeps the assessment read-only"
+      ]
+    },
+    {
+      "root": "ship",
+      "prompt": "Implement the agreed change and ship into this branch.",
+      "fixture": "Clean feature branch; endpoint default pr-ready; established checks and commit conventions.",
+      "invariants": [
+        "Captures original branch and integrates verified task changes into it without changing the destination after isolation",
+        "Follows repository commit conventions and preserves unrelated work",
+        "Does not push or create a PR despite legacy endpoint default",
+        "Reports relevant observed checks and actual local integration state"
+      ]
+    },
+    {
+      "root": "ship-pr",
+      "prompt": "Ship the agreed change and raise a PR for review.",
+      "fixture": "Repository with feature/ branch naming and conventional commits; base receives new commits after implementation but before PR creation; old endpoint default pr-squash-main.",
+      "invariants": [
+        "Creates a fresh task branch for this work item using repository conventions",
+        "Fetches remote base immediately before PR creation; integrates new base commits and reruns affected checks and review before publishing",
+        "Includes merge-risk output for final base/head snapshot in PR description: overall judgment, CI state, five dimensions, evidence gaps and precautions",
+        "Updates assessment after changed head, base or relevant evidence and preserves repository PR template",
+        "Stops ready for human review and does not merge or request duplicate publishing authorization"
+      ]
+    },
+    {
+      "root": "ship-auto",
+      "prompt": "Ship the agreed change, raise a PR and automatically squash merge into main.",
+      "fixture": "Existing unrelated branch; repository requires CI and human approval; auto-merge available; main advances after PR opens.",
+      "invariants": [
+        "Creates fresh task branch targeting main and follows repository branch and commit patterns",
+        "Fetches and integrates base changes before opening PR and rechecks freshness before merge; revalidates affected checks and reviews",
+        "Includes current merge-risk assessment in PR description and preserves unknown evidence",
+        "Treats invocation as authorization for scoped push, PR and squash merge without another permission gate",
+        "Does not bypass protections or self-approve; queued automatic merge remains pending until observed merged",
+        "Confirms actual squash merge and resulting SHA before reporting completion"
+      ]
+    },
+    {
+      "root": "ship-auto",
+      "prompt": "Resume shipping this change.",
+      "fixture": "Existing task branch and PR with auto-merge queued, required approval still missing; checks passed; high-risk assessment from prior snapshot.",
+      "invariants": [
+        "Reuses same task branch and PR rather than creating duplicates",
+        "Inspects live head, base, checks and approvals; preserves pending state while approval is missing",
+        "Does not treat green CI or merge-risk judgment as approval and does not claim merged",
+        "Revalidates assessment if snapshot changed and reports exact blocker"
+      ]
+    },
+    {
+      "root": "ship-auto",
+      "prompt": "Ship the change and auto-merge it.",
+      "fixture": "Repository has only trunk, no main; credentials available.",
+      "invariants": [
+        "Does not silently target trunk or create main",
+        "Reports unavailable main endpoint without claiming merged or publishing to a different target"
       ]
     }
   ]
