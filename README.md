@@ -1,10 +1,11 @@
 # Fudge skills
 
-Thirteen public skills cover setup, shipping, design, UX, review, planning, issue tracking and focused specialist workflows. Each installed root bundles its dependency closure and works independently; bundled guidance is loaded only when needed.
+Fourteen public skills cover setup, shipping, design, UX, review, planning, issue tracking and focused specialist workflows. Each installed root bundles its dependency closure and works independently; bundled guidance is loaded only when needed.
 
 | Public skill | Purpose | Internal capabilities |
 |---|---|---|
 | `fudge:ship` | Discover requirements, implement, verify, deliver | Engineering, verification, PR delivery and review learning, gap analysis, system decomposition, interactive HTML planning, test planning, decision pressure-testing; routes to design, UX, review, setup, ticket |
+| `/merge-risk` | Assess integration risk read-only | Evidence gaps, blast radius, rollback and production detection |
 | `fudge:review` | Review a PR or local diff | Findings, re-review, conventions checks |
 | `fudge:design` | Shape and build the visual experience | Visual craft, design systems, static mocks, prototypes, design QA |
 | `fudge:ux` | Shape the experience people need | Research, content architecture, interaction design, accessibility, measurement |
@@ -33,14 +34,15 @@ Requires Python 3.9+ and Bash. Clone this repository, then run:
 ./install.sh -a codex --root ship --copy -y
 ./install.sh -a codex --root plan -y
 ./install.sh -a codex --root retro -y
+./install.sh -a codex --root merge-risk -y
 ./install.sh -a codex --root bug-fix --copy -y
 ./install.sh list
 ./install.sh remove -a codex --all -y
 ```
 
-Supported terminals use a four-step keyboard installer: agents → roots → method → review. Use arrows to move, Space to select, Enter to continue, Esc to go back, and q to cancel. Back preserves selections. Narrow or unsupported terminals use numbered choices. Conflicts appear before applying changes. Defaults select all thirteen roots. Supported targets: Claude, Codex, Cursor, OpenCode. Non-interactive installation requires an explicit target (`-a`); it applies without a prompt. `-y` bypasses interactive confirmation. Non-interactive removal requires `-y`.
+Supported terminals use a four-step keyboard installer: agents → roots → method → review. Use arrows to move, Space to select, Enter to continue, Esc to go back, and q to cancel. Back preserves selections. Narrow or unsupported terminals use numbered choices. Conflicts appear before applying changes. Defaults select all fourteen roots. Supported targets: Claude, Codex, Cursor, OpenCode. Non-interactive installation requires an explicit target (`-a`); it applies without a prompt. `-y` bypasses interactive confirmation. Non-interactive removal requires `-y`.
 
-The installer offers thirteen public roots. Each package includes its dependency closure, internal guides, and shared policies. Symlinks point to generated `.fudge-build` packages; copies include an installer ownership marker and can be updated by rerunning the installer.
+The installer offers fourteen public roots. Each package includes its dependency closure, internal guides, and shared policies. Symlinks point to generated `.fudge-build` packages; copies include an installer ownership marker and can be updated by rerunning the installer.
 
 ### Migration
 
@@ -53,12 +55,15 @@ Installation removes retired entries only when they are owned by this checkout's
 ```text
 fudge-{ship,review,design,ux,setup}/SKILL.md
 fudge-{investigation,bug-fix,hillclimb,prototype,visual-parity,ticket,retro}/SKILL.md
+merge-risk/SKILL.md            # standalone /merge-risk assessment
 modules/<capability>/guide.md
 plan/SKILL.md                  # standalone public skill, also bundled into ship
 shared/{execution.md,writing.md,artifacts.md,locate.md,working-defaults.md,artifact_path.py}
 shared/report-deck/
 scripts/skill-manifest.json
 ```
+
+`merge-risk` installs under its own name and is invoked with `/merge-risk`. It assesses risk without running tests or changing the PR; it reports missing evidence and does not grant merge approval. Inspired by [Warp’s merge-risk skill](https://github.com/warpdotdev/common-skills/blob/main/.agents/skills/merge-risk/SKILL.md).
 
 The manifest declares module ownership, optional source entry filenames, root dependencies, and optional package names. Existing Fudge roots keep their `fudge-` package names; standalone HTML planning installs to `fudge-plan` and is invoked with `/fudge:plan`. HTML planning reuses the standalone `plan/` source as a ship module, including its runtime, block reference, and examples; it is also available as the standalone `fudge-plan` package through `--root plan` or `--skill plan`. Node.js is required to pack HTML plans and reports. Every built root includes byte-identical canonical plan runtime assets in `shared/report-deck/runtime/`, so optional HTML reports work without a plan workflow dependency. `shared/report-deck/guide.md` routes report composition to that UI; the former independent slide styles and runtime are retired. The builder computes a closure with no recursive root copies. An installed package contains:
 

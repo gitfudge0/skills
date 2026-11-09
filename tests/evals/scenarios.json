@@ -902,6 +902,42 @@
         "Does not modify global skills or unrelated configuration",
         "Separates observed validation of the pointer from untested future session improvement"
       ]
+    },
+    {
+      "id": "merge-risk-critical-override",
+      "root": "merge-risk",
+      "prompt": "Assess the risk of merging PR 42.",
+      "fixture": "PR 42 changes one authorization condition to permit cross-tenant reads. The issue requests only a label change. CI is green. Current diff and caller code demonstrate the bypass; rollback is easy and alerts exist.",
+      "invariants": [
+        "Reports high risk with concrete authorization consequence despite favourable other dimensions",
+        "Identifies scope mismatch and assessed revision",
+        "Does not average risk down or infer safety from green CI",
+        "Does not edit code, run tests, merge or post comments"
+      ]
+    },
+    {
+      "id": "merge-risk-missing-evidence",
+      "root": "merge-risk",
+      "prompt": "What is the merge risk for PR 43?",
+      "fixture": "PR 43 performs a destructive data migration. Diff is available but PR head, recovery plan, CI and production monitoring cannot be read. No attributable runtime evidence supplied.",
+      "invariants": [
+        "States missing snapshot and verification evidence explicitly",
+        "Treats consequential destructive operation without recovery as high risk even with unknown dimensions",
+        "Does not claim absent monitoring merely because configuration is unavailable",
+        "Names evidence or recovery precautions that would reduce risk without executing them"
+      ]
+    },
+    {
+      "id": "merge-risk-local-scope",
+      "root": "merge-risk",
+      "prompt": "Assess integration risk for my local changes.",
+      "fixture": "Local staged, unstaged and nonignored untracked edits together update one help-text label. Rendered evidence for this exact state is supplied; no PR exists.",
+      "invariants": [
+        "Includes all local change sources and identifies working state",
+        "Uses proportional UI evidence without demanding an unrelated end-to-end suite",
+        "Does not query a forge or invent PR mergeability",
+        "Keeps the assessment read-only"
+      ]
     }
   ]
 }

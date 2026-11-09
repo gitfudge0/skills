@@ -29,7 +29,7 @@ class InstallerTests(unittest.TestCase):
         return result
     def test_defaults_and_standalone_navigation(self):
         self.run_install('install', '-a', 'codex')
-        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'investigation', 'bug-fix', 'hillclimb', 'prototype', 'visual-parity', 'ticket', 'retro']} | {'fudge-plan'})
+        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'review', 'setup', 'investigation', 'bug-fix', 'hillclimb', 'prototype', 'visual-parity', 'ticket', 'retro']} | {'fudge-plan', 'merge-risk'})
         spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
         builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
@@ -46,6 +46,25 @@ class InstallerTests(unittest.TestCase):
         self.run_install('remove', '-a', 'codex', '--all', '-y')
         self.run_install('-a', 'codex', '--root', 'setup', '-y')
         self.assertEqual([p.name for p in self.skills.iterdir()], ['fudge-setup'])
+    def test_merge_risk_standalone_install_update_remove(self):
+        for copy in (False, True):
+            with self.subTest(copy=copy):
+                args = ['-a', 'codex', '--root', 'merge-risk', '-y']
+                if copy:
+                    args.append('--copy')
+                self.run_install(*args)
+                package = self.skills / 'merge-risk'
+                self.assertEqual({p.name for p in self.skills.iterdir()}, {'merge-risk'})
+                self.assertEqual(package.is_symlink(), not copy)
+                self.assertEqual(json.loads((package / '.fudge-package.json').read_text())['root'], 'merge-risk')
+                self.assertEqual((package / 'SKILL.md').read_bytes(), (self.repo / 'merge-risk/SKILL.md').read_bytes())
+                source = self.repo / 'merge-risk/SKILL.md'
+                source.write_text(source.read_text() + '\nUpdated assessment fixture.\n')
+                self.run_install(*args)
+                self.assertIn('Updated assessment fixture.', (package / 'SKILL.md').read_text())
+                self.run_install('remove', '-a', 'codex', '--root', 'merge-risk', '-y')
+                self.assertFalse(package.exists() or package.is_symlink())
+
     def test_specialists_install_alone_as_portable_copies(self):
         required = {
             'investigation': [],
@@ -122,8 +141,8 @@ class InstallerTests(unittest.TestCase):
             else:
                 self.assertFalse(old.exists())
                 self.assertFalse(old.is_symlink())
-            for root in manifest['roots']:
-                package = directory / ('fudge-' + root)
+            for root, spec in manifest['roots'].items():
+                package = directory / spec.get('package', 'fudge-' + root)
                 metadata = json.loads((package / '.fudge-package.json').read_text())
                 self.assertEqual(metadata['root'], root)
                 for module in metadata['modules']:
@@ -131,7 +150,7 @@ class InstallerTests(unittest.TestCase):
             self.assertTrue((directory / 'fudge-ship/references/roots/setup/references/project-verification.md').is_file())
             self.assertTrue((directory / 'fudge-ship/references/modules/engineering/references/refactoring.md').is_file())
             self.assertTrue((directory / 'fudge-review/shared/test-effectiveness.md').is_file())
-        self.assertIn('Installed 13 public skills for 4 agents', result.stdout)
+        self.assertIn('Installed 14 public skills for 4 agents', result.stdout)
         # Noninteractive default selection has the same retirement behavior.
         old = self.home / targets[0] / 'fudge-write'
         old.symlink_to(self.repo / 'fudge-write')

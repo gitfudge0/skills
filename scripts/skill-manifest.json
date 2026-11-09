@@ -13,6 +13,7 @@
     "prototype": {"source": "fudge-prototype", "modules": [], "roots": ["ship"]},
     "visual-parity": {"source": "fudge-visual-parity", "modules": [], "roots": ["ship"]},
     "ticket": {"source": "fudge-ticket", "modules": [], "roots": []},
+    "merge-risk": {"source": "merge-risk", "package": "merge-risk", "modules": [], "roots": []},
     "retro": {"source": "fudge-retro", "modules": [], "roots": ["review", "investigation", "setup", "ship"]}
   },
   "modules": {
