@@ -16,6 +16,15 @@ Scale the work to the request. A route/content inventory, a taxonomy or navigati
 
 Do not invent product policy, eligibility, deadlines, prices, clinical advice, financial consequences, or other consequential facts to make copy sound complete. Surface missing facts and use approved source material. Keep proposed copy distinguishable from verified product rules.
 
+## Remove uncertainty in the copy
+
+Apply these checks to the controls and content in scope:
+
+- Name the action and object where the consequence would otherwise be unclear: “Confirm purchase” rather than “Let’s go.” Put helper text beside the decision when people need to know who can see a note, where it appears, or what a submission changes.
+- Make errors specific enough to act on: identify the affected input or operation, what is known about the failure, and the available correction or recovery. Preserve uncertainty when the outcome is unknown; avoid exposing sensitive information or blaming the person without evidence.
+- Keep information needed for a decision available in context. Prefer wrapping or a usable expansion over truncating prices, conditions, distinguishing names, or recovery instructions. Check realistic long and localized text at relevant widths; hover-only disclosure is insufficient for touch and keyboard users.
+- Identify applicable disclosures from approved product or policy sources and place them at the relevant decision. Check their destinations. Do not add generic terms, consent claims, or privacy assurances merely to make a screen feel trustworthy; surface missing authoritative copy.
+
 ## Boundary and completion
 
 The design-for-recognition module applies broad hierarchy and usability judgment; this skill owns content placement, navigation vocabulary, and interface wording. The interaction-design module owns the behavior and state transitions behind an action. the ui-mock module owns the visual board; the design-system module owns visual tokens and component contracts. Give those modules the settled content decisions when they need them.
