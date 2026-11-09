@@ -14,6 +14,15 @@ Define what happens when a person acts, including what they see while the result
 
 Record behavior in the project's existing design or product source of truth. Use a separate linked flow document only when the number of events or actors would make the existing document hard to use. A small control can be specified in a few lines; no diagram, schema, or new file is required by default. Keep event names and state names consistent with related mocks and implementation work.
 
+## Resolve uncertainty and preserve control
+
+Select only checks that apply to the changed task; keep the contract in its existing source of truth:
+
+- **Empty and filtered results:** distinguish first use, no matches, and unavailable data. Offer an appropriate next action, such as creating an item, changing a query, clearing filters, or retrying. For filter reset, specify which controls it affects and whether it restores defaults or removes all restrictions; preserve unrelated settings and make the resulting selection visible.
+- **Known information and interrupted input:** reuse appropriate values already available for the current person and account, show their source when ambiguity matters, and allow correction. Preserve entered values through recoverable errors according to product policy. Check account changes and stale values; convenience must not expose another account’s information or imply unauthorized retention.
+- **Permissions:** request necessary access when its purpose becomes relevant, explain that purpose, and define denial or revocation behavior and any available alternative. Follow platform and product policy; do not promise a fallback the service cannot support.
+- **Waiting and completion:** choose feedback proportionate to the operation. A brief spinner can suffice; a longer wait may need truthful status, a skeleton for known content structure, or supported progress and cancellation. Never invent stages or percentages. Confirm the actual outcome through an updated result, status, or message; a fast save with an obvious updated result need not add a toast or success screen. Define how the person can find the result and recover if completion remains uncertain.
+
 ## Decisions and handoff
 
 Mark an unsettled product rule as a question for the user or authorized owner, with the affected transitions. Do not invent autosave, offline availability, permission, data retention, or reviewer behavior to make a flow look complete. State any temporary design assumption and its consequence until the owner decides.

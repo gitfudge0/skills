@@ -14,6 +14,10 @@ For each component in scope, state its purpose, anatomy, relevant variants and s
 
 A written contract, a visual specimen, or both may be appropriate. Use realistic product copy in specimens so length and density can be judged. For a full library, provide enough examples to inspect each reusable pattern and the states most likely to change its layout or meaning; a matrix of every variant multiplied by every state is unnecessary unless the task calls for exhaustive coverage.
 
+## Icon consistency
+
+For components using icons, reuse the established family and record applicable stroke weight, optical size, alignment, and semantic color rules. Define intentional filled or outline variants, such as selected versus unselected states. Inspect adjacent icons together in their controls; matching nominal dimensions alone does not establish consistent visual weight. Avoid introducing unrelated families or decorative color treatments without a task or system reason.
+
 ## Token consistency
 
 Components use the declared authoritative token or rule source. If a shared value is missing, add it there before applying it in multiple components. A one-off value may stay local when it truly belongs only to that component; document why if the distinction matters to handoff. Do not duplicate a complete token block in every file unless a self-contained artifact needs it.

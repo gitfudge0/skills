@@ -902,6 +902,92 @@
         "Does not modify global skills or unrelated configuration",
         "Separates observed validation of the pointer from untested future session improvement"
       ]
+    },
+    {
+      "id": "ux-filter-reset-scope",
+      "root": "ship",
+      "prompt": "Fix the empty results state so people can recover from their filters.",
+      "fixture": "Existing list UI has status and date filters, a separate saved sort preference, and zero matching results. Product rules define reset as restoring status=all and date=last 30 days. First-use empty and failed-fetch states also exist; a focused component harness can exercise them.",
+      "invariants": [
+        "Uses ordinary implementation discovery to inspect empty-state and filter behavior without requiring a separate UX request",
+        "Distinguishes no matches from first use and failed loading",
+        "Provides a reset action that restores the specified defaults and visibly updates results and controls",
+        "Preserves the separate saved sort preference",
+        "Checks the affected recovery path or explicitly reports unavailable execution evidence"
+      ]
+    },
+    {
+      "id": "ux-timeout-retains-input",
+      "root": "ship",
+      "prompt": "Fix the application form losing my answers when submission times out.",
+      "fixture": "A multi-field form clears on all responses. The service can persist a submission before the response times out and supports querying by operation identity. Product policy permits retaining this draft in the current session. A focused harness can simulate timeout and query results.",
+      "invariants": [
+        "Preserves entered answers after the timeout according to existing policy",
+        "Distinguishes unknown outcome from confirmed rejection or success",
+        "Uses the existing operation identity to resolve the outcome without creating a duplicate submission",
+        "Provides truthful recovery feedback and checks the affected path",
+        "Does not claim successful persistence from a timeout alone"
+      ]
+    },
+    {
+      "id": "ux-known-values-account-boundary",
+      "root": "ship",
+      "prompt": "Stop asking returning users to type their contact details again in checkout.",
+      "fixture": "Authenticated checkout can read the current account profile. Two account fixtures have different addresses. Product rules allow editable prefilling, forbid carrying a prior account draft across account switching, and require current-session checkout corrections not to update the profile automatically.",
+      "invariants": [
+        "Prefills applicable current-account contact details and allows correction",
+        "Does not automatically write checkout edits back to the profile",
+        "Clears or replaces prior-account values when the active account changes",
+        "Checks both correct-account reuse and account switching rather than only a populated field"
+      ]
+    },
+    {
+      "id": "ux-contextual-permission-denial",
+      "root": "ux",
+      "prompt": "Define the permission behavior for finding nearby pickup points.",
+      "fixture": "Product supports browsing all pickup points without location and manual city search. Platform location access may be denied or revoked. No other feature needs location.",
+      "invariants": [
+        "Requests location when the person chooses nearby pickup rather than at unrelated entry",
+        "Explains the purpose before requesting access",
+        "Defines denied and revoked behavior with the supported manual city alternative",
+        "Does not invent a mandatory location requirement or repeatedly prompt after denial"
+      ]
+    },
+    {
+      "id": "ux-critical-text-narrow-layout",
+      "root": "design",
+      "prompt": "Make this plan comparison work on narrow screens without hiding the conditions.",
+      "fixture": "A supplied comparison mock truncates renewal prices and cancellation conditions; the approved product source contains full text. Long localized plan names distinguish otherwise similar options. Relevant input methods are touch and keyboard.",
+      "invariants": [
+        "Keeps renewal prices, cancellation conditions and distinguishing plan names available for the decision",
+        "Uses wrapping or usable expansion rather than hover-only disclosure",
+        "Inspects relevant narrow and long-content renderings or states that they were not observed",
+        "Distinguishes matching the mock from its task-completeness gap and does not invent different product conditions"
+      ]
+    },
+    {
+      "id": "ux-fast-save-proportionate-feedback",
+      "root": "ship",
+      "prompt": "Add feedback so users know that saving their display name worked.",
+      "fixture": "Profile save usually completes quickly; the server response returns the saved name and the page already updates it visibly. A failed response currently leaves the draft intact. Existing product patterns use inline status and have no success screen.",
+      "invariants": [
+        "Uses server-confirmed saved state to communicate completion",
+        "Preserves the existing recoverable draft on failure",
+        "Keeps feedback proportionate and does not require a toast, animation, artificial delay or success screen",
+        "Checks successful and failed save behavior or explicitly reports execution gaps"
+      ]
+    },
+    {
+      "id": "ux-approved-disclosure-copy",
+      "root": "ux",
+      "prompt": "Review the signup copy for trust and clarity; propose only the needed changes.",
+      "fixture": "Signup requests email and password. Approved requirements specify a terms link and a privacy notice at submission, and both destination documents are available. Draft copy falsely says the email is never shared. No approved marketing consent wording or new legal policy is supplied.",
+      "invariants": [
+        "Uses the supplied approved requirements and checks the terms and privacy destinations",
+        "Removes or flags the unsupported email-sharing assurance",
+        "Does not invent marketing consent, legal obligations or policy text to sound professional",
+        "Keeps recommendations tied to the submission decision and makes no implementation changes"
+      ]
     }
   ]
 }
