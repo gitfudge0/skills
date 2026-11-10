@@ -1,6 +1,6 @@
 # Run state and recovery
 
-Read this when a ship run needs durable recovery or coordination, or when resuming an existing run. Routine and comprehensive work can both use it; engineering risk alone does not require a run directory. Without durable state, still inspect the starting files, protect user work, and keep verification attributable to the current change.
+Read this for every PR run, when a local ship run needs durable recovery or coordination, or when resuming an existing run. Routine and comprehensive work can both use it; engineering risk alone does not require a run directory. Without durable state, still inspect the starting files, protect user work, and keep verification attributable to the current change.
 
 ## Run identity and record
 
@@ -15,6 +15,14 @@ Keep a concise risk plan and its observed outcomes in the run record or a linked
 For long, uncertain, or unattended work, keep a compact attempt record: hypothesis, attributable change, observation/evidence, and keep/revert/next-step decision. Preserve rejected attempts and material decisions rather than reconstructing a success narrative. Before handoff, audit the record against actual files, revisions, command output, and review dispositions; correct unsupported claims and distinguish planned from executed checks. Adapted from [show-me-your-work](https://github.com/cursor/plugins/tree/main/pstack/skills/show-me-your-work).
 
 Durable records support recovery; they do not create a background worker or scheduler. Use only host-supported execution/goal facilities, within their limits and authorization. If the host stops, checkpoint and report pending work; do not promise automatic continuation.
+
+## Minimum PR checkpoint
+
+Every `pr-review`, `pr-squash-current`, or explicitly narrower PR run saves a compact `run.json` before implementation using the artifact policy above. Reserve it at the original checkout or a caller-supplied durable destination, outside disposable task worktrees. This minimum does not require a matrix, HTML report or full recovery snapshot. If it cannot be stored safely, report the blocker before implementation or publication rather than relying on conversation memory.
+
+Record the request/scope, endpoint and existing authorization; original checkout, branch and HEAD; forge host, base repository owner/name, base remote/branch and fetched SHA; head repository owner/name, push remote, task branch, worktree path and ownership; ahead/behind classification, selected starting SHA and transferred inputs; current local and published head SHAs; PR URL/number (null before creation); check/review evidence references, active stage, blocker and next action. Keep credentials and token-bearing remote URLs out of the record. Update after meaningful Git/external mutations and before handoff; record confirmed merge SHA and original checkout synchronization state at completion.
+
+On interruption, compare the checkpoint with live repository, branch, worktree and PR identities before continuing. An operation may have succeeded before its checkpoint update: inspect the recorded head branch and forge PRs before retrying a push, creating a PR or merging. Reuse the existing task resources and authorization; never recapture the task branch as the original base. Missing or conflicting identity is a recovery gap to resolve, not permission to guess or create duplicate work. Inspect actual check/review evidence for the current snapshot before retaining a readiness claim.
 
 ## Protect the starting state
 

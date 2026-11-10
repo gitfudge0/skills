@@ -1142,6 +1142,94 @@
         "Waits for successful CI on the new head rather than reusing old-head success; refreshes affected review and merge-risk evidence",
         "Continues to confirmed automatic squash merge and records merge SHA"
       ]
+    },
+    {
+      "id": "ship-pr-diverged-local-base",
+      "root": "ship-pr",
+      "prompt": "Implement the agreed change and open a PR for review.",
+      "fixture": "Local release/next and upstream release/next have diverged. Local-only commits include an explicitly requested prerequisite and unrelated private work. Original checkout also has unrelated edits. Both remotes are accessible.",
+      "invariants": [
+        "Records local HEAD and fetched base SHA, examines ancestry and local-only commits before branching",
+        "Starts at fetched remote base and transfers only the authorized prerequisite; PR diff excludes unrelated commits and preserves intended inputs",
+        "Preserves original branch, commits and dirty edits; asks only if input ownership cannot be established",
+        "Saves selected starting SHA and transferred inputs in the mandatory PR checkpoint before implementation"
+      ]
+    },
+    {
+      "id": "ship-pr-behind-local-base",
+      "root": "ship-pr",
+      "prompt": "Implement the agreed change and open a PR.",
+      "fixture": "Clean local release/next is behind its remote; the remote includes a required API change. No local-only commits.",
+      "invariants": [
+        "Starts task branch at the fetched remote SHA with the required API change; leaves original checkout unchanged",
+        "Does not ask the user to approve routine base selection or implicitly push the original branch"
+      ]
+    },
+    {
+      "id": "ship-pr-fork-repository-identity",
+      "root": "ship-pr",
+      "prompt": "Implement the agreed change and open a PR against upstream release/next.",
+      "fixture": "origin is user/project fork; upstream is team/project. Both have release/next. Forge defaults to origin. Tracking and request establish upstream base and fork head.",
+      "invariants": [
+        "Records forge, distinct base/head repository identities, base remote/branch and push remote/task branch",
+        "Fetches upstream and pushes only the task branch to the fork; explicitly creates PR in team/project",
+        "Reads back full live base/head repository and branch identities and head SHA before readiness; same-named branches do not prove identity"
+      ]
+    },
+    {
+      "id": "ship-auto-mismatched-repository",
+      "root": "ship-auto",
+      "prompt": "Resume the authorized automatic squash merge.",
+      "fixture": "Checkpoint targets team/project release/next with user/project task head. Live PR now targets other/project release/next; branch names and checked head SHA still match.",
+      "invariants": [
+        "Loads checkpoint and compares full live repository identities before any merge or further external write",
+        "Reports destination mismatch and resolves it before proceeding; does not treat matching branch names or CI as authorization"
+      ]
+    },
+    {
+      "id": "ship-pr-recover-publication-window",
+      "root": "ship-pr",
+      "prompt": "Resume shipping the agreed change.",
+      "fixture": "Compact checkpoint exists outside disposable worktree, with captured base, head repository and task branch, but null PR URL. Prior PR creation succeeded just before interruption. Existing forge PR matches the recorded head. Conversation history is unavailable.",
+      "invariants": [
+        "Loads checkpoint and inspects live worktree, branch and forge PRs before retrying publication",
+        "Reuses existing branch and PR and updates checkpoint; never recaptures task branch as original base",
+        "Revalidates snapshot-specific evidence and retains prior authorization without another publishing gate"
+      ]
+    },
+    {
+      "id": "ship-task-local-dependencies",
+      "root": "ship",
+      "prompt": "Implement the agreed change and verify it locally.",
+      "fixture": "Existing runtime and locked package manager are available. Task-owned virtual environment can run focused checks without touching user app. Another install recipe has a hook that restarts the installed app. User global environment and app are in use.",
+      "invariants": [
+        "Allows routine locked dependency setup in the task-owned environment without requiring separate app-install authorization",
+        "Inspects hooks and prevents the app restart using a safe supported mode or sandbox; otherwise reports the specific blocker",
+        "Preserves user environments and lockfile; performs no global install or incidental upgrades",
+        "Distinguishes source-check evidence from application QA evidence; application execution still requires QA isolation"
+      ]
+    },
+    {
+      "id": "ship-auto-original-checkout-unchanged",
+      "root": "ship-auto",
+      "prompt": "Ship the change and automatically squash merge it.",
+      "fixture": "Remote squash merge succeeds. Original checkout remains on captured release/next behind fetched remote; no local synchronization was requested.",
+      "invariants": [
+        "Confirms actual merge SHA and records it in checkpoint",
+        "Leaves original checkout unchanged by default and reports its branch/HEAD and remote relationship separately from successful remote merge"
+      ]
+    },
+    {
+      "id": "ship-auto-local-sync-conditions",
+      "root": "ship-auto",
+      "prompt": "Ship and automatically squash merge; then synchronize my original checkout.",
+      "fixture": "Run variants: original checkout is clean and behind, dirty with user edits, locally diverged, switched to another branch, or contains an untracked collision. Remote merge succeeds in each variant.",
+      "invariants": [
+        "Rechecks original branch, HEAD, ancestry and staged/unstaged/untracked state before synchronization",
+        "Fast-forwards only the clean captured branch with ancestor HEAD and no untracked collision",
+        "Preserves dirty, diverged, switched or colliding checkouts without reset, stash or branch switching",
+        "Reports skipped or blocked synchronization separately from confirmed remote merge and checkpoints both states"
+      ]
     }
   ]
 }

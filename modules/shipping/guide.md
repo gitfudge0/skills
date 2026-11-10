@@ -51,7 +51,7 @@ The caller must supply a delivery contract before implementation. Public entry p
 Reporting and recovery are separate from risk:
 
 - Concise risk-based plan by default, even for narrow comprehensive changes. Formal HTML matrix only when requested or required by project process.
-- Durable [run state](references/run-state.md) only for multi-session or multi-stage work, recovery, or on request.
+- Every PR run requires the compact [minimum PR checkpoint](references/run-state.md#minimum-pr-checkpoint); fuller durable run state is for multi-session or multi-stage work, recovery, or on request. Local routine work needs no run directory.
 - An explicit test-plan request adds that capability, not every comprehensive stage.
 
 Adjusting course: one uncertainty may need one specialist, not a comprehensive run. If scope or risk grows, switch paths, say why, and keep completed decisions and evidence. A user correction narrows the work: "we didn't need new tests" stops new test work but does not authorize deleting existing tests or assets.
@@ -100,7 +100,7 @@ Every implementation starts with discovery under `references/modules/engineering
 | Worktree implementation | [Worktree coordination](references/pr-delivery.md#worktree-and-worker-coordination) | Task needs a worktree |
 | Deploy or compatibility | [External operations](references/external-workflows.md) | Explicit deploy, stored data, shared contracts, rollout order |
 | Comprehensive assurance | [Comprehensive assurance](references/comprehensive.md) | Comprehensive path |
-| Recover durable work | [Run state](references/run-state.md) | Cross-session work, long unattended attempts, recovery |
+| Recover durable work | [Run state](references/run-state.md) | Every PR run (minimum checkpoint); cross-session work, long unattended attempts, recovery |
 | Formal review | `references/roots/review/guide.md` | Comprehensive change or request |
 
 - Gap analysis keeps every valid gap with evidence. "What is missing before we build?" is analysis-only: return gaps, decisions and next actions. Clear requests need a small discovery pass, not a workshop.
@@ -118,7 +118,7 @@ Every implementation starts with discovery under `references/modules/engineering
 3. **Verify** acceptance and plausible regressions under verification, in Docker when `runtime: docker-only` is set. Add automated coverage only for a meaningful failure mode with a suitable harness, or on request; several UI steps alone do not need a new end-to-end suite.
 4. **Review and finish.** Read the final diff for correctness, contracts, scope and stray changes; fix and recheck. For either PR contract, run the [review loop](references/pr-delivery.md#review-fix-and-learn) through a fresh final review. Reach the endpoint, [clean up](references/pr-delivery.md#clean-up-after-the-pr-endpoint) task-created resources, and report changes, evidence and gaps.
 
-Routine work needs no run directory, HTML matrix, test-case approval, blanket full-suite gates or conventions audit. Never re-ask a settled visual or behavior choice once implementation starts.
+Routine local work needs no run directory; PR work keeps only the required compact checkpoint unless more recovery detail is needed. Routine work needs no HTML matrix, test-case approval, blanket full-suite gates or conventions audit. Never re-ask a settled visual or behavior choice once implementation starts.
 
 ## Recovery
 
