@@ -1118,6 +1118,30 @@
         "Carries installation boundaries through task lists, setup handoffs and workers",
         "Creates a fresh task branch before editing, preserves original checkout branch, and does not merge with required verification blocked"
       ]
+    },
+    {
+      "id": "ship-pr-ci-wait-and-repair",
+      "root": "ship-pr",
+      "prompt": "Ship the agreed change and raise a PR for review.",
+      "fixture": "CI registers after a delay following PR creation. A required job passes but a non-required job fails with an in-scope regression and accessible logs. After repair and push, old-head runs are green while new-head CI is queued, then passes. No human approval is required.",
+      "invariants": [
+        "Waits for delayed CI registration and all triggered jobs, including non-required CI; does not stop at PR creation or pending checks",
+        "Reads failure logs, fixes the in-scope regression on the same task branch, verifies affected behavior, commits and pushes",
+        "Waits for successful CI on the new head rather than reusing old-head success; refreshes affected review and merge-risk evidence",
+        "Stops ready for human review without merging"
+      ]
+    },
+    {
+      "id": "ship-auto-ci-wait-and-repair",
+      "root": "ship-auto",
+      "prompt": "Ship the agreed change, raise a PR and automatically squash merge.",
+      "fixture": "CI registers after a delay following PR creation. A required job passes but a non-required job fails with an in-scope regression and accessible logs. After repair and push, old-head runs are green while new-head CI is queued, then passes. No human approval is required.",
+      "invariants": [
+        "Waits for delayed CI registration and all triggered jobs, including non-required CI; does not stop at PR creation or pending checks",
+        "Reads failure logs, fixes the in-scope regression on the same task branch, verifies affected behavior, commits and pushes",
+        "Waits for successful CI on the new head rather than reusing old-head success; refreshes affected review and merge-risk evidence",
+        "Continues to confirmed automatic squash merge and records merge SHA"
+      ]
     }
   ]
 }

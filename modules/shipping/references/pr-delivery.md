@@ -74,7 +74,7 @@ Never rewrite a shared or unowned branch; without rewrite authorization, use a p
 | Verified locally | Nothing published unless requested | Observed evidence |
 | PR opened | Scoped branch, commit, push, PR | Live link and accurate pending checks |
 | PR ready (legacy explicit endpoint) | Remote checks and repeated review | [Finish conditions](#finish-pr-ready) on the current head |
-| `pr-review` | Fresh branch, PR, full review loop and required checks | Ready for human review; no merge |
+| `pr-review` | Fresh branch, PR, full review loop and completed CI repair loop | Ready for human review; no merge |
 | `pr-squash-current` | Same PR gates, then automatic squash merge into the captured original branch | Confirmed merged SHA |
 
 None authorizes release/deploy, self-approval, bypassing protection or changing agreed behavior. Issue updates and external messages are separate opt-ins.
@@ -83,6 +83,16 @@ None authorizes release/deploy, self-approval, bypassing protection or changing 
 2. For either PR endpoint, explicitly set the forge PR base to the captured original branch. Never rely on the forge default or fall back to `main`; `main` is valid only when it was the original branch. Record target, remote and branch ownership, and verify the live PR base matches before declaring readiness or merging.
 3. Inspect staged content before each commit; commit only task-owned changes.
 4. Push only the selected task branch. Immediately before PR creation, perform the freshness gate below, assess merge risk, and include the assessment in the description alongside final behavior, verification and limitations. Preserve the repository PR template and applicable human-written context.
+
+### Wait for CI and repair failures (both PR contracts)
+
+After opening the PR and after every subsequent push or base synchronization, inspect the live CI runs and checks for the current PR head. Wait for all triggered CI, including non-required jobs, to reach a terminal state before declaring `pr-review` ready or proceeding to automatic squash merge. Use the forge’s watch mechanism or bounded polling with progress updates; queued, pending and running checks are work in progress, not a handoff endpoint. Account for delayed run registration: an initially empty check list is not proof that CI is absent. Inspect applicable workflow triggers and run listings; if no CI applies, record that evidence rather than claiming a pass.
+
+For failures, read the failing job logs, diagnose the cause, fix actionable in-scope defects on the same task branch, run affected local checks, commit and push, then wait for the replacement CI runs. Repeat until CI succeeds and review is current. Recheck the live head before accepting results: green runs from an earlier head do not cover a fix, rebase or base update. Refresh affected review and the PR’s merge-risk assessment after changes. Never weaken checks, bypass protections or treat skipped/cancelled runs as passes; establish whether they are expected under workflow policy or need rerunning.
+
+Retry transient infrastructure failures only with evidence and within existing authorization. If CI needs unavailable credentials, external approval or infrastructure, or a failure is demonstrably unrelated and outside scope, preserve logs, run links, head SHA and recovery steps and report the precise blocker. Reassess repeated failed repairs instead of retrying indefinitely. A blocked or inaccessible run remains an explicit partial outcome, never CI success or PR readiness. Do not stop merely because CI takes time or the PR was created.
+
+Once the loop succeeds, continue the selected skill’s endpoint: `pr-review` stops ready for human review without merging; `pr-squash-current` continues through required approvals and confirmed squash merge. An explicitly narrower PR-opened endpoint may stop on creation with accurate pending CI status.
 
 ### Base freshness gate
 
@@ -153,7 +163,7 @@ For the pushed current head:
 
 - [ ] Verified initial and fresh final reviews recorded for the full diff, repeated after fixes that affect them.
 - [ ] No unresolved confirmed actionable in-scope issues.
-- [ ] All required checks green.
+- [ ] [CI wait and repair loop](#wait-for-ci-and-repair-failures-both-pr-contracts) completed for the current head; all required checks green and all triggered CI resolved without unexplained failures.
 - [ ] Local and remote heads agree; checked target SHA reported.
 
 Name pending human approvals or mergeability; never claim approved or mergeable. If credentials, CI or policy block, report the precise partial state, the PR link when available, and keep recovery state. Do not merge under `pr-review` or a legacy PR-ready endpoint. Automatic merging is permitted only under the explicit `pr-squash-current` contract or equivalent explicit user authorization.
