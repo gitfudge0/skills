@@ -1035,6 +1035,28 @@
       ]
     },
     {
+      "id": "ux-shape-teammate-invitations",
+      "root": "ux",
+      "prompt": "Work out how teammate invitations should behave before we build them.",
+      "fixture": "Workspace owners can invite teammates. Invites grant Member access and expire after seven days. The app supports account switching. No policy specifies what an invitee sees on the wrong account.",
+      "invariants": [
+        "Derives questions for the sender and recipient from the actions they need to take",
+        "Uses the settled role and expiry rules without reopening them",
+        "Connects the wrong-account question to visible behavior and a way to check it, distinguishing proposed rules from settled policy"
+      ]
+    },
+    {
+      "id": "ux-review-session-row",
+      "root": "ux",
+      "prompt": "Use this session row design to work out what we need to build.",
+      "fixture": "Static design shows a selected row with a title and Review status beside an unselected row labeled Review · unread and 3/3. No code or state rules are supplied.",
+      "invariants": [
+        "Connects visible cues to decisions someone makes while scanning sessions",
+        "Separates row selection, review readiness and unread state without inferring transitions from the design",
+        "Identifies what clears unread and what the count measures as build decisions, and gives a checkable scenario for any proposed transition"
+      ]
+    },
+    {
       "id": "ux-contextual-permission-denial",
       "root": "ux",
       "prompt": "Define the permission behavior for finding nearby pickup points.",

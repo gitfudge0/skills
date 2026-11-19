@@ -10,7 +10,7 @@ Sixteen public skills cover setup, shipping, design, UX, review, planning, issue
 | `/merge-risk` | Assess integration risk read-only | Evidence gaps, blast radius, rollback and production detection |
 | `fudge:review` | Review a PR or local diff | Findings, re-review, conventions checks |
 | `fudge:design` | Shape and build the visual experience | Visual craft, design systems, static mocks, prototypes, design QA |
-| `fudge:ux` | Shape the experience people need | Research, content architecture, interaction design, accessibility, measurement |
+| `fudge:ux` | Find what a feature must answer for users | Feature behavior, UX reviews, research, copy, states, accessibility, measurement |
 | `fudge:setup` | Establish project rules and make a project runnable | Conventions setup, audit, amendment, startup readiness, project verification recipes, guidance diagnosis |
 | `fudge:plan` | Create interactive HTML implementation plans | Runtime, block references, and examples; also bundled into ship |
 | `fudge:investigation` | Explain behavior, cause or rationale read-only | Source, history and conditional trace forensics |
