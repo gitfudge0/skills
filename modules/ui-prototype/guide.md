@@ -17,12 +17,13 @@ Follow package-root `shared/artifacts.md` for path resolution, caller overrides,
 ## Build a runnable task
 
 - Implement the transitions the question depends on. A path shown as clickable must respond to the action, including relevant branch choices, Back, save/resume, retry, cancellation, and feedback where they affect the task. Avoid decorative controls that imply unsupported behavior; label any intentional dead end.
+- When animating a transition, use the motion guidance in `references/modules/design-for-recognition/guide.md`. Map the trigger to meaningful feedback and a stable resulting state. Keep the next action available and retain the same information and controls with reduced motion.
 - Model persistence and reset deliberately. Specify what survives navigation, reload, and a new session; give the reviewer a clear way to reset the scenario and repeat the task. If persistence is simulated, say where the simulated state lives and how it differs from the intended product behavior.
 - Make the artifact easy to open or run with a short, exact instruction. Prefer minimal dependencies and follow the project's runtime conventions. Show the scope and limitations near the artifact, especially any simulated backend, authentication, data, permissions, or network behavior.
 
 ## Inspect and learn
 
-Inspect the running screen or screenshots at relevant sizes, including the starting view and at least one consequential state where available. Judge hierarchy, composition, and visual clarity in the rendered result, then fix and recheck material issues. Report unavailable visual coverage explicitly.
+Inspect the running screen or screenshots at relevant sizes, including the starting view and at least one consequential state where available. Use the design-for-recognition guide to assess task effectiveness and creative quality. Fix and recheck material issues, including timing, interruption, and reduced motion where movement affects the task. Report unavailable visual coverage explicitly.
 
 Perform the key task yourself through consequential branches and recovery with the relevant input methods. Verify save/resume and reset against the stated persistence contract. Fix broken or misleading behavior before review. Report those observations separately from the visual inspection.
 

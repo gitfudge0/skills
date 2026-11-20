@@ -10,6 +10,8 @@ Trace what a person must notice, distinguish, decide, and do. Identify the first
 
 ## Compose for the task
 
+When the user leaves direction open and it matters to the result, compare concepts that differ in composition, information grouping, or interaction emphasis. Use the same content and a consequential state to compare how each serves the goal. State the chosen concept and the quality it should evoke in context, then carry it through type, color, image choices, scale, controls, and motion. Familiar patterns support predictable action. Expressive choices can supply character where they reinforce the concept. Let the medium, audience, and task determine how much density, ornament, or asymmetry is appropriate.
+
 - **Grouping and hierarchy:** Express the chosen relationships and priority through proximity, position, scale, alignment, contrast, whitespace, imagery, and containers. Give important items emphasis relative to their surroundings; use a tighter range on dense screens when large display treatments would crowd the task. Make distinct choices visually distinguishable and leave enough space to show which elements belong together. Columns and a four-point spacing rhythm can help consistency and responsive behavior when they fit the product; neither decides the composition.
 - **Typography:** Choose type roles from the content hierarchy and make scan targets distinct while body text remains readable. For font selection, anatomy, pairings, scale, line height, letter spacing, and responsive type, read [Typography decisions](references/typography.md) when those choices affect the task.
 - **Color and depth:** Start from the product's established brand color and surface language when present. Use color to clarify priority and meaning, pairing semantic colors with text, shape, or another cue. In dark themes, compare surface steps, border contrast, and accent brightness in context; in light themes, tune shadows to the layer and background. Cards may need less depth than popovers above other content, but the rendered context decides. Check readable contrast rather than relying on opacity percentages. When color ramps or theme values become reusable rules, route their tokens and contracts to the design-system module.
@@ -18,21 +20,30 @@ Trace what a person must notice, distinguish, decide, and do. Identify the first
 
 Compare real interfaces serving a similar task for patterns worth testing, including their less visible states and responsive behavior. Inspiration suggests possibilities; it is not evidence about this product's users. Treat familiar recipes as options to evaluate, not rules to apply: one font, a modular ratio, fixed spacing counts, prescribed opacity, icon size, button padding, or heading leading can all be wrong for the actual content and screen. The relation between elements matters more than an isolated number.
 
+## Design motion across states
+
+Use [Motion and temporal design](references/motion.md) when movement or timing affects feedback, attention, continuity, or control. Establish the static cues and interaction contract before choosing animation. Use the same review for an immediate state change when an animation would add a wait without helping the task.
+
 ## Inspect and revise
 
-Inspect the live screen or screenshots with realistic content at relevant widths and themes. Include the starting view and states that change the person's next step, such as waiting, error, and recovery. Follow the task with the relevant input methods. Assess the dimensions that apply to the work.
+Inspect the live screen or screenshots with representative content at relevant widths and themes. Include the starting view and states that change the person's next step, such as waiting, error, and recovery. Follow the task with the relevant input methods. Assess design effectiveness and creative quality independently, using the dimensions that apply to the work.
 
-- **Clarity and hierarchy.** Can someone tell what the screen is for and find the primary action? Check what attracts attention first and whether supporting information competes with the task.
-- **Layout and composition.** Check alignment, whitespace, grouping, and visual balance. See whether long or missing content changes reading order, separates related items, or crowds actions at narrow widths.
-- **Typography.** Check legibility, line lengths, and the distinction between type roles. Use a coherent type treatment that fits the interface's character.
-- **Color and visual consistency.** Check contrast, purposeful use of color, and consistency across controls and states. Use depth to clarify layers and motion to clarify changes that need it.
-- **Interaction and usability.** Check that actions look actionable and states are distinguishable. Follow feedback and recovery, and make sure secondary options are findable when needed. Inspect keyboard, touch, and assistive modes where they affect the task.
+### Design effectiveness
 
-Tie findings to the observed state or viewport, the specific visual issue, and its effect on the task. Fix material issues and recheck the affected renders or interactions. Report any unobserved coverage and describe these findings as expert evaluation. Participant evidence comes from observing people perform the task.
+- **Clarity and trust.** Check what attracts attention first, whether the purpose and primary action are clear, whether grouping and copy match the task, and whether feedback makes outcomes and uncertainty understandable. Check the source for consequential claims, displayed progress, and data comparisons.
+- **Interaction and inclusion.** Follow the task through feedback, interruption, and recovery. Check that controls and states are distinguishable, secondary options are findable, and people can keep their work or regain control where the product allows it. Inspect keyboard, touch, and assistive modes where they affect the task.
+- **Resilience.** Use relevant narrow widths and long, missing, or changing content. See whether they change reading order, crowd actions, or introduce layout shifts. Check responsiveness and both elapsed and perceived delays where they affect the task.
+
+### Creative quality
+
+- **Concept and character.** Identify the idea expressed by the result and see whether hierarchy, imagery, color, typography, and motion reinforce it. Look for distinctive choices that suit the audience and context.
+- **Composition and craft.** Check visual weight, rhythm, whitespace, optical alignment, type roles and line lengths, color contrast, and how control details read together. Look for competing emphasis and inconsistent details across comparable states. Reuse rules where they create coherence across the work.
+
+Tie findings to the observed state or viewport, the specific issue, and its effect on the task or the concept. Fix material issues and recheck the affected renders or interactions. Report any unobserved coverage and describe these findings as expert evaluation. Participant evidence comes from observing people perform the task.
 
 ## Specialist boundaries
 
-the content-architecture module owns routes, content placement, labels, and interface words. the interaction-design module owns the transition and recovery contract behind actions. the design-system module owns reusable tokens and component contracts. the accessible-ui module owns criterion-level accessibility guidance and assessment. the design-qa module owns comparison of a built UI with its selected design. Use the ux-research module when the question needs observation with people. Carry those decisions into the visual treatment and flag consequential conflicts rather than writing a competing rule here.
+The content-architecture module owns routes, content placement, labels, and interface words. The interaction-design module owns the transition and recovery contract behind actions. The design-system module owns reusable tokens and component contracts. The accessible-ui module owns criterion-level accessibility guidance and assessment. The design-qa module owns comparison of a built UI with its selected design. Use the ux-research module when the question needs observation with people. Carry those decisions into the visual treatment and flag consequential conflicts for resolution in the owning guidance.
 
 ## Worked visual change
 
