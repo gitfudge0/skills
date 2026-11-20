@@ -1,36 +1,44 @@
 ---
 name: fudge:design
-description: "Design, build, or critique screens, components, visual hierarchy, typography, themes, and design systems. Use for UI polish, static mockups, interaction demos, or checking built UI against a chosen design. User needs, navigation, copy, and task-flow decisions belong to fudge:ux; preserving existing appearance belongs to fudge:visual-parity."
+description: "Shape, evaluate, and build designs from concrete tasks. Use for feature behavior, UX research, copy, navigation, accessibility, visual design, design systems, scoped UI components and design QA, or runnable experiments for interaction, API, algorithm, and performance questions."
 ---
 
 # fudge:design
 
-## Locate guidance
-
-Paths under `references/modules/`, `references/roots/` and `shared/` resolve from the package root: the nearest ancestor containing `.fudge-package.json`, or in a source checkout the ancestor containing `scripts/skill-manifest.json` (mapping in `shared/locate.md`). Links to this guide's own references stay relative to this file. Read only the selected guidance.
-
-Use package-root `shared/execution.md` for implementation/delegation policy, `shared/writing.md` for prose, and `shared/artifacts.md` before writing review artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read package-root `shared/report-deck/guide.md` for the shared plan runtime UI; concise chat is the default.
-
-Own the visual question through its requested endpoint. Inspect existing UI, project instructions, vocabulary, authoritative design documents, tokens, and components. Use established patterns for routine choices; resolve only consequential unsettled product choices with the user. Read `references/modules/design-for-recognition/guide.md` for task-specific hierarchy, typography, color, surfaces, controls, and feedback.
+Use a concrete case to discover what the design needs to do. Give the idea enough form to inspect or try it, follow what happens, and revise the design in light of the evidence. Own the work through the requested endpoint.
 
 ## Choose the endpoint
 
-| Request | Route and output |
-|---|---|
-| Advice or critique | Concise direction tied to the task and source evidence; no artifact by default |
-| Show or compare screens | `references/modules/ui-mock/guide.md`, artifact-only mode; inspect the rendered static frames |
-| Test an interaction that static frames cannot answer | `references/modules/ui-prototype/guide.md`; bounded runnable exploration |
-| Tokens, theming, component library, reusable rules | `references/modules/design-system/guide.md`; reuse authoritative sources |
-| Implement specific components | [Component build](references/component-build.md); build and verify the requested scope |
-| Compare built UI with selected design | `references/modules/design-qa/guide.md`; record observed differences and retests |
-| Draft plus durable project rules | [Design draft and project rules](references/design-package.md) |
+Start at the level of the request. A label request can end with labels. A mock with settled requirements goes straight to the visual draft, and a named experiment goes straight to the runnable question. Move between guides when a finding changes the decision or the requested output.
 
-A mock request with settled content enters the mock module directly. A component request does not require a mock. Create durable documents only when requested or when the chosen scope establishes reusable rules. Keep one-off decisions with the task.
+| Request | Guidance and output |
+|---|---|
+| Research what people need or understand | `references/modules/ux-research/guide.md` for discovery, task-based evaluation, or synthesis |
+| Shape or review behavior across roles, states, and recovery | `references/modules/interaction-design/guide.md` for a checkable behavior contract |
+| Review or write copy, navigation, and forms | `references/modules/content-architecture/guide.md` for the path and language in context |
+| Assess or improve accessibility | `references/modules/accessible-ui/guide.md` for scoped guidance, audit, or fix and retest |
+| Define or assess task success | `references/modules/experience-measurement/guide.md` for measurement and comparison |
+| Design or critique hierarchy, layout, typography, and controls | `references/modules/design-for-recognition/guide.md` for visual direction grounded in the task |
+| Show or compare screens | `references/modules/ui-mock/guide.md` in artifact-only mode for a rendered static draft |
+| Resolve an interaction, API, algorithm, or performance question empirically | `references/modules/design-experiment/guide.md` for an isolated runnable experiment and observed results |
+| Establish tokens, theming, or reusable component rules | `references/modules/design-system/guide.md` for design systems |
+| Implement specific UI components | [Component build](references/component-build.md) for the requested implementation and verification |
+| Compare built UI with a chosen design | `references/modules/design-qa/guide.md` for fidelity, task completeness, and retests |
+| Prepare a visual draft and durable project rules | [Design draft and project rules](references/design-package.md) |
 
 ## Work the decision
 
-1. Identify the person's task, content priority, constraints, and consequential states. Mark assumptions and distinguish observed behavior from recommendations.
-2. Read `references/roots/ux/guide.md` only when needs, content, flow, or state behavior could change the visual decision. Pass the specific question and retain settled decisions. Read `references/modules/accessible-ui/guide.md` for scoped accessibility guidance or assessment. For conflicting requirements or consequential tradeoffs, hand the bounded discovery or pressure-test question to public `fudge:ship` when available; otherwise surface the concrete unresolved decision.
-3. Produce the selected output using shared execution and artifact guidance. Supply exact output paths and bounded ownership to any worker. UX and design can inform each other; neither is a mandatory prerequisite.
-4. Follow the selected endpoint’s inspection and verification requirements. For a component build without a selected visual contract, inspect the component in context and follow its key interaction at relevant sizes, including keyboard/focus, feedback, and consequential empty/error states. For code changes, run relevant project checks and read raw output. A mock proves appearance only; expert inspection is not participant research or accessibility conformance.
-5. Return the decision, output or changed paths, verification evidence, and material open questions. When called by ship, honor its supplied path and already settled behavior; let ship own delivery.
+1. **Follow a real case.** Identify the person or caller, goal, starting context, realistic input, and observable result. Inspect relevant existing behavior, requirements, research, terminology, and visual primitives. Rehearse the key task through completion and include delay, error, interruption, or recovery when it could change the design.
+2. **Find the decision.** Ask what the person needs to know or do at the consequential moment and which behavior or visual cue would make it possible. A cue shows what the design communicates. Check the source or running product for the rule behind it. Name the observable differences between viable options. Use established requirements and patterns for routine choices. Bring unsettled choices to the user or authorized owner when the consequences warrant it, and carry on with the parts that are settled.
+3. **Use evidence that can change the design.** Match fidelity and effort to the question. Compare labels in their actual context, render hierarchy with realistic content, walk an uncertain transition, observe participants for comprehension, or run a harness for technical behavior. Before an experiment, name the observation that would change the choice. Revisit where the job belongs before adding another control, rule, or service.
+4. **Deliver a checkable result.** Give the requested copy, critique, contract, mock, experiment, or component. For consequential behavior, state the trigger, visible outcome, and recovery rule as applicable. Check the selected output through the relevant states and report what you observed. Distinguish requirements, proposals, expert inspection, participant evidence, and simulated or live results. Record durable rules only when requested or when the work establishes a reusable contract.
+
+For component work, inspect the result in context at relevant sizes and input methods. Include keyboard and focus behavior, feedback, and consequential empty or error states as applicable. For code changes, run relevant project checks and read their raw output.
+
+For example, an icon that becomes **Send** once an AI draft has text opens two questions. Can someone switch to voice while keeping that draft, and what happens when they send it during a response? Inspect the empty, editing, and busy states before choosing the control. If queueing is proposed, a runnable draft can check what gets queued, what remains editable, and what survives cancellation. A participant task can establish what the person understood about those outcomes.
+
+## Locate and use guidance
+
+Resolve `references/modules/`, `references/roots/`, and `shared/` from the nearest ancestor containing `.fudge-package.json`, or from the source checkout containing `scripts/skill-manifest.json`. Use `shared/locate.md` for source mappings. Links to this guide’s own references stay relative to this file. Load only guidance that changes or verifies the selected decision.
+
+Use `shared/execution.md` for implementation and verification, `shared/writing.md` for prose, and `shared/artifacts.md` for artifacts. For a requested durable HTML report, use `shared/report-deck/guide.md` with the host's presentation rules. Discuss or draft at the caller’s scope. Broader production integration and delivery use `fudge:ship`; controlled before/after appearance checks for behavior-preserving migrations use `fudge:visual-parity`. When called by shipping, honor the caller’s scope, settled decisions, and destination, and return evidence to the caller.

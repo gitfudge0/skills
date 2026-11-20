@@ -30,7 +30,7 @@ Never invent participants, quotes, task outcomes, or success rates. An agent wal
 
 Give the design owner a short account of what was observed, the evidence and limits, recommended changes tied to findings, and what remains uncertain. When project `DESIGN.md`, `COMPONENTS.md`, or equivalent source-of-truth documents are in scope, update the affected decisions and cite the research evidence; do not silently turn a tentative result into a permanent rule. Re-test material changes when the unresolved risk warrants it.
 
-Route broader corpus reconciliation or a decision pressure-test to public `fudge:ship` when available; those internal modules are not dependencies of UX or design packages. If ship is unavailable, surface the specific missing evidence or decision without requiring an unavailable guide. Neither corpus analysis nor simulated perspectives supply observations of real users. Use the design-qa module for expert comparison of a built UI with its design; use this skill when the question requires evidence from people attempting the task.
+Use `references/modules/gap-analysis/guide.md` for broader corpus reconciliation and `references/modules/decision-room/guide.md` for a decision pressure-test, within the requested scope. Identify conclusions from corpus analysis or simulated perspectives by their actual source. Use the design-qa module for expert comparison of a built UI with its design and this guide for questions that require observing people attempting the task.
 
 ## Observation to finding
 

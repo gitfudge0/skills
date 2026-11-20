@@ -29,7 +29,11 @@ class InstallerTests(unittest.TestCase):
         return result
     def test_defaults_and_standalone_navigation(self):
         self.run_install('install', '-a', 'codex')
-        self.assertEqual({p.name for p in self.skills.iterdir()}, {'fudge-' + n for n in ['design', 'ux', 'ship', 'ship-pr', 'ship-auto', 'review', 'setup', 'investigation', 'bug-fix', 'hillclimb', 'prototype', 'visual-parity', 'ticket', 'retro']} | {'fudge-plan', 'merge-risk'})
+        expected = {'fudge-' + n for n in ['design', 'ship', 'ship-pr', 'ship-auto', 'review', 'setup',
+                                           'investigation', 'bug-fix', 'hillclimb', 'visual-parity', 'ticket', 'retro']}
+        expected.update({'fudge-plan', 'merge-risk'})
+        self.assertEqual({p.name for p in self.skills.iterdir()}, expected)
+        self.assertEqual({p.name for p in (self.repo / '.fudge-build').iterdir()}, expected)
         spec = importlib.util.spec_from_file_location('builder', self.repo / 'scripts/build_root_skills.py')
         builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
@@ -84,8 +88,19 @@ class InstallerTests(unittest.TestCase):
                         'references/modules/shipping/references/pr-delivery.md'],
             'hillclimb': ['references/modules/engineering/references/performance.md',
                          'references/modules/verification/guide.md'],
-            'prototype': ['references/modules/ui-prototype/guide.md',
-                          'references/modules/engineering/references/performance.md'],
+            'design': ['references/component-build.md',
+                       'references/modules/design-system/guide.md',
+                       'references/modules/design-qa/guide.md',
+                       'references/modules/ui-mock/guide.md',
+                       'references/modules/ui-prototype/guide.md',
+                       'references/modules/ux-research/guide.md',
+                       'references/modules/content-architecture/guide.md',
+                       'references/modules/interaction-design/guide.md',
+                       'references/modules/accessible-ui/guide.md',
+                       'references/modules/experience-measurement/guide.md',
+                       'references/modules/design-experiment/guide.md',
+                       'references/modules/engineering/references/performance.md',
+                       'references/modules/verification/guide.md'],
             'visual-parity': ['references/modules/design-qa/guide.md',
                              'references/modules/verification/guide.md'],
         }
@@ -156,7 +171,7 @@ class InstallerTests(unittest.TestCase):
             self.assertTrue((directory / 'fudge-ship/references/roots/setup/references/project-verification.md').is_file())
             self.assertTrue((directory / 'fudge-ship/references/modules/engineering/references/refactoring.md').is_file())
             self.assertTrue((directory / 'fudge-review/shared/test-effectiveness.md').is_file())
-        self.assertIn('Installed 16 public skills for 4 agents', result.stdout)
+        self.assertIn('Installed 14 public skills for 4 agents', result.stdout)
         # Noninteractive default selection has the same retirement behavior.
         old = self.home / targets[0] / 'fudge-write'
         old.symlink_to(self.repo / 'fudge-write')
@@ -412,6 +427,62 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual([p.name for p in self.skills.iterdir()], ['fudge-design'])
         result = self.run_install('-a', 'codex', '--skill', 'mindmap', '-y', success=False)
         self.assertIn('removed', result.stderr)
+
+    def test_design_migrates_owned_ux_and_prototype_for_selected_hosts(self):
+        self.skills.mkdir(parents=True)
+        ux = self.skills / 'fudge-ux'
+        ux.symlink_to(self.repo / 'fudge-ux')
+        prototype = self.skills / 'fudge-prototype'
+        prototype.mkdir()
+        (prototype / '.fudge-installer').write_text(str(self.repo) + '\n')
+
+        claude = self.home / '.claude/skills'
+        claude.mkdir(parents=True)
+        former_package = self.repo / '.fudge-build/fudge-prototype'
+        former_package.mkdir(parents=True)
+        (former_package / '.fudge-build-generated').touch()
+        (former_package / 'SKILL.md').write_text('working legacy package\n')
+        other_host = claude / 'fudge-prototype'
+        other_host.symlink_to(former_package)
+        foreign = claude / 'fudge-ux'
+        foreign.mkdir()
+        (foreign / 'SKILL.md').write_text('manually installed\n')
+
+        self.run_install('-a', 'codex', '--root', 'setup', '-y')
+        self.assertTrue(ux.is_symlink())
+        self.assertTrue(prototype.is_dir())
+        self.assertTrue((other_host / 'SKILL.md').is_file())
+
+        result = self.run_install('-a', 'codex', '--root', 'ux', '--skill', 'fudge-prototype', '--copy', '-y')
+        self.assertIn('Migration: ux → fudge:design', result.stdout)
+        self.assertIn('Migration: prototype → fudge:design', result.stdout)
+        self.assertIn('Installed 1 public skills for 1 agents', result.stdout)
+        self.assertFalse(ux.exists() or ux.is_symlink())
+        self.assertFalse(prototype.exists())
+        self.assertTrue((self.skills / 'fudge-design/SKILL.md').is_file())
+        self.assertTrue((other_host / 'SKILL.md').is_file())
+
+        self.run_install('-a', 'claude', '--root', 'design', '-y')
+        self.assertFalse(other_host.exists() or other_host.is_symlink())
+        self.assertTrue((claude / 'fudge-design/SKILL.md').is_file())
+        self.assertEqual((foreign / 'SKILL.md').read_text(), 'manually installed\n')
+
+    def test_legacy_design_removal_targets_only_the_requested_package(self):
+        self.skills.mkdir(parents=True)
+        packages = {'fudge-design', 'fudge-ux', 'fudge-prototype'}
+        selections = (('--root', 'ux'), ('--skill', 'fudge-ux'),
+                      ('--root', 'fudge-prototype'), ('--skill', 'prototype'))
+        for flag, selection in (*selections, ('--root', 'design')):
+            with self.subTest(flag=flag, selection=selection):
+                for name in packages:
+                    entry = self.skills / name
+                    entry.mkdir(exist_ok=True)
+                    (entry / '.fudge-installer').write_text(str(self.repo) + '\n')
+                self.run_install('remove', '-a', 'codex', flag, selection, '-y')
+                selected = 'fudge-' + selection.removeprefix('fudge-')
+                remaining = set() if selection == 'design' else packages - {selected}
+                self.assertEqual({entry.name for entry in self.skills.iterdir()}, remaining)
+
     def test_system_decomposition_migrates_into_ship(self):
         self.skills.mkdir(parents=True)
         legacy = self.skills / 'fudge-system-decomposition'

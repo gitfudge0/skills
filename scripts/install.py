@@ -14,8 +14,10 @@ BUILD = SOURCE / '.fudge-build'
 MANIFEST = json.loads((SOURCE / 'scripts/skill-manifest.json').read_text())
 ROOTS = list(MANIFEST['roots'])
 PACKAGES = {name: spec.get('package', 'fudge-' + name) for name, spec in MANIFEST['roots'].items()}
+FORMER_DESIGN_SKILLS = ('ux', 'prototype')
 ALIASES = {name: spec['owner'] for name, spec in MANIFEST['modules'].items() if name not in ROOTS}
 ALIASES.update({'conventions': 'setup', 'delegate': 'ship', 'unslop': 'ship', 'report-deck': 'design', 'html-plan': 'plan'})
+ALIASES.update(dict.fromkeys(FORMER_DESIGN_SKILLS, 'design'))
 RETIRED = set(ALIASES) | {'mindmap', 'write'}
 LEGACY = {'html-plan': 'plan', 'fudge-html-plan': 'plan'}
 AGENTS = {'claude': '.claude/skills', 'codex': '.codex/skills', 'cursor': '.cursor/skills', 'opencode': '.config/opencode/skills'}
@@ -72,7 +74,7 @@ def main():
     parser = argparse.ArgumentParser(description='Install public Fudge skills. Each root bundles its selected dependencies.')
     parser.add_argument('command', nargs='?', choices=['install', 'list', 'remove'], default='install')
     parser.add_argument('-a', '--agent', action='append', choices=AGENTS, default=[])
-    parser.add_argument('--root', action='append', default=[], help=', '.join(ROOTS) + ' (conventions and html-plan are migration aliases)')
+    parser.add_argument('--root', action='append', default=[], help=', '.join(ROOTS) + ' (migration aliases include conventions, html-plan, ux, and prototype)')
     parser.add_argument('--skill', action='append', default=[], help='public skill or legacy name; legacy modules select their owning root')
     parser.add_argument('--all', action='store_true', help='select all public roots; remove all owned entries')
     parser.add_argument('--no-roots', action='store_true', help='legacy flag, accepted only with --skill')
@@ -84,10 +86,14 @@ def main():
     if args.no_roots and (args.root or not args.skill):
         raise ValueError('--no-roots is supported only with legacy --skill selections; modules now install through their owning root')
     roots = []
+    exact_removals = set()
     for name in args.root + args.skill:
         name = name.removeprefix('fudge-')
         if name in {'mindmap', 'write'}:
             raise ValueError(f'{name} has been removed; it has no replacement public skill')
+        if args.command == 'remove' and name in FORMER_DESIGN_SKILLS:
+            exact_removals.add('fudge-' + name)
+            continue
         root = ALIASES.get(name, name)
         if root not in ROOTS:
             raise ValueError(f'Unknown skill: {name}')
@@ -129,8 +135,9 @@ def main():
         return
     if args.command == 'remove':
         candidates = [entry for target in targets if target.is_dir() for entry in sorted(target.iterdir()) if owned(entry)]
-        if roots:
-            candidates = [entry for entry in candidates if LEGACY.get(entry.name, ALIASES.get(entry.name.removeprefix('fudge-'), entry.name.removeprefix('fudge-'))) in roots]
+        if roots or exact_removals:
+            candidates = [entry for entry in candidates if entry.name in exact_removals
+                          or LEGACY.get(entry.name, ALIASES.get(entry.name.removeprefix('fudge-'), entry.name.removeprefix('fudge-'))) in roots]
         elif not args.all:
             if not candidates:
                 print('No installer-owned skills found.')

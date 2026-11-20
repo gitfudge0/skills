@@ -1,22 +1,20 @@
 # Fudge skills
 
-Sixteen public skills cover setup, shipping, design, UX, review, planning, issue tracking and focused specialist workflows. Each installed root bundles its dependency closure and works independently; bundled guidance is loaded only when needed.
+Fourteen public skills cover setup, shipping, design, review, planning, issue tracking and focused specialist workflows. Each installed root bundles its dependency closure and works independently; bundled guidance is loaded only when needed.
 
 | Public skill | Purpose | Internal capabilities |
 |---|---|---|
-| `fudge:ship` | Implement, verify, and integrate into the current branch locally | Engineering, verification, PR delivery and review learning, gap analysis, system decomposition, interactive HTML planning, test planning, decision pressure-testing; routes to design, UX, review, setup, ticket |
+| `fudge:ship` | Implement, verify, and integrate into the current branch locally | Engineering, verification, PR delivery and review learning, gap analysis, system decomposition, interactive HTML planning, test planning, decision pressure-testing; routes to design, review, setup, ticket |
 | `fudge:ship-pr` | Ship on a fresh branch and raise a PR for human review | Shared shipping workflow; base freshness gate; merge-risk output in PR description |
 | `fudge:ship-auto` | Ship on a fresh branch, raise PR, automatically squash merge into the captured original branch | Shared shipping workflow; required checks and approvals; confirmed merge |
 | `/merge-risk` | Assess integration risk read-only | Evidence gaps, blast radius, rollback and production detection |
 | `fudge:review` | Review a PR or local diff | Findings, re-review, conventions checks |
-| `fudge:design` | Shape and build the visual experience | Visual craft, design systems, static mocks, prototypes, design QA |
-| `fudge:ux` | Find what a feature must answer for users | Feature behavior, UX reviews, research, copy, states, accessibility, measurement |
+| `fudge:design` | Decide how something should work, give it form, and test it | User research, copy, navigation, interaction behavior, accessibility, measurement, visual design, design systems, mockups, component builds, design QA, and runnable UI, API, algorithm, or performance experiments |
 | `fudge:setup` | Establish project rules and make a project runnable | Conventions setup, audit, amendment, startup readiness, project verification recipes, guidance diagnosis |
 | `fudge:plan` | Create interactive HTML implementation plans | Runtime, block references, and examples; also bundled into ship |
 | `fudge:investigation` | Explain behavior, cause or rationale read-only | Source, history and conditional trace forensics |
 | `fudge:bug-fix` | Reproduce, diagnose and fix a bounded defect | Shared engineering, regression verification and selected delivery |
 | `fudge:hillclimb` | Improve a measured metric within a budget | Authoritative performance loop and correctness evidence |
-| `fudge:prototype` | Answer one empirical question with a disposable experiment | UI prototype machinery, API/algorithm harnesses, measurement |
 | `fudge:visual-parity` | Preserve appearance or verify matched renderings | Controlled before/after captures, design QA and scoped verification |
 | `fudge:ticket` | Draft, reconcile and update issue-tracker tickets, drafts first | User-facing story splits with platform subtasks, ticket-vs-implementation reconciliation, post-merge comments and transitions; also routed from ship |
 | `fudge:retro` | Learn from a coding session and propose durable improvements | Bounded evidence, cause tracing, ranked proposals; routes application to existing owners |
@@ -44,11 +42,13 @@ Requires Python 3.9+ and Bash. Clone this repository, then run:
 ./install.sh remove -a codex --all -y
 ```
 
-Supported terminals use a four-step keyboard installer: agents → roots → method → review. Use arrows to move, Space to select, Enter to continue, Esc to go back, and q to cancel. Back preserves selections. Narrow or unsupported terminals use numbered choices. Conflicts appear before applying changes. Defaults select all sixteen roots. Supported targets: Claude, Codex, Cursor, OpenCode. Non-interactive installation requires an explicit target (`-a`); it applies without a prompt. `-y` bypasses interactive confirmation. Non-interactive removal requires `-y`.
+Supported terminals use a four-step keyboard installer: agents → roots → method → review. Use arrows to move, Space to select, Enter to continue, Esc to go back, and q to cancel. Back preserves selections. Narrow or unsupported terminals use numbered choices. Conflicts appear before applying changes. Defaults select all fourteen roots. Supported targets: Claude, Codex, Cursor, OpenCode. Non-interactive installation requires an explicit target (`-a`); it applies without a prompt. `-y` bypasses interactive confirmation. Non-interactive removal requires `-y`.
 
-The installer offers sixteen public roots. Each package includes its dependency closure, internal guides, and shared policies. Symlinks point to generated `.fudge-build` packages; copies include an installer ownership marker and can be updated by rerunning the installer.
+Each package includes its dependency closure, internal guides, and shared policies. Symlinks point to generated `.fudge-build` packages; copies include an installer ownership marker and can be updated by rerunning the installer.
 
 ### Migration
+
+`fudge:design` includes the former `fudge:ux` and `fudge:prototype` workflows. Install `--root design` for each target that used either skill. The installer replaces this checkout’s owned UX and Prototype entries for the selected targets. `--root ux`, `--root prototype`, and their `fudge-` and `--skill` forms select Design.
 
 `--root conventions` selects `setup`. Legacy `--skill` names select their owning root: for example, `--skill ui-mock` selects `design`, and `--skill gap-analysis` and `--skill system-decomposition` select `ship`. `--no-roots --skill NAME` remains a migration form. `--skill plan` selects the standalone public skill. Legacy `html-plan` and `fudge-html-plan` selections remain migration aliases for `plan`. `--skill mindmap` and explicit `write` selections report their removal.
 
@@ -57,8 +57,8 @@ Installation removes retired entries only when they are owned by this checkout's
 ## Source and package layout
 
 ```text
-fudge-{ship,review,design,ux,setup}/SKILL.md
-fudge-{investigation,bug-fix,hillclimb,prototype,visual-parity,ticket,retro}/SKILL.md
+fudge-{ship,review,design,setup}/SKILL.md
+fudge-{investigation,bug-fix,hillclimb,visual-parity,ticket,retro}/SKILL.md
 merge-risk/SKILL.md            # standalone /merge-risk assessment
 modules/<capability>/guide.md
 plan/SKILL.md                  # standalone public skill, also bundled into ship

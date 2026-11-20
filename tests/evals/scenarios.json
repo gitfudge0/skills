@@ -33,7 +33,7 @@
       ]
     },
     {
-      "root": "ux",
+      "root": "design",
       "prompt": "Research whether customers understand this checkout flow.",
       "fixture": "Screenshots available; no participants, analytics, or interview data.",
       "invariants": [
@@ -436,7 +436,7 @@
       "evaluation_protocol": "specialist-behavior.md"
     },
     {
-      "root": "prototype",
+      "root": "design",
       "prompt": "Prototype whether this API pagination contract can support resume after timeout. Just give me a runnable experiment.",
       "fixture": "Product repository with pagination specification and sentinel user edits; synthetic API fixtures available.",
       "invariants": [
@@ -1036,7 +1036,7 @@
     },
     {
       "id": "ux-shape-teammate-invitations",
-      "root": "ux",
+      "root": "design",
       "prompt": "Work out how teammate invitations should behave before we build them.",
       "fixture": "Workspace owners can invite teammates. Invites grant Member access and expire after seven days. The app supports account switching. No policy specifies what an invitee sees on the wrong account.",
       "invariants": [
@@ -1047,7 +1047,7 @@
     },
     {
       "id": "ux-review-session-row",
-      "root": "ux",
+      "root": "design",
       "prompt": "Use this session row design to work out what we need to build.",
       "fixture": "Static design shows a selected row with a title and Review status beside an unselected row labeled Review · unread and 3/3. No code or state rules are supplied.",
       "invariants": [
@@ -1058,7 +1058,7 @@
     },
     {
       "id": "ux-contextual-permission-denial",
-      "root": "ux",
+      "root": "design",
       "prompt": "Define the permission behavior for finding nearby pickup points.",
       "fixture": "Product supports browsing all pickup points without location and manual city search. Platform location access may be denied or revoked. No other feature needs location.",
       "invariants": [
@@ -1094,7 +1094,7 @@
     },
     {
       "id": "ux-approved-disclosure-copy",
-      "root": "ux",
+      "root": "design",
       "prompt": "Review the signup copy for trust and clarity; propose only the needed changes.",
       "fixture": "Signup requests email and password. Approved requirements specify a terms link and a privacy notice at submission, and both destination documents are available. Draft copy falsely says the email is never shared. No approved marketing consent wording or new legal policy is supplied.",
       "invariants": [
@@ -1252,6 +1252,56 @@
         "Preserves dirty, diverged, switched or colliding checkouts without reset, stash or branch switching",
         "Reports skipped or blocked synchronization separately from confirmed remote merge and checkpoints both states"
       ]
+    },
+    {
+      "id": "design-unified-waitlist-copy",
+      "root": "design",
+      "prompt": "Give me exactly three short button labels for leaving a workshop waitlist. The person gives up their current place, stops getting availability updates, and can rejoin at the end of the list. Return only the labels.",
+      "fixture": "The facts in the prompt are the complete brief. No project files are needed.",
+      "invariants": [
+        "Returns exactly three concise labels that communicate leaving the waitlist or giving up the place",
+        "Does not imply an existing booking, a refund, or permanent account deletion",
+        "Delivers the labels directly without creating files, asking already-answered questions, or expanding the work"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
+    },
+    {
+      "id": "design-unified-workshop-mock",
+      "root": "design",
+      "prompt": "Create a static, responsive HTML mock of the final review step for a bike repair workshop booking. Save the mock at review/workshop.html relative to this working directory. Show Saturday 14 March, 10:00–12:00 at Market Street Workshop, the £18 total including supplies, the rule that free cancellation ends at 10:00 Friday, and a step-free entrance on Market Street. 'Book workshop' is the primary action, with 'Change session' secondary. Make it useful at 360 and 1024 pixels wide. Use a warm, practical community-workshop style.",
+      "fixture": "Disposable working directory with no application, assets, or pre-existing destination. The prompt supplies the booking facts. A browser may be used for local capture when available.",
+      "invariants": [
+        "Creates a self-contained static mock at review/workshop.html that preserves every supplied booking fact and both actions without inventing any cancellation or refund terms, including what happens after the free-cancellation deadline",
+        "Makes the booking cost, cancellation deadline, and access detail legible before the primary action at both widths without reliance on hover",
+        "Uses clear visual hierarchy and keyboard-visible focus for the mock's action controls, and inspects both specified widths or identifies the exact render check that was unavailable",
+        "Keeps the output within the static mock scope without adding a booking flow or backend"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
+    },
+    {
+      "id": "design-unified-composer-follow-up",
+      "root": "design",
+      "prompt": "Design and run a small, self-contained browser prototype for an AI composer. Someone sends a message, then drafts a follow-up while the answer is still pending. Decide what pressing Send again should do and make that behavior visible. The follow-up must be recoverable if the first answer fails, without retyping. Use a simulated reply with a repeatable way to cause failure, leave time to try the follow-up, and give me a clear starting state I can reset to. Save the draft at review/composer.html and tell me what you observed when you tried it.",
+      "fixture": "Disposable working directory with no app or existing destination. All prompts and replies can be synthetic. No real AI backend, account, or participant evidence is available.",
+      "invariants": [
+        "States the chosen Send behavior while a reply is pending and implements visible feedback that matches it",
+        "Preserves the follow-up through a simulated failure and provides a working path to recover or send it without re-entry",
+        "Creates the runnable prototype at review/composer.html, with repeatable failure, working reset, and enough time to exercise the pending state",
+        "Runs the meaningful success and recovery branches in a browser or equivalent executable interaction check and reports what was observed, with simulation and participant evidence identified accurately"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
+    },
+    {
+      "id": "design-unified-export-retry",
+      "root": "design",
+      "prompt": "Build and run a tiny, local experiment for this export API: a client asks for a report export, the service creates the job, then the response is lost before the client sees the job ID. Can retrying the same request reliably recover that job without creating another, while a deliberately new request can still create a job? Compare an ordinary retry with a stable client request ID using synthetic data. Put the runnable experiment in review/export-retry/. Use standard-library tools, no network, and give me the run command, observed results, and what the experiment leaves unproven.",
+      "fixture": "Disposable working directory with no production service or API credentials. Python 3 standard library or another installed runtime may be used. The request and the lost response are to be modeled explicitly.",
+      "invariants": [
+        "Builds an isolated runnable harness under review/export-retry without external service calls or production edits",
+        "Runs both policies across a simulated failure after job creation and checks returned job identity and resulting job count, including that a deliberately new request can start a new job",
+        "Reports actual outputs, reproduction steps, and boundaries of the simulation such as durability or concurrent retries where not exercised"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
     }
   ]
 }

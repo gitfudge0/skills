@@ -76,7 +76,7 @@ Pick specialists from the work itself; never ask the user to choose a skill. Fea
 | Explain behavior, cause or rationale without edits | `references/roots/investigation/guide.md` |
 | Repair a bounded defect | `references/roots/bug-fix/guide.md` |
 | Improve a measured metric within a budget | `references/roots/hillclimb/guide.md` |
-| Answer one empirical question with a disposable artifact | `references/roots/prototype/guide.md` |
+| Answer one empirical question with a disposable artifact | `references/modules/design-experiment/guide.md` |
 | Match appearance or verify before/after renderings | `references/roots/visual-parity/guide.md` |
 | Create or update tracker issues | `references/roots/ticket/guide.md` |
 
@@ -87,8 +87,7 @@ Every implementation starts with discovery under `references/modules/engineering
 | Reconcile requirements | `references/modules/gap-analysis/guide.md` | Material gap or conflict |
 | Decompose a system | `references/modules/system-decomposition/guide.md` | Broad brief needs responsibilities or contracts; decomposition-only stops at analysis |
 | Pressure-test a decision | `references/modules/decision-room/guide.md` | Consequential choice unsettled |
-| Shape the experience | `references/roots/ux/guide.md` | Needs, content, flow, states or usability need a decision |
-| Shape the interface | `references/roots/design/guide.md` | Visual direction, UI guidance, a mock or components |
+| Shape the experience or interface | `references/roots/design/guide.md` | Needs, content, flow, states, usability, visual direction, a mock or components |
 | Interactive plan | `references/modules/plan/guide.md` | HTML plan requested, or a complex multi-file change needs a reviewable tree |
 | Plan failure cases | `references/modules/test-plan/guide.md` | Risk or request warrants a test plan |
 | Make it runnable | `references/roots/setup/guide.md` | Dependencies, environment, startup or a verification recipe (focused mode) |
@@ -104,7 +103,7 @@ Every implementation starts with discovery under `references/modules/engineering
 | Formal review | `references/roots/review/guide.md` | Comprehensive change or request |
 
 - Gap analysis keeps every valid gap with evidence. "What is missing before we build?" is analysis-only: return gaps, decisions and next actions. Clear requests need a small discovery pass, not a workshop.
-- A named stage sets membership, not order; UX and design inform each other either way and carry settled decisions across.
+- A named stage sets membership, not order. Carry settled decisions as work moves between behavior, appearance, and experiments.
 - A pressure-test simulates perspectives; judge arguments by evidence, not persona agreement.
 - Read each selected guide and honor its contract for the chosen path.
 - Unknown stage names need clarification. A missing required skill is a reported blocker, not a silent substitute.

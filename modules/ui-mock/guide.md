@@ -6,7 +6,7 @@ Make a reviewable visual answer to the user's design question. The output is one
 
 ## Scope the artifact
 
-1. Identify the screen, control, flow, or decision the user needs to judge. Read the relevant product UI, copy, and design tokens when they exist. Match the project's visual language. If no system exists, use a restrained neutral style.
+1. Identify the screen, control, flow, or decision the user needs to judge. Read the relevant product UI, copy, and design tokens when they exist. Carry supplied facts that affect the decision into the relevant frames. Use the brief or an authoritative product source for policy claims such as fees, refund terms, eligibility, or consent. If a missing rule affects the decision under review, flag it in a note outside the mocked UI. Match the project's visual language. If no system exists, use a restrained neutral style.
 2. Choose the smallest set of frames that answers that question. A single frame is enough for a focused visual direction. Add context when placement changes the judgment. Add states when they change layout, available actions, comprehension, or risk, such as empty versus populated, pending versus error, or a destructive confirmation. Show before and after when the old design is needed to assess a replacement. Do not turn a narrow mock into an inventory of every possible state.
 3. If the user asks to compare options, make distinct approaches to the same target state. Use the requested count or the smallest useful set, usually two to four. Keep each in enough context to judge it and give each a short, concrete tradeoff. Record a selection if the user makes one. End the mock task after sharing the artifact and obtaining any requested choice; a selection alone does not start implementation.
 
