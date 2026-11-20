@@ -1287,6 +1287,7 @@
         "States the chosen Send behavior while a reply is pending and implements visible feedback that matches it",
         "Preserves the follow-up through a simulated failure and provides a working path to recover or send it without re-entry",
         "Creates the runnable prototype at review/composer.html, with repeatable failure, working reset, and enough time to exercise the pending state",
+        "Makes the conversation and composer visually primary and the simulation setup secondary. Inspects rendered desktop and narrow views in the starting state and a queued or recovery state, refines and rechecks any material visual problems found, and reports unavailable visual checks as unverified",
         "Runs the meaningful success and recovery branches in a browser or equivalent executable interaction check and reports what was observed, with simulation and participant evidence identified accurately"
       ],
       "evaluation_protocol": "specialist-behavior.md"

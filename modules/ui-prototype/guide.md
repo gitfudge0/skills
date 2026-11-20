@@ -7,7 +7,7 @@ Make a taskable, nonproduction draft that answers **one named interaction questi
 ## Define the test
 
 1. State the person's task, the interaction question, and what observation would change the design. Identify the starting state, relevant branches, success condition, and failure or recovery path.
-2. Check the project's design source, existing tokens, components, content, and platform constraints. Choose realistic sample content and only enough visual fidelity to make the task credible. Keep fabricated data safe and visibly synthetic where it could be mistaken for real records.
+2. Check the project's design source, existing tokens, components, content, and platform constraints. Use realistic sample content and compose a credible product screen with `references/modules/design-for-recognition/guide.md`. Give the main task visual priority and keep simulation controls and instructions secondary. Use a simpler treatment for a requested low-fidelity or logic-only spike. Keep fabricated data safe and visibly synthetic where it could be mistaken for real records.
 3. Choose an **exact unused output path** under this skill's Output location below. Keep prototype files and any run instructions there. Edit production components only when the user separately requests a component or product build.
 
 ## Output location
@@ -22,7 +22,9 @@ Follow package-root `shared/artifacts.md` for path resolution, caller overrides,
 
 ## Inspect and learn
 
-Run or open the prototype. Perform the key task yourself through consequential branches and recovery, checking rendered states at relevant sizes and input methods. Verify save/resume and reset against the stated persistence contract. Fix broken or misleading behavior before review.
+Inspect the running screen or screenshots at relevant sizes, including the starting view and at least one consequential state where available. Judge hierarchy, composition, and visual clarity in the rendered result, then fix and recheck material issues. Report unavailable visual coverage explicitly.
+
+Perform the key task yourself through consequential branches and recovery with the relevant input methods. Verify save/resume and reset against the stated persistence contract. Fix broken or misleading behavior before review. Report those observations separately from the visual inspection.
 
 If the remaining uncertainty depends on a person's behavior, invite the user to try **one focused task** with a neutral prompt and a clear starting state. Capture what happened separately from the agent's walkthrough and from simulated behavior. Use the ux-research module when planning or conducting participant research; never present an agent walkthrough as participant evidence.
 

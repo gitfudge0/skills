@@ -20,7 +20,15 @@ Compare real interfaces serving a similar task for patterns worth testing, inclu
 
 ## Inspect and revise
 
-Use realistic content, including long names, missing data, and consequential states. Inspect the rendered result at relevant widths, themes, and input modes, then follow the person's task through the available interactions. Check whether the chosen priority reads as intended, cues remain distinguishable, text stays readable, actions look actionable, and feedback explains the result. Fix observed visual gaps and report the inspection's limits. An expert walkthrough supplies a design judgment, not evidence that participants succeeded.
+Inspect the live screen or screenshots with realistic content at relevant widths and themes. Include the starting view and states that change the person's next step, such as waiting, error, and recovery. Follow the task with the relevant input methods. Assess the dimensions that apply to the work.
+
+- **Clarity and hierarchy.** Can someone tell what the screen is for and find the primary action? Check what attracts attention first and whether supporting information competes with the task.
+- **Layout and composition.** Check alignment, whitespace, grouping, and visual balance. See whether long or missing content changes reading order, separates related items, or crowds actions at narrow widths.
+- **Typography.** Check legibility, line lengths, and the distinction between type roles. Use a coherent type treatment that fits the interface's character.
+- **Color and visual consistency.** Check contrast, purposeful use of color, and consistency across controls and states. Use depth to clarify layers and motion to clarify changes that need it.
+- **Interaction and usability.** Check that actions look actionable and states are distinguishable. Follow feedback and recovery, and make sure secondary options are findable when needed. Inspect keyboard, touch, and assistive modes where they affect the task.
+
+Tie findings to the observed state or viewport, the specific visual issue, and its effect on the task. Fix material issues and recheck the affected renders or interactions. Report any unobserved coverage and describe these findings as expert evaluation. Participant evidence comes from observing people perform the task.
 
 ## Specialist boundaries
 
