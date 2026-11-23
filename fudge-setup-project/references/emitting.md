@@ -1,6 +1,6 @@
 # Emitting the artifact
 
-What Phase 3 writes, where it goes, and what it is never allowed to do on the way. `fudge:setup` is the generator; `<project>-conventions` is the artifact described here. Say which one you mean every time either is named.
+What Phase 3 writes, where it goes, and what it is never allowed to do on the way. `fudge:setup-project` is the generator; `<project>-conventions` is the artifact described here. Say which one you mean every time either is named.
 
 ---
 
@@ -71,7 +71,7 @@ description: Use whenever writing, editing, refactoring, or reviewing code in th
 
 # <project> conventions
 
-Generated <YYYY-MM-DD> by `fudge:setup`. `fudge:setup` is the generator and lives elsewhere; this file is the artifact and lives in this repo. Editing this file changes this project's rules; it does not change the generator.
+Generated <YYYY-MM-DD> by `fudge:setup-project`. `fudge:setup-project` is the generator and lives elsewhere; this file is the artifact and lives in this repo. Editing this file changes this project's rules; it does not change the generator.
 
 ## The rules that matter most
 

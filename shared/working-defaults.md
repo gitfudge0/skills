@@ -38,5 +38,5 @@ Before posting to an external system (ticket text, tracker comment, chat message
 
 ## Who reads and writes
 
-- `fudge:setup` records and amends the section with the user's approval.
+- `fudge:setup-project` records and amends the section with the user's approval.
 - `fudge:ship`, `fudge:ticket`, `fudge:review`, and `fudge:bug-fix` read it before choosing an endpoint, committing or pushing, starting services, or posting externally.

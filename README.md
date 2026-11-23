@@ -10,11 +10,11 @@ Fourteen public skills cover setup, shipping, design, review, planning, issue tr
 | `/merge-risk` | Assess integration risk read-only | Evidence gaps, blast radius, rollback and production detection |
 | `fudge:review` | Review a PR or local diff | Findings, re-review, conventions checks |
 | `fudge:design` | Decide how something should work, give it form, and test it | User research, copy, navigation, interaction behavior, accessibility, measurement, visual design, design systems, mockups, component builds, design QA, and runnable UI, API, algorithm, or performance experiments |
-| `fudge:setup` | Establish project rules and make a project runnable | Conventions setup, audit, amendment, startup readiness, project verification recipes, guidance diagnosis |
+| `fudge:setup-project` | Establish project rules and make a project runnable | Conventions setup, audit, amendment, startup readiness, project verification recipes, guidance diagnosis |
 | `fudge:plan` | Create interactive HTML implementation plans | Runtime, block references, and examples; also bundled into ship |
-| `fudge:investigation` | Explain behavior, cause or rationale read-only | Source, history and conditional trace forensics |
+| `fudge:investigate` | Explain behavior, cause or rationale read-only | Source, history and conditional trace forensics |
 | `fudge:bug-fix` | Reproduce, diagnose and fix a bounded defect | Shared engineering, regression verification and selected delivery |
-| `fudge:hillclimb` | Improve a measured metric within a budget | Authoritative performance loop and correctness evidence |
+| `fudge:optimise-performance` | Improve a measured metric within a budget | Authoritative performance loop and correctness evidence |
 | `fudge:visual-parity` | Preserve appearance or verify matched renderings | Controlled before/after captures, design QA and scoped verification |
 | `fudge:ticket` | Draft, reconcile and update issue-tracker tickets, drafts first | User-facing story splits with platform subtasks, ticket-vs-implementation reconciliation, post-merge comments and transitions; also routed from ship |
 | `fudge:retro` | Learn from a coding session and propose durable improvements | Bounded evidence, cause tracing, ranked proposals; routes application to existing owners |
@@ -50,15 +50,17 @@ Each package includes its dependency closure, internal guides, and shared polici
 
 `fudge:design` includes the former `fudge:ux` and `fudge:prototype` workflows. Install `--root design` for each target that used either skill. The installer replaces this checkout’s owned UX and Prototype entries for the selected targets. `--root ux`, `--root prototype`, and their `fudge-` and `--skill` forms select Design.
 
-`--root conventions` selects `setup`. Legacy `--skill` names select their owning root: for example, `--skill ui-mock` selects `design`, and `--skill gap-analysis` and `--skill system-decomposition` select `ship`. `--no-roots --skill NAME` remains a migration form. `--skill plan` selects the standalone public skill. Legacy `html-plan` and `fudge-html-plan` selections remain migration aliases for `plan`. `--skill mindmap` and explicit `write` selections report their removal.
+`--root hillclimb`, `--root setup`, and `--root investigation` select `optimise-performance`, `setup-project`, and `investigate` respectively. These also work with `--skill` and the `fudge-` prefix. Rerun the installer for each target to replace its installer-owned entries with the new invocation names.
+
+`--root conventions` selects `setup-project`. Legacy `--skill` names select their owning root: for example, `--skill ui-mock` selects `design`, and `--skill gap-analysis` and `--skill system-decomposition` select `ship`. `--no-roots --skill NAME` remains a migration form. `--skill plan` selects the standalone public skill. Legacy `html-plan` and `fudge-html-plan` selections remain migration aliases for `plan`. `--skill mindmap` and explicit `write` selections report their removal.
 
 Installation removes retired entries only when they are owned by this checkout's installer and their owning root was selected. Explicitly removed mindmap entries are also cleaned up; removed Write entries are cleaned up on default/all installations. Selecting standalone `plan` migrates owned legacy `html-plan` and `fudge-html-plan` entries to `fudge-plan`; selecting `ship` preserves them. Review lists planned cleanup before confirmation. Recognized ownership is an exact installer link target (including old dangling links), or a copy marker containing this checkout's path. Foreign directories, manual copies, and unrelated dangling links are preserved. A foreign entry at a selected public destination blocks installation without overwriting it.
 
 ## Source and package layout
 
 ```text
-fudge-{ship,review,design,setup}/SKILL.md
-fudge-{investigation,bug-fix,hillclimb,visual-parity,ticket,retro}/SKILL.md
+fudge-{ship,review,design,setup-project}/SKILL.md
+fudge-{investigate,bug-fix,optimise-performance,visual-parity,ticket,retro}/SKILL.md
 merge-risk/SKILL.md            # standalone /merge-risk assessment
 modules/<capability>/guide.md
 plan/SKILL.md                  # standalone public skill, also bundled into ship
@@ -95,7 +97,7 @@ Shipping behavior fixtures and the independent evaluation protocol are in [tests
 
 Write is retired as a public skill. Shared prose guidance remains bundled for every skill. A default/all install removes only this checkout’s installer-owned legacy `fudge-write` entries; manual and foreign entries remain untouched.
 
-Conditional capabilities stay with their owners: setup maintains project verification recipes and diagnoses failed guidance; ship engineering handles behavior-preserving refactors; hillclimb reuses the authoritative engineering performance reference; verification and review check test effectiveness; verification exercises relevant retry/restart risks; durable ship runs preserve auditable attempts. These references load only for the applicable work, not for every task. Behavioral scenarios describe expected decisions; they are not executed agent evaluation results.
+Conditional capabilities stay with their owners: Setup Project maintains project verification recipes and diagnoses failed guidance; ship engineering handles behavior-preserving refactors; Optimise Performance reuses the authoritative engineering performance reference; verification and review check test effectiveness; verification exercises relevant retry/restart risks; durable ship runs preserve auditable attempts. These references load only for the applicable work, not for every task. Behavioral scenarios describe expected decisions; they are not executed agent evaluation results.
 
 Standalone specialist behavior cases and their evidence protocol are in [tests/evals/specialist-behavior.md](tests/evals/specialist-behavior.md). Dependency closure may include other public guides for shared references; installation does not imply running those workflows.
 

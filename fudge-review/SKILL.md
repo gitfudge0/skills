@@ -58,7 +58,7 @@ Never check out, switch branches, create worktrees, or modify the user's working
 **4. Review.** Cover every applicable topic:
 - [ ] Correctness and security.
 - [ ] Contracts: API shape; identifiers, columns and config keys shared across repos; deploy order and what breaks in the wrong order.
-- [ ] Conventions: when the repo has rule sources, run package-root `references/roots/setup/guide.md` in audit mode against them. Reuse a supplied audit only when its scope, source/rule versions and attributable evidence match the current change; revalidate affected rules and files after changes and keep unaffected evidence. Missing, stale or ambiguous coverage needs review. Each finding cites its rule and source file.
+- [ ] Conventions: when the repo has rule sources, run package-root `references/roots/setup-project/guide.md` in audit mode against them. Reuse a supplied audit only when its scope, source/rule versions and attributable evidence match the current change; revalidate affected rules and files after changes and keep unaffected evidence. Missing, stale or ambiguous coverage needs review. Each finding cites its rule and source file.
 - [ ] Tests: for changed tests, read package-root `shared/test-effectiveness.md` for a bounded test-oracle check. Separate static reasoning from executed evidence and assess material coverage of the changed contract.
 - [ ] Quality.
 

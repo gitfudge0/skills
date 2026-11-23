@@ -26,7 +26,7 @@ regression against a fresh original snapshot, then the fixed tree; preserve both
 outputs and check relevant existing behavior. A passing final checker alone
 cannot prove the regression caught the original defect.
 
-For hillclimb, retain baseline and candidate completed-work/error counts alongside
+For Optimise Performance, retain baseline and candidate completed-work/error counts alongside
 samples. Independently verify output completeness and correctness before scoring
 latency. A faster candidate with missing records fails, even if its metric wins.
 Compare identical workload/method and report timing uncertainty. For parity,

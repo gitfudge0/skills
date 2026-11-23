@@ -17,10 +17,10 @@ Do this before choosing depth. Preserve the caller’s delivery contract when ro
 
 | Request | Route |
 |---|---|
-| Question or explanation ("what does X do", "what happens if…") | `references/roots/investigation/guide.md`; no ship run |
+| Question or explanation ("what does X do", "what happens if…") | `references/roots/investigate/guide.md`; no ship run |
 | Review a PR or diff | `fudge:review`, else `references/roots/review/guide.md` standalone mode; no ship run |
 | Issue-tracker work | `references/roots/ticket/guide.md`; no ship run |
-| Run locally, manual testing, containers, a one-off task | `references/roots/setup/guide.md` run readiness; no ship run |
+| Run locally, manual testing, containers, a one-off task | `references/roots/setup-project/guide.md` run readiness; no ship run |
 | Rebase or restack only | [Restack check](references/pr-delivery.md#restack-check) as its own endpoint |
 | Build, fix, refactor or deliver a change | Continue below |
 
@@ -73,9 +73,9 @@ Pick specialists from the work itself; never ask the user to choose a skill. Fea
 
 | Focused work | Specialist |
 |---|---|
-| Explain behavior, cause or rationale without edits | `references/roots/investigation/guide.md` |
+| Explain behavior, cause or rationale without edits | `references/roots/investigate/guide.md` |
 | Repair a bounded defect | `references/roots/bug-fix/guide.md` |
-| Improve a measured metric within a budget | `references/roots/hillclimb/guide.md` |
+| Improve a measured metric within a budget | `references/roots/optimise-performance/guide.md` |
 | Answer one empirical question with a disposable artifact | `references/modules/design-experiment/guide.md` |
 | Match appearance or verify before/after renderings | `references/roots/visual-parity/guide.md` |
 | Create or update tracker issues | `references/roots/ticket/guide.md` |
@@ -90,7 +90,7 @@ Every implementation starts with discovery under `references/modules/engineering
 | Shape the experience or interface | `references/roots/design/guide.md` | Needs, content, flow, states, usability, visual direction, a mock or components |
 | Interactive plan | `references/modules/plan/guide.md` | HTML plan requested, or a complex multi-file change needs a reviewable tree |
 | Plan failure cases | `references/modules/test-plan/guide.md` | Risk or request warrants a test plan |
-| Make it runnable | `references/roots/setup/guide.md` | Dependencies, environment, startup or a verification recipe (focused mode) |
+| Make it runnable | `references/roots/setup-project/guide.md` | Dependencies, environment, startup or a verification recipe (focused mode) |
 | Engineer the change | `references/modules/engineering/guide.md` | Discovery, cause tracing, state modeling, implementation |
 | Coordinate implementation | `shared/execution.md` | Product or test files change |
 | Verify completion | `references/modules/verification/guide.md` | Any implementation |

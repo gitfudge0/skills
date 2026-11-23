@@ -1,6 +1,6 @@
 # Dimension bank
 
-The full set of dimensions `fudge:setup` can turn into rules, grouped and typed. Phase 0 selects capability-dependent dimensions from observed code, planned architecture and project scope. Phase 1 groups the relevant dimensions into rounds.
+The full set of dimensions `fudge:setup-project` can turn into rules, grouped and typed. Phase 0 selects capability-dependent dimensions from observed code, planned architecture and project scope. Phase 1 groups the relevant dimensions into rounds.
 
 ## Legend
 

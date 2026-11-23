@@ -1,6 +1,6 @@
 ---
 name: fudge:retro
-description: "Analyze a coding session for workflow friction, causes, and small durable improvements to guidance, tooling, checks, or skill orchestration. Use when explicitly asked for a retrospective, session postmortem, or lessons learned. Code review belongs to fudge:review; unresolved runtime causes belong to fudge:investigation."
+description: "Analyze a coding session for workflow friction, causes, and small durable improvements to guidance, tooling, checks, or skill orchestration. Use when explicitly asked for a retrospective, session postmortem, or lessons learned. Code review belongs to fudge:review; unresolved runtime causes belong to fudge:investigate."
 ---
 
 # fudge:retro
@@ -44,8 +44,8 @@ Include useful successes and evidence gaps briefly. Do not manufacture a quota o
 Proposals are the default endpoint. A request to run a retro alone does not authorize editing project rules, skills or global configuration. When the user requests application, carry forward the accepted scope and prior permissions without adding a redundant approval gate. Apply only authorized improvements through their existing owner and verify the relevant outcome. Project evidence does not justify automatic global edits.
 
 - Change correctness or security review: `references/roots/review/guide.md`.
-- Deeper unresolved causal questions: `references/roots/investigation/guide.md`.
-- Project guidance, conventions, verification recipes or tooling: `references/roots/setup/guide.md`.
+- Deeper unresolved causal questions: `references/roots/investigate/guide.md`.
+- Project guidance, conventions, verification recipes or tooling: `references/roots/setup-project/guide.md`.
 - Implementation of accepted code, check or skill improvements: `references/roots/ship/guide.md`.
 
 Keep the retro's proposal endpoint when consulting an owner for context. Read its implementation workflow only when application is requested; do not let a bundled dependency expand the task.

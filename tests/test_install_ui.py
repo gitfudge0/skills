@@ -35,20 +35,20 @@ class WizardTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp)
             if conflict:
-                (target / 'fudge-setup').mkdir()
+                (target / 'fudge-setup-project').mkdir()
             with patch.object(UI.curses, 'wrapper', side_effect=lambda action: action(screen)), patch.object(UI.curses, 'curs_set'):
-                result = UI.choose(['codex', 'claude'], ['setup', 'design'], ['codex'], ['setup'], False, lambda agent: target, lambda path: False, retired or (lambda target, roots: []))
+                result = UI.choose(['codex', 'claude'], ['setup-project', 'design'], ['codex'], ['setup-project'], False, lambda agent: target, lambda path: False, retired or (lambda target, roots: []))
             return result, screen.lines
     def test_cancel_with_q_and_escape(self):
         self.assertIsNone(self.run_wizard([ord('q')])[0])
         self.assertIsNone(self.run_wizard([27])[0])
     def test_back_preserves_selections(self):
         result, lines = self.run_wizard([10, curses.KEY_DOWN, ord(' '), 27, 10, 10, curses.KEY_DOWN, ord(' '), 10, 10])
-        self.assertEqual(result, (['codex'], ['setup', 'design'], True))
+        self.assertEqual(result, (['codex'], ['setup-project', 'design'], True))
         self.assertIn('[x] design', lines)
     def test_review_lists_cleanup(self):
         result, lines = self.run_wizard([10, 10, 10, 10], lambda target, roots: [target / 'fudge-conventions'])
-        self.assertEqual(result, (['codex'], ['setup'], False))
+        self.assertEqual(result, (['codex'], ['setup-project'], False))
         self.assertIn('Retired entries to remove:', lines)
         self.assertTrue(any('fudge-conventions' in line for line in lines))
     def test_review_blocks_foreign_conflicts(self):

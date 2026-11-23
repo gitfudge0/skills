@@ -16,7 +16,11 @@ ROOTS = list(MANIFEST['roots'])
 PACKAGES = {name: spec.get('package', 'fudge-' + name) for name, spec in MANIFEST['roots'].items()}
 FORMER_DESIGN_SKILLS = ('ux', 'prototype')
 ALIASES = {name: spec['owner'] for name, spec in MANIFEST['modules'].items() if name not in ROOTS}
-ALIASES.update({'conventions': 'setup', 'delegate': 'ship', 'unslop': 'ship', 'report-deck': 'design', 'html-plan': 'plan'})
+ALIASES.update({
+    'setup': 'setup-project', 'conventions': 'setup-project',
+    'investigation': 'investigate', 'hillclimb': 'optimise-performance',
+    'delegate': 'ship', 'unslop': 'ship', 'report-deck': 'design', 'html-plan': 'plan',
+})
 ALIASES.update(dict.fromkeys(FORMER_DESIGN_SKILLS, 'design'))
 RETIRED = set(ALIASES) | {'mindmap', 'write'}
 LEGACY = {'html-plan': 'plan', 'fudge-html-plan': 'plan'}
@@ -74,7 +78,7 @@ def main():
     parser = argparse.ArgumentParser(description='Install public Fudge skills. Each root bundles its selected dependencies.')
     parser.add_argument('command', nargs='?', choices=['install', 'list', 'remove'], default='install')
     parser.add_argument('-a', '--agent', action='append', choices=AGENTS, default=[])
-    parser.add_argument('--root', action='append', default=[], help=', '.join(ROOTS) + ' (migration aliases include conventions, html-plan, ux, and prototype)')
+    parser.add_argument('--root', action='append', default=[], help=', '.join(ROOTS) + ' (previous root names are accepted as migration aliases)')
     parser.add_argument('--skill', action='append', default=[], help='public skill or legacy name; legacy modules select their owning root')
     parser.add_argument('--all', action='store_true', help='select all public roots; remove all owned entries')
     parser.add_argument('--no-roots', action='store_true', help='legacy flag, accepted only with --skill')

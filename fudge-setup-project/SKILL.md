@@ -1,9 +1,9 @@
 ---
-name: fudge:setup
+name: fudge:setup-project
 description: "Set up or run an existing project locally, install its prerequisites, troubleshoot startup, or operate branch/worktree environments and containers. Also use to establish or amend project coding rules, audit convention drift, maintain verification recipes, or diagnose ineffective project guidance. Product feature implementation belongs to fudge:ship."
 ---
 
-# fudge:setup
+# fudge:setup-project
 
 ## Locate guidance
 
@@ -11,7 +11,7 @@ Package addresses (`shared/`, `references/modules/`, `references/roots/`) resolv
 
 Use package-root `shared/execution.md` for implementation/delegation policy, `shared/writing.md` for prose, and `shared/artifacts.md` before writing run artifacts. Existing user decisions and authorization carry across handoffs. For a requested durable HTML report, read package-root `shared/report-deck/guide.md` for the shared plan runtime UI; concise chat is the default.
 
-Set up a usable project by reusing its existing authority and run instructions. `fudge:setup` is this public skill; `<project>-conventions` is the project-specific rule artifact it may create. Preserve that distinction and never create competing sources of authority.
+Set up a usable project by reusing its existing authority and run instructions. `fudge:setup-project` is this public skill; `<project>-conventions` is the project-specific rule artifact it may create. Preserve that distinction and never create competing sources of authority.
 
 ## Choose the mode
 

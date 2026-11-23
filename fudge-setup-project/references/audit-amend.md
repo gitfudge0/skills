@@ -1,6 +1,6 @@
 # Audit and amend existing conventions
 
-Use this reference only for audit or targeted amendment. The authoritative project instructions and project-specific conventions skill are the rule source. `fudge:setup` coordinates the check; it does not become a competing rulebook.
+Use this reference only for audit or targeted amendment. The authoritative project instructions and project-specific conventions skill are the rule source. `fudge:setup-project` coordinates the check; it does not become a competing rulebook.
 
 ## Audit a bounded change
 

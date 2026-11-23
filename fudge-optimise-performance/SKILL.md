@@ -1,9 +1,9 @@
 ---
-name: fudge:hillclimb
-description: "Optimize performance through measured experiments while preserving correctness. Use to make code faster, reduce latency, memory, or resource cost, or improve throughput against a representative workload and time or cost budget. Establish a baseline before changing code; explanation-only performance diagnosis belongs to fudge:investigation."
+name: fudge:optimise-performance
+description: "Optimize performance through measured experiments while preserving correctness. Use to make code faster, reduce latency, memory, or resource cost, or improve throughput against a representative workload and time or cost budget. Establish a baseline before changing code; explanation-only performance diagnosis belongs to fudge:investigate."
 ---
 
-# fudge:hillclimb
+# fudge:optimise-performance
 
 ## Locate guidance
 

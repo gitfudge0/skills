@@ -1,9 +1,9 @@
 ---
-name: fudge:investigation
+name: fudge:investigate
 description: "Explain how code works, why behavior occurs, what caused a failure or regression, or why a design was chosen. Use for read-only debugging, root-cause analysis, and history or trace forensics when the requested outcome is an explanation. Requests to repair the defect belong to fudge:bug-fix."
 ---
 
-# fudge:investigation
+# fudge:investigate
 
 ## Locate guidance
 

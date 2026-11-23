@@ -170,7 +170,7 @@ When updating the PR, replace the existing assessment rather than appending anot
 
 **Learning from reusable gaps.**
 
-1. Diagnose first with setup's guidance-diagnosis reference (adjacent to `references/roots/setup/guide.md`): missing, buried/conflicting, missed-trigger or noncompliant instructions.
+1. Diagnose first with setup's guidance-diagnosis reference (adjacent to `references/roots/setup-project/guide.md`): missing, buried/conflicting, missed-trigger or noncompliant instructions.
 2. Prefer: remove the structural cause > suitable types > a narrow existing-harness check or regression test > residual judgment guidance. Fix the authoritative source or routing; no duplicate rulebooks or generic prose.
 3. Record `finding → cause → gate or skill delta → verification`, with a failing and a valid case for any new check.
 4. An explicit standing review-learning grant covers additive, evidence-backed changes that keep established behavior; apply via setup's targeted amendment guidance and review the deltas in this PR. Product decisions, weaker gates or policy changes need the user. Without a grant, propose the improvement.

@@ -29,8 +29,8 @@ class InstallerTests(unittest.TestCase):
         return result
     def test_defaults_and_standalone_navigation(self):
         self.run_install('install', '-a', 'codex')
-        expected = {'fudge-' + n for n in ['design', 'ship', 'ship-pr', 'ship-auto', 'review', 'setup',
-                                           'investigation', 'bug-fix', 'hillclimb', 'visual-parity', 'ticket', 'retro']}
+        expected = {'fudge-' + n for n in ['design', 'ship', 'ship-pr', 'ship-auto', 'review', 'setup-project',
+                                           'investigate', 'bug-fix', 'optimise-performance', 'visual-parity', 'ticket', 'retro']}
         expected.update({'fudge-plan', 'merge-risk'})
         self.assertEqual({p.name for p in self.skills.iterdir()}, expected)
         self.assertEqual({p.name for p in (self.repo / '.fudge-build').iterdir()}, expected)
@@ -48,8 +48,8 @@ class InstallerTests(unittest.TestCase):
                 self.assertEqual((skill / 'shared/report-deck/runtime' / asset).read_bytes(),
                                  (self.repo / 'plan/runtime' / asset).read_bytes())
         self.run_install('remove', '-a', 'codex', '--all', '-y')
-        self.run_install('-a', 'codex', '--root', 'setup', '-y')
-        self.assertEqual([p.name for p in self.skills.iterdir()], ['fudge-setup'])
+        self.run_install('-a', 'codex', '--root', 'setup-project', '-y')
+        self.assertEqual([p.name for p in self.skills.iterdir()], ['fudge-setup-project'])
     def test_merge_risk_standalone_install_update_remove(self):
         for copy in (False, True):
             with self.subTest(copy=copy):
@@ -77,16 +77,16 @@ class InstallerTests(unittest.TestCase):
             'ship-auto': ['references/modules/shipping/guide.md',
                           'references/modules/shipping/references/pr-delivery.md',
                           'references/roots/merge-risk/guide.md'],
-            'investigation': [],
+            'investigate': [],
             'retro': ['agents/openai.yaml',
                       'references/roots/review/guide.md',
-                      'references/roots/investigation/guide.md',
-                      'references/roots/setup/guide.md',
+                      'references/roots/investigate/guide.md',
+                      'references/roots/setup-project/guide.md',
                       'references/roots/ship/guide.md'],
             'bug-fix': ['references/modules/engineering/guide.md',
                         'references/modules/verification/guide.md',
                         'references/modules/shipping/references/pr-delivery.md'],
-            'hillclimb': ['references/modules/engineering/references/performance.md',
+            'optimise-performance': ['references/modules/engineering/references/performance.md',
                          'references/modules/verification/guide.md'],
             'design': ['references/component-build.md',
                        'references/modules/design-system/guide.md',
@@ -150,7 +150,7 @@ class InstallerTests(unittest.TestCase):
             else:
                 old.mkdir()
                 (old / ('manual.txt' if mode == 'foreign' else '.fudge-installer')).write_text('keep' if mode == 'foreign' else str(self.repo))
-        self.run_install('-a', 'codex', '--root', 'setup', '-y')
+        self.run_install('-a', 'codex', '--root', 'setup-project', '-y')
         self.assertTrue((self.home / targets[0] / 'fudge-write').is_symlink())
         result = self.run_install('-a', 'codex', '-a', 'claude', '-a', 'cursor', '-a', 'opencode', '--all', '-y')
         manifest = json.loads((self.repo / 'scripts/skill-manifest.json').read_text())
@@ -168,7 +168,7 @@ class InstallerTests(unittest.TestCase):
                 self.assertEqual(metadata['root'], root)
                 for module in metadata['modules']:
                     self.assertTrue((package / 'references/modules' / module / 'guide.md').is_file())
-            self.assertTrue((directory / 'fudge-ship/references/roots/setup/references/project-verification.md').is_file())
+            self.assertTrue((directory / 'fudge-ship/references/roots/setup-project/references/project-verification.md').is_file())
             self.assertTrue((directory / 'fudge-ship/references/modules/engineering/references/refactoring.md').is_file())
             self.assertTrue((directory / 'fudge-review/shared/test-effectiveness.md').is_file())
         self.assertIn('Installed 14 public skills for 4 agents', result.stdout)
@@ -226,8 +226,8 @@ class InstallerTests(unittest.TestCase):
         self.assertTrue((foreign / '.fudge-build-generated').exists())
 
     def test_shared_report_runtime_is_portable_without_plan_dependency(self):
-        self.run_install('-a', 'codex', '--root', 'setup', '--copy', '-y')
-        package = self.skills / 'fudge-setup'
+        self.run_install('-a', 'codex', '--root', 'setup-project', '--copy', '-y')
+        package = self.skills / 'fudge-setup-project'
         metadata = json.loads((package / '.fudge-package.json').read_text())
         self.assertNotIn('plan', metadata['roots'])
         runtime = package / 'shared/report-deck/runtime'
@@ -370,11 +370,11 @@ class InstallerTests(unittest.TestCase):
                 self.assertFalse(legacy.exists())
 
     def test_copy_update(self):
-        self.run_install('-a', 'codex', '--root', 'setup', '--copy', '-y')
-        installed = self.skills / 'fudge-setup'
+        self.run_install('-a', 'codex', '--root', 'setup-project', '--copy', '-y')
+        installed = self.skills / 'fudge-setup-project'
         self.assertFalse(installed.is_symlink())
-        (self.repo / 'fudge-setup/SKILL.md').write_text((self.repo / 'fudge-setup/SKILL.md').read_text() + '\nUpdate fixture.\n')
-        self.run_install('-a', 'codex', '--root', 'setup', '--copy', '-y')
+        (self.repo / 'fudge-setup-project/SKILL.md').write_text((self.repo / 'fudge-setup-project/SKILL.md').read_text() + '\nUpdate fixture.\n')
+        self.run_install('-a', 'codex', '--root', 'setup-project', '--copy', '-y')
         self.assertIn('Update fixture.', (installed / 'SKILL.md').read_text())
     def test_migration_preserves_foreign_entries(self):
         self.skills.mkdir(parents=True)
@@ -401,11 +401,32 @@ class InstallerTests(unittest.TestCase):
         self.run_install('remove', '-a', 'codex', '--all', '-y')
         self.assertTrue(foreign.exists())
         self.assertTrue(dangling.is_symlink())
+    def test_renamed_roots_migrate_owned_entries_and_preserve_foreign_entries(self):
+        self.skills.mkdir(parents=True)
+        legacy_link = self.skills / 'fudge-setup'
+        legacy_link.symlink_to(self.repo / '.fudge-build/fudge-setup')
+        legacy_copy = self.skills / 'fudge-hillclimb'
+        legacy_copy.mkdir()
+        (legacy_copy / '.fudge-installer').write_text(str(self.repo) + '\n')
+        foreign = self.skills / 'fudge-investigation'
+        foreign.mkdir()
+        (foreign / 'SKILL.md').write_text('Manual skill\n')
+
+        self.run_install('-a', 'codex', '--root', 'setup', '--skill', 'fudge-hillclimb',
+                         '--root', 'investigation', '-y')
+
+        self.assertFalse(legacy_link.is_symlink())
+        self.assertFalse(legacy_copy.exists())
+        self.assertEqual((foreign / 'SKILL.md').read_text(), 'Manual skill\n')
+        for name in ('setup-project', 'optimise-performance', 'investigate'):
+            skill = self.skills / f'fudge-{name}' / 'SKILL.md'
+            self.assertIn(f'\nname: fudge:{name}\n', skill.read_text())
+
     def test_cleanup_is_scoped_to_selected_owner(self):
         self.skills.mkdir(parents=True)
         legacy = self.skills / 'fudge-ui-mock'
         legacy.symlink_to(self.repo / 'fudge-ui-mock')
-        result = self.run_install('-a', 'codex', '--root', 'setup')
+        result = self.run_install('-a', 'codex', '--root', 'setup-project')
         self.assertTrue(legacy.is_symlink())
         self.assertNotIn(str(legacy), result.stdout)
         result = self.run_install('-a', 'codex', '--root', 'design')
@@ -413,14 +434,14 @@ class InstallerTests(unittest.TestCase):
         self.assertIn('Retired entries to remove:', result.stdout)
         self.assertIn(str(legacy), result.stdout)
     def test_nonterminal_remove_requires_yes(self):
-        self.run_install('-a', 'codex', '--root', 'setup')
+        self.run_install('-a', 'codex', '--root', 'setup-project')
         self.run_install('remove', '-a', 'codex', '--all', success=False)
-        self.assertTrue((self.skills / 'fudge-setup').is_symlink())
+        self.assertTrue((self.skills / 'fudge-setup-project').is_symlink())
     def test_foreign_selected_root_is_protected(self):
         self.skills.mkdir(parents=True)
-        foreign = self.skills / 'fudge-setup'
+        foreign = self.skills / 'fudge-setup-project'
         foreign.symlink_to(self.base / 'missing')
-        self.run_install('-a', 'codex', '--root', 'setup', '-y', success=False)
+        self.run_install('-a', 'codex', '--root', 'setup-project', '-y', success=False)
         self.assertTrue(foreign.is_symlink())
     def test_legacy_selection_and_removed_skill(self):
         self.run_install('-a', 'codex', '--no-roots', '--skill', 'ui-mock', '-y')
@@ -448,7 +469,7 @@ class InstallerTests(unittest.TestCase):
         foreign.mkdir()
         (foreign / 'SKILL.md').write_text('manually installed\n')
 
-        self.run_install('-a', 'codex', '--root', 'setup', '-y')
+        self.run_install('-a', 'codex', '--root', 'setup-project', '-y')
         self.assertTrue(ux.is_symlink())
         self.assertTrue(prototype.is_dir())
         self.assertTrue((other_host / 'SKILL.md').is_file())
@@ -487,7 +508,7 @@ class InstallerTests(unittest.TestCase):
         self.skills.mkdir(parents=True)
         legacy = self.skills / 'fudge-system-decomposition'
         legacy.symlink_to(self.repo / 'fudge-system-decomposition')
-        self.run_install('-a', 'codex', '--root', 'setup', '-y')
+        self.run_install('-a', 'codex', '--root', 'setup-project', '-y')
         self.assertTrue(legacy.is_symlink())
         self.run_install('-a', 'codex', '--skill', 'system-decomposition', '-y')
         self.assertFalse(legacy.is_symlink())
@@ -496,15 +517,15 @@ class InstallerTests(unittest.TestCase):
         self.assertTrue((module / 'references/lenses.md').is_file())
         self.assertFalse((module / 'SKILL.md').exists())
     def test_bad_navigation_and_unmarked_build_are_rejected(self):
-        source = self.repo / 'fudge-setup/SKILL.md'
+        source = self.repo / 'fudge-setup-project/SKILL.md'
         source.write_text(source.read_text() + '\nRead `references/modules/missing/guide.md`.\n')
-        self.run_install('-a', 'codex', '--root', 'setup', '-y', success=False)
+        self.run_install('-a', 'codex', '--root', 'setup-project', '-y', success=False)
         self.assertFalse(self.skills.exists())
         source.write_text(source.read_text().replace('\nRead `references/modules/missing/guide.md`.\n', ''))
-        package = self.repo / '.fudge-build/fudge-setup'
+        package = self.repo / '.fudge-build/fudge-setup-project'
         package.mkdir(parents=True)
         (package / 'manual.txt').write_text('keep')
-        self.run_install('-a', 'codex', '--root', 'setup', '-y', success=False)
+        self.run_install('-a', 'codex', '--root', 'setup-project', '-y', success=False)
         self.assertEqual((package / 'manual.txt').read_text(), 'keep')
 
 if __name__ == '__main__':
