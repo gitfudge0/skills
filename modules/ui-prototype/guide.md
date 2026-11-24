@@ -8,7 +8,7 @@ Make a taskable, nonproduction draft that answers **one named interaction questi
 
 1. State the person's task, the interaction question, and what observation would change the design. Identify the starting state, relevant branches, success condition, and failure or recovery path.
 2. Check the project's design source, existing tokens, components, content, and platform constraints. Use realistic sample content and compose a credible product screen with `references/modules/design-for-recognition/guide.md`. Give the main task visual priority and keep simulation controls and instructions secondary. Use a simpler treatment for a requested low-fidelity or logic-only spike. Keep fabricated data safe and visibly synthetic where it could be mistaken for real records.
-3. Choose an **exact unused output path** under this skill's Output location below. Keep prototype files and any run instructions there. Edit production components only when the user separately requests a component or product build.
+3. Resolve the exact output path using the artifact policy below. Use an unused path for a new prototype. When the caller asks to revise an existing prototype, update it at its existing path within the requested scope. Keep prototype files and any run instructions there. Edit production components only when the user separately requests a component or product build.
 
 ## Output location
 

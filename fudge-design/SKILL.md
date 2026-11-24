@@ -1,6 +1,6 @@
 ---
 name: fudge:design
-description: "Shape, evaluate, and build designs from concrete tasks. Use for feature behavior, UX research, copy, navigation, accessibility, visual design, design systems, scoped UI components and design QA, or runnable experiments for interaction, API, algorithm, and performance questions."
+description: "Shape, review, and build designs from concrete tasks. Use for UI/UX reviews of whether a feature serves its purpose, feature behavior, research, copy, navigation, accessibility, visual design, design systems, scoped UI components, design QA, or runnable experiments."
 ---
 
 # fudge:design
@@ -13,6 +13,7 @@ Start at the level of the request. A label request can end with labels. A mock w
 
 | Request | Guidance and output |
 |---|---|
+| Review whether a feature, screen, or control serves its purpose | [Feature review](references/feature-review.md) for user questions, interface evidence, and prioritized findings |
 | Research what people need or understand | `references/modules/ux-research/guide.md` for discovery, task-based evaluation, or synthesis |
 | Shape or review behavior across roles, states, and recovery | `references/modules/interaction-design/guide.md` for a checkable behavior contract |
 | Review or write copy, navigation, and forms | `references/modules/content-architecture/guide.md` for the path and language in context |
@@ -26,6 +27,8 @@ Start at the level of the request. A label request can end with labels. A mock w
 | Implement specific UI components | [Component build](references/component-build.md) for the requested implementation and verification |
 | Compare built UI with a chosen design | `references/modules/design-qa/guide.md` for fidelity, task completeness, and retests |
 | Prepare a visual draft and durable project rules | [Design draft and project rules](references/design-package.md) |
+
+Use feature review for a broad UI/UX critique of an existing or proposed design, including when there is no approved spec. Use the narrower route when the request names a specific comparison, accessibility criterion, wording issue, or other bounded question.
 
 ## Work the decision
 

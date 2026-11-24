@@ -12,11 +12,11 @@ Define what happens when a person acts, including what they see while the result
 4. Follow the actual paths through back, cancel, undo, save, resume, submit, return for changes, and retry as applicable. Cover pending, empty, invalid, error, and interrupted states. Where shared editing or repeated requests are possible, define conflict handling and duplicate-action behavior with the project's product and technical owners.
 5. Trace the contract to the UI. Use the content-architecture module for labels, instructions, and recovery copy; use the ui-mock module to show the visible states; use the ui-prototype module when someone must attempt the task to validate the behavior. A visual frame alone does not define its transition.
 
-Record behavior in the project's existing design or product source of truth. Use a separate linked flow document only when the number of events or actors would make the existing document hard to use. A small control can be specified in a few lines; no diagram, schema, or new file is required by default. Keep event names and state names consistent with related mocks and implementation work.
+Return the review findings or proposed behavior contract in the requested medium. When updating authoritative project rules is in scope, record settled behavior in the existing design or product source of truth. Use a separate linked flow document only when the number of events or actors would make the existing document hard to use. A small control can be specified in a few lines. Keep event names and state names consistent with related mocks and implementation work.
 
 ## Resolve uncertainty and preserve control
 
-Select only checks that apply to the changed task; keep the contract in its existing source of truth:
+Select only checks that apply to the task under review:
 
 - **Empty and filtered results:** distinguish first use, no matches, and unavailable data. Offer an appropriate next action, such as creating an item, changing a query, clearing filters, or retrying. For filter reset, specify which controls it affects and whether it restores defaults or removes all restrictions; preserve unrelated settings and make the resulting selection visible.
 - **Known information and interrupted input:** reuse appropriate values already available for the current person and account, show their source when ambiguity matters, and allow correction. Preserve entered values through recoverable errors according to product policy. Check account changes and stale values; convenience must not expose another account’s information or imply unauthorized retention.

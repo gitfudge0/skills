@@ -1057,6 +1057,19 @@
       ]
     },
     {
+      "id": "design-review-session-row-purpose",
+      "root": "design",
+      "prompt": "Review the UX of this session row. I use the session list to decide what needs my attention next. Give me your findings only.",
+      "fixture": "A static mock shows a selected session labeled Review and an unselected session labeled Review · unread with a 3/3 count. No approved specification describes the count or what clears unread. No runnable UI is available.",
+      "invariants": [
+        "Starts from deciding which session to open next and identifies the distinct questions the row must answer at a glance",
+        "Connects visible labels and indicators to those questions, prioritizing unclear answers by their effect on the decision",
+        "Distinguishes visible ambiguity from unsettled behavior, including what clears unread, without inventing policy or claiming a runtime observation",
+        "Returns findings without changing the mock, production code, or authoritative project documents"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
+    },
+    {
       "id": "ux-contextual-permission-denial",
       "root": "design",
       "prompt": "Define the permission behavior for finding nearby pickup points.",
@@ -1290,6 +1303,18 @@
         "Makes the conversation and composer visually primary and the simulation setup secondary. Inspects rendered desktop and narrow views in the starting state and a queued or recovery state, refines and rechecks any material visual problems found, and reports unavailable visual checks as unverified",
         "Explains what a follow-up action will do while a reply is pending. Any motion clarifies a real state change, preserves the same static cues and controls with reduced motion, and leaves actions available during interruption. Verifies those behaviors where motion is used or reports unavailable checks as unverified",
         "Runs the meaningful success and recovery branches in a browser or equivalent executable interaction check and reports what was observed, with simulation and participant evidence identified accurately"
+      ],
+      "evaluation_protocol": "specialist-behavior.md"
+    },
+    {
+      "id": "design-revise-existing-prototype",
+      "root": "design",
+      "prompt": "Revise the existing prototype at review/composer.html so I can recover my follow-up draft after a simulated reply fails. Keep the filename and the existing reset behavior. Run the failure and recovery path and tell me what happened.",
+      "fixture": "The named file is an editable self-contained browser prototype. It simulates replies, has a repeatable failure trigger, currently drops the follow-up on failure, and resets to an empty composer. The project also has an unrelated production composer.",
+      "invariants": [
+        "Updates the requested artifact in place without creating a replacement prototype or modifying production files",
+        "Preserves the follow-up through failure and lets the person recover it without retyping",
+        "Retains the existing reset behavior and reports the outcomes observed in the executable prototype, including any untested condition"
       ],
       "evaluation_protocol": "specialist-behavior.md"
     },
